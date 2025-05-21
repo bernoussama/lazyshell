@@ -4,6 +4,10 @@
 name: Node.js Package
 
 on:
+  push:
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*-*'
   release:
     types: [created]
 
