@@ -1,0 +1,40 @@
+{
+  "name": "lazyshell",
+  "version": "1.0.4",
+  "description": "",
+  "main": "bin/lazyshell",
+  "bin": {
+    "lazyshell": "./bin/lazyshell"
+  },
+  "scripts": {
+    "start": "node bin/lazyshell",
+    "build": "npx tsc",
+    "dev": "npx tsc -w",
+    "x": "npx tsc && node bin/lazyshell",
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "bernoussama",
+  "license": "GPL-3.0",
+  "packageManager": "pnpm@10.11.0",
+  "devDependencies": {
+    "@jest/types": "^29.6.3",
+    "@types/figlet": "^1.7.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.15.21",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.3.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@ai-sdk/google": "^1.2.18",
+    "@ai-sdk/groq": "^1.2.9",
+    "@inquirer/prompts": "^7.5.1",
+    "@types/json-schema": "^7.0.15",
+    "ai": "^4.3.16",
+    "chalk": "^5.4.1",
+    "commander": "^14.0.0",
+    "figlet": "^1.8.1"
+  }
+}
