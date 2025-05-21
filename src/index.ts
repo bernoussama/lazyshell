@@ -2,7 +2,7 @@ import { generateText, type LanguageModel } from 'ai';
 import { groq } from '@ai-sdk/groq';
 import { google } from '@ai-sdk/google';
 import { Command } from 'commander';
-import { confirm } from '@inquirer/prompts';
+import { select, input } from '@inquirer/prompts';
 import chalk from 'chalk';
 import { runCommand } from './utils';
 
@@ -29,36 +29,70 @@ async function genCommand(prompt: string) {
   return result;
 }
 
+async function editPrompt(command: string): Promise<string> {
+  // For now, just return the command as is
+  // In a real implementation, this would open an editor
+  const editedCommand = await input({
+    message: 'How would you like to edit the command?',
+    default: command,
+  });
+  return editedCommand;
+}
+
+async function refineCommand(currentPrompt: string, command: string): Promise<string> {
+  const refineText = await input({
+    message: 'How would you like to refine the command?',
+    default: '',
+  });
+  
+  // Combine the original prompt with the refinement
+  return `former prompt:${currentPrompt} its command is ${command} refining prompt: ${refineText}`;
+}
 
 const program = new Command();
 program
   .version(require("../package.json").version)
   .description(require("../package.json").description)
   .argument("<prompt_parts...>", "prompt")
-  .option("-y, --yes", "auto-confirm")
-  .action(async (prompt_parts: string[], options) => {
-    const prompt = prompt_parts.join(" ")
-    try {
-      const result = await genCommand(prompt);
-      const command = result.text;
-      let confirmed = false;
-      if (!options.y) {
-        confirmed = await confirm({
-          message:
-            `Run this command: ${chalk.green(command)}?`,
-          default: false,
+  .action(async (prompt_parts: string[]) => {
+    let currentPrompt = prompt_parts.join(" ");
+    let shouldContinue = true;
+    
+    while (shouldContinue) {
+      try {
+        const result = await genCommand(currentPrompt);
+        const command = result.text.trim();
+        
+        const action = await select({
+          message: `Command: ${chalk.green(command)}`,
+          choices: [
+            { name: '✅ Execute command', value: 'execute' },
+            // { name: '✏️  Edit command', value: 'edit' },
+            { name: '🔧 Refine prompt', value: 'refine' },
+            { name: '❌ Cancel', value: 'cancel' },
+          ],
         });
-        if (!confirmed) {
-          console.log("Command not run.");
-          return;
-        }
-      }
-      runCommand(command);
-    }
-    catch (error) {
-      console.error(chalk.red(error));
-    }
 
+        switch (action) {
+          case 'execute':
+            runCommand(command);
+            shouldContinue = false;
+            break;
+          case 'edit':
+            currentPrompt = await editPrompt(command);
+            break;
+          case 'refine':
+            currentPrompt = await refineCommand(currentPrompt, command);
+            break;
+          case 'cancel':
+            console.log(chalk.yellow('Command cancelled.'));
+            return;
+        }
+      } catch (error) {
+        console.error(chalk.red(error));
+        shouldContinue = false;
+      }
+    }
   })
 
 program.parse(process.argv);
