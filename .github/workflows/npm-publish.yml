@@ -30,8 +30,11 @@ jobs:
       - uses: pnpm/action-setup@v3
         with:
           version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 23
           registry-url: https://registry.npmjs.org/
       - run: pnpm install --frozen-lockfile
-      - run: pnpm publish --no-git-checks
+      - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
