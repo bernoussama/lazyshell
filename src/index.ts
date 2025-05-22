@@ -1,6 +1,7 @@
 import { generateText, type LanguageModel } from 'ai';
 import { groq } from '@ai-sdk/groq';
 import { google } from '@ai-sdk/google';
+import { ollama } from 'ollama-ai-provider';
 import { Command } from 'commander';
 import { select, input } from '@inquirer/prompts';
 import chalk from 'chalk';
@@ -28,7 +29,11 @@ async function genCommand(prompt: string) {
   } else if (process.env.GROQ_API_KEY) {
     model = groq('llama-3.1-8b-instant');
   } else {
-    return Promise.reject(new Error("No API key found. Please set either GROQ_API_KEY or GOOGLE_GENERATIVE_AI_API_KEY."));
+    try {
+      model = ollama('llama3.2');
+    } catch (error) {
+      return Promise.reject(new Error("No API key found. Please set either GROQ_API_KEY or GOOGLE_GENERATIVE_AI_API_KEY. Or setup Ollama"));
+    }
   }
 
 
