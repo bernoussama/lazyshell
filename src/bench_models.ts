@@ -1,30 +1,12 @@
-import { generateText, type LanguageModel } from 'ai';
-import { groq } from '@ai-sdk/groq';
-import { google } from '@ai-sdk/google';
-import { ollama } from 'ollama-ai-provider';
-import { openrouter } from '@openrouter/ai-sdk-provider';
-import { openai } from '@ai-sdk/openai';
-import { anthropic } from '@ai-sdk/anthropic';
 import ora from 'ora';
 import fs from 'fs/promises';
 import path from 'path';
 import chalk from 'chalk';
 import { performance } from 'perf_hooks';
+import { getBenchmarkModels, generateBenchmarkText } from './lib/ai';
 
-// Define the models to benchmark
-const models: Record<string, LanguageModel> = {
-
-  'openrouter-llama3.3': openrouter('meta-llama/llama-3.3-8b-instruct:free'),
-  'groq-mixtral-8x7b': groq('mixtral-8x7b-32768'),
-  'groq-llama3-8b': groq('llama3-8b-8192'),
-  'gemini-2.0-flash-lite': google('gemini-2.0-flash-lite'),
-  // 'openai-gpt-4': openai('gpt-4'),
-  // 'openai-gpt-3.5-turbo': openai('gpt-3.5-turbo'),
-  // 'anthropic-claude-3-sonnet': anthropic('claude-3-sonnet-20240229'),
-  // 'anthropic-claude-3-haiku': anthropic('claude-3-haiku-20240307'),
-  // Add any local Ollama models you want to test
-  'ollama3.2': ollama('llama3.2'),
-};
+// Get the models to benchmark from our AI library
+const models = getBenchmarkModels();
 
 // Define benchmark prompts
 const prompts = [
@@ -64,12 +46,7 @@ async function runBenchmark() {
       try {
         const startTime = performance.now();
 
-        const output = await generateText({
-          model,
-          temperature: 0,
-          system: "You are an expert system administrator. Generate only the command with no explanation.",
-          prompt,
-        });
+        const output = await generateBenchmarkText(model, prompt);
 
         const endTime = performance.now();
         const timeMs = endTime - startTime;
@@ -77,11 +54,11 @@ async function runBenchmark() {
         results.push({
           modelName,
           prompt,
-          output: output.text.trim(),
+          output: output.trim(),
           timeMs,
         });
         //show output
-        console.log(chalk.blue(`Output: ${output.text.trim()}`));
+        console.log(chalk.blue(`Output: ${output.trim()}`));
 
         spinner.succeed(`Completed in ${timeMs.toFixed(2)}ms`);
       } catch (error: any) {

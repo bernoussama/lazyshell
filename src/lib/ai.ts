@@ -45,7 +45,11 @@ export function getDefaultModel(): ModelConfig {
   let provider: string;
   let modelId: string;
 
-  if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+  if (process.env.GROQ_API_KEY) {
+    provider = 'groq';
+    modelId = 'llama-3.1-8b-instant';
+    model = groq(modelId);
+  } else if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
     provider = 'google';
     modelId = 'gemini-2.0-flash-lite';
     model = google(modelId);
@@ -53,10 +57,6 @@ export function getDefaultModel(): ModelConfig {
     provider = 'openrouter';
     modelId = 'meta-llama/llama-3.3-8b-instruct:free';
     model = openrouter(modelId);
-  } else if (process.env.GROQ_API_KEY) {
-    provider = 'groq';
-    modelId = 'llama-3.1-8b-instant';
-    model = groq(modelId);
   } else if (process.env.ANTHROPIC_API_KEY) {
     provider = 'anthropic';
     modelId = 'claude-3-5-haiku-latest';
