@@ -1,0 +1,157 @@
+[
+  {
+    "modelName": "openrouter-llama3.3",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": "`find . -type f -size +100M`",
+    "timeMs": 2457.705341
+  },
+  {
+    "modelName": "groq-mixtral-8x7b",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": "",
+    "timeMs": 0,
+    "error": "The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead."
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": "`find . -type f -size +100M`",
+    "timeMs": 985.8877029999994
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": "```bash\nfind . -type f -size +100M\n```",
+    "timeMs": 828.3470200000002
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": "`find . -type f -size +100M`",
+    "timeMs": 792.4773279999999
+  },
+  {
+    "modelName": "openrouter-llama3.3",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": "`docker stats --all`",
+    "timeMs": 1457.164025
+  },
+  {
+    "modelName": "groq-mixtral-8x7b",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": "",
+    "timeMs": 0,
+    "error": "The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead."
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": "docker ps -s",
+    "timeMs": 370.2979610000002
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": "```bash\ndocker stats --format \"table {{.ID}}\\t{{.Name}}\\t{{.CPUPerc}}\\t{{.MemUsage}}\\t{{.MemPerc}}\"\n```",
+    "timeMs": 956.5780020000002
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": "```bash\ndocker ps -a --no-trunc | awk '{print $2, \":\", $4}' | sort -k 1,1n | uniq | while read container; do echo \"$container\"; done\n```\n\nor \n\n```bash\ndocker ps -a --no-trunc | grep -v 'Exit' | awk '{print $2, \":\", $4}'\n```",
+    "timeMs": 3203.29392
+  },
+  {
+    "modelName": "openrouter-llama3.3",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": "`ffmpeg -i input.mp4 -ab 160k -ac 2 -ar 44100 -vn output.mp3`",
+    "timeMs": 2065.862373
+  },
+  {
+    "modelName": "groq-mixtral-8x7b",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": "",
+    "timeMs": 0,
+    "error": "The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead."
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": "ffmpeg -i input.mp4 -c:a libmp3lame output.mp3",
+    "timeMs": 808.4118030000009
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": "```bash\nffmpeg -i input.mp4 -vn -acodec copy output.aac\n```",
+    "timeMs": 738.1599499999975
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": "`ffmpeg -i input.mp4 -vn -ar 44100 -ac 2 output.wav`",
+    "timeMs": 1022.3257670000021
+  },
+  {
+    "modelName": "openrouter-llama3.3",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": "`find . -name \"*.js\" -exec sed -i 's/old_text/new_text/g' {} \\;`",
+    "timeMs": 1224.332741000002
+  },
+  {
+    "modelName": "groq-mixtral-8x7b",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": "",
+    "timeMs": 0,
+    "error": "The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead."
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": "`find . -type f -name \"*.js\" -exec sed -i 's/old_text/new_text/g' {} \\;`",
+    "timeMs": 524.3655130000006
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": "```bash\nfind . -name \"*.js\" -type f -print0 | xargs -0 sed -i 's/OLD_TEXT/NEW_TEXT/g'\n```",
+    "timeMs": 896.7185959999988
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": "`find . -type f -name \"*.js\" -exec sed -i 's/old_text/new_text/g' {} \\;`",
+    "timeMs": 1574.617237999999
+  },
+  {
+    "modelName": "openrouter-llama3.3",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": "`df -h --sort=size`",
+    "timeMs": 1272.1766739999985
+  },
+  {
+    "modelName": "groq-mixtral-8x7b",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": "",
+    "timeMs": 0,
+    "error": "The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead."
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": "`du -sh --sort=total`",
+    "timeMs": 433.82227200000125
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": "```bash\ndu -h --max-depth=1 | sort -hr\n```",
+    "timeMs": 608.2991440000005
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": "`df -h | sort -k 2 -n`",
+    "timeMs": 719.2761229999996
+  }
+]

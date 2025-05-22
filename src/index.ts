@@ -7,6 +7,10 @@ import { select, input } from '@inquirer/prompts';
 import chalk from 'chalk';
 import { runCommand } from './utils';
 import os from 'os';
+import { openrouter } from '@openrouter/ai-sdk-provider';
+import { openai } from '@ai-sdk/openai';
+import { anthropic } from '@ai-sdk/anthropic';
+import ora from 'ora';
 
 // Get system information for context
 const osInfo = {
@@ -26,22 +30,41 @@ async function genCommand(prompt: string) {
   if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
     model = google('gemini-2.0-flash-lite');
 
+  } else if (process.env.OPENROUTER_API_KEY) {
+    // model = openrouter('mistralai/devstral-small:free')
+    model = openrouter('meta-llama/llama-3.3-8b-instruct:free')
+
   } else if (process.env.GROQ_API_KEY) {
     model = groq('llama-3.1-8b-instant');
+
+  } else if (process.env.ANTHROPIC_API_KEY) {
+    model = anthropic('claude-3-5-haiku-latest');
+
+  } else if (process.env.OPENAI_API_KEY) {
+    model = openai("gpt-4.1-mini")
+
   } else {
     try {
       model = ollama('llama3.2');
+
     } catch (error) {
       return Promise.reject(new Error("No API key found. Please set either GROQ_API_KEY or GOOGLE_GENERATIVE_AI_API_KEY. Or setup Ollama"));
     }
   }
 
 
-  const result = await generateText({
-    model,
-    temperature: 0,
-    system:
-      `You are an expert system administrator.
+  // console log the model being used
+  console.log(chalk.blue(`Using model: ${model.provider}/${model.modelId}`));
+
+  // Show spinner while generating command
+  const spinner = ora('Generating command...').start();
+  try {
+
+    const result = await generateText({
+      model,
+      temperature: 0,
+      system:
+        `You are an expert system administrator.
 Here is the system information: ${JSON.stringify(osInfo)}
 Your task is to generate ONLY the command to run following user request.
 Do not use markdown NEVER or any other formatting. Do not add any explanation or additional information.
@@ -52,9 +75,15 @@ If the prompt is a command sequence for a different *NIX system, return the righ
 If the user's intention requires superuser priviledges, ensure to prefix the command with 'sudo' or an appropriate equivalent given the operating system.
 `,
 
-    prompt,
-  });
-  return result;
+      prompt,
+    });
+
+    spinner.succeed();
+    return result;
+  } catch (error) {
+    spinner.fail('Failed to generate command');
+    throw error;
+  }
 }
 
 async function editPrompt(command: string): Promise<string> {

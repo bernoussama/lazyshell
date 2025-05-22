@@ -1,0 +1,157 @@
+[
+  {
+    "modelName": "openrouter-llama3.3",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": "`find . -type f -size +100M`",
+    "timeMs": 1903.615505
+  },
+  {
+    "modelName": "openrouter-llama3.3",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": "`docker stats --all`",
+    "timeMs": 1222.4626429999998
+  },
+  {
+    "modelName": "openrouter-llama3.3",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": "`ffmpeg -i input.mp4 -ab 160k -ac 2 -ar 44100 -vn output.mp3`",
+    "timeMs": 1398.8792980000007
+  },
+  {
+    "modelName": "openrouter-llama3.3",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": "`find . -name \"*.js\" -exec sed -i 's/old_text/new_text/g' {} \\;`",
+    "timeMs": 1420.8677870000001
+  },
+  {
+    "modelName": "openrouter-llama3.3",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": "`df -h --sort=size`",
+    "timeMs": 1396.8738219999996
+  },
+  {
+    "modelName": "groq-mixtral-8x7b",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": "",
+    "timeMs": 0,
+    "error": "The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead."
+  },
+  {
+    "modelName": "groq-mixtral-8x7b",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": "",
+    "timeMs": 0,
+    "error": "The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead."
+  },
+  {
+    "modelName": "groq-mixtral-8x7b",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": "",
+    "timeMs": 0,
+    "error": "The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead."
+  },
+  {
+    "modelName": "groq-mixtral-8x7b",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": "",
+    "timeMs": 0,
+    "error": "The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead."
+  },
+  {
+    "modelName": "groq-mixtral-8x7b",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": "",
+    "timeMs": 0,
+    "error": "The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead."
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": "`find . -type f -size +100M`",
+    "timeMs": 426.23971100000017
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": "docker ps -s",
+    "timeMs": 762.1774939999996
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": "ffmpeg -i input.mp4 -c:a libmp3lame output.mp3",
+    "timeMs": 376.88415499999974
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": "`find . -type f -name \"*.js\" -exec sed -i 's/old_text/new_text/g' {} \\;`",
+    "timeMs": 396.8866190000008
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": "`du -sh --sort=total`",
+    "timeMs": 373.0166570000001
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": "```bash\nfind . -type f -size +100M\n```",
+    "timeMs": 892.6646020000007
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": "```bash\ndocker stats --format \"table {{.ID}}\\t{{.Name}}\\t{{.CPUPerc}}\\t{{.MemUsage}}\\t{{.MemPerc}}\"\n```",
+    "timeMs": 898.1096109999999
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": "```bash\nffmpeg -i input.mp4 -vn -acodec copy output.aac\n```",
+    "timeMs": 582.098994
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": "```bash\nfind . -name \"*.js\" -type f -print0 | xargs -0 sed -i 's/OLD_TEXT/NEW_TEXT/g'\n```",
+    "timeMs": 764.1033560000014
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": "```bash\ndu -h --max-depth=1 | sort -hr\n```",
+    "timeMs": 587.2369000000017
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": "`find . -type f -size +100M`",
+    "timeMs": 999.4805729999971
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": "```bash\ndocker ps -a --no-trunc | awk '{print $2, \":\", $4}' | sort -k 1,1n | uniq | while read container; do echo \"$container\"; done\n```\n\nor \n\n```bash\ndocker ps -a --no-trunc | grep -v 'Exit' | awk '{print $2, \":\", $4}'\n```",
+    "timeMs": 3112.330833
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": "`ffmpeg -i input.mp4 -vn -ar 44100 -ac 2 output.wav`",
+    "timeMs": 977.1886969999978
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": "`find . -type f -name \"*.js\" -exec sed -i 's/old_text/new_text/g' {} \\;`",
+    "timeMs": 1195.261294
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": "`df -h | sort -k 2 -n`",
+    "timeMs": 663.6294700000035
+  }
+]
