@@ -85,19 +85,23 @@ const zLLMJudgeResult = z.object({
 export function createLLMJudge(
   name: string,
   criteria: string = "quality, relevance, and correctness of the output",
-  modelConfig?: ModelConfig
+  modelConfig?: ModelConfig,
+  delayMs: number = 1000 // Make delay configurable
 ): Scorer<any, any, any> {
   return {
     name,
     description: `AI-powered evaluation based on ${criteria}`,
     score: async (input: any, output: any, expected?: any): Promise<number> => {
-      // delay to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 1000));
       try {
+        return await withRetry(async () => {
+          // Optional delay for conservative rate limiting
+          // if (delayMs > 0) {
+          //   await createDelay(delayMs);
+          // }
 
-        const model = modelConfig || judgeModelConf;
-        
-        const prompt = `You are an expert evaluator. Please rate the following output based on ${criteria}.
+          const model = modelConfig || judgeModelConf;
+          
+          const prompt = `You are an expert evaluator. Please rate the following output based on ${criteria}.
 
 Input/Task: ${JSON.stringify(input)}
 Output to evaluate: ${JSON.stringify(output)}
@@ -111,19 +115,20 @@ Rate the output on a scale of 1-5 where:
 
 Provide both a score and brief reasoning for your evaluation.`;
 
-        const { object } = await generateObject({
-          model: model.model,
-          schema: zLLMJudgeResult,
-          prompt,
-          temperature: 0.1 // Low temperature for consistent scoring
-        });
+          const { object } = await generateObject({
+            model: model.model,
+            schema: zLLMJudgeResult,
+            prompt,
+            temperature: 0.1 // Low temperature for consistent scoring
+          });
 
-        // Transform 1-5 score to 0-1 scale: (score - 1) / 4
-        const normalizedScore = (object.score - 1) / 4;
-        
-        console.log(`    LLM Judge reasoning: ${object.reasoning}`);
-        
-        return normalizedScore;
+          // Transform 1-5 score to 0-1 scale: (score - 1) / 4
+          const normalizedScore = (object.score - 1) / 4;
+          
+          console.log(`    LLM Judge reasoning: ${object.reasoning}`);
+          
+          return normalizedScore;
+        }, 3, delayMs);
       } catch (error) {
         console.error(`LLM Judge scoring failed: ${error}`);
         return 0; // Default to 0 on error
@@ -132,8 +137,10 @@ Provide both a score and brief reasoning for your evaluation.`;
   };
 }
 
-// Convenience export for default LLM judge
+// Convenience exports for different delay strategies
 export const LLMJudge = createLLMJudge("LLMJudge");
+export const LLMJudgeNoDelay = createLLMJudge("LLMJudgeNoDelay", undefined, undefined, 0);
+export const LLMJudgeFast = createLLMJudge("LLMJudgeFast", undefined, undefined, 500);
 
 // Helper function for Levenshtein distance
 function levenshteinDistance(str1: string, str2: string): number {
@@ -159,6 +166,40 @@ function levenshteinDistance(str1: string, str2: string): number {
   }
 
   return matrix[str2.length][str1.length];
+}
+
+// Utility function for better delay handling
+export function createDelay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Rate limiting with exponential backoff
+export async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 3,
+  baseDelayMs: number = 1000
+): Promise<T> {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      // Check if it's a rate limit error
+      const isRateLimitError = error && 
+        (String(error).toLowerCase().includes('rate limit') || 
+         String(error).toLowerCase().includes('too many requests'));
+      
+      if (!isRateLimitError || attempt === maxRetries - 1) {
+        throw error;
+      }
+      
+      // Exponential backoff: wait longer each retry
+      const delayMs = baseDelayMs * Math.pow(2, attempt);
+      console.log(`Rate limited, retrying in ${delayMs}ms (attempt ${attempt + 1}/${maxRetries})`);
+      await createDelay(delayMs);
+    }
+  }
+  
+  throw new Error('Max retries exceeded');
 }
 
 // 3. Main Evaluation Function
