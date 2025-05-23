@@ -73,6 +73,7 @@ async function runCIEvaluations(): Promise<boolean> {
         { ...createLLMJudge("Unix/Linux command correctness and syntax", judgeModelConf), name: "Correctness" },
         { ...createLLMJudge("security considerations and best practices", judgeModelConf), name: "Security" },
         // { ...createLLMJudge("efficiency and performance of the command", judgeModelConf), name: "Efficiency" }
+        // efficiency and performance of the command are not important for the eval CI
       ],
     });
 
