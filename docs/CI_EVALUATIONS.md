@@ -20,8 +20,8 @@ Edit `src/lib/ci-eval.ts` to adjust the thresholds:
 
 ```typescript
 const CI_CONFIG: CIEvalConfig = {
-  minThreshold: 0.7, // 70% average score required to pass
-  criticalScorers: ['LLMJudge'] // These scorers must individually meet the threshold
+  minThreshold: 0.7, // 70% score required to pass (both overall and individual)
+  criticalScorers: ['Quality', 'Correctness', 'Security'] // These scorers must individually meet the threshold
 };
 ```
 
@@ -43,12 +43,11 @@ The CI evaluations run against these command generation scenarios:
 
 ## Scoring Criteria
 
-Each test case is evaluated by 4 LLM judges:
+Each test case is evaluated by 3 LLM judges:
 
-1. **Overall Quality**: General command quality and appropriateness
-2. **Unix/Linux Correctness**: Command syntax and platform compatibility
+1. **Quality**: General command quality and appropriateness
+2. **Correctness**: Unix/Linux command syntax and platform compatibility
 3. **Security**: Security considerations and best practices
-4. **Efficiency**: Performance and efficiency of the generated commands
 
 ## GitHub Actions Setup
 
@@ -118,7 +117,9 @@ The evaluation will show:
 🎯 Required threshold: 70.0%
 
 🔍 Critical scorer results:
-  LLMJudge: 87.5% ✅
+  Quality: 87.5% ✅
+  Correctness: 82.3% ✅
+  Security: 90.1% ✅
 
 ✅ EVALUATION PASSED
 All scores meet the required threshold.

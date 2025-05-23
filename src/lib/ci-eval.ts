@@ -9,15 +9,13 @@ const judgeModelConf: ModelConfig = {
 
 // Configuration for CI thresholds
 interface CIEvalConfig {
-  minThreshold: number; // Minimum average score to pass (0-1 scale)
-  minAvg?: number; // Minimum average score to pass (0-1 scale)
+  minThreshold: number; // Minimum score to pass (0-1 scale)
   criticalScorers?: string[]; // Scorers that must individually pass the threshold
 }
 
 const CI_CONFIG: CIEvalConfig = {
-  minThreshold: 0.7, // 70% average score required to pass
-  minAvg: 0.75, // 75% average score required to pass
-  criticalScorers: ['LLMJudge'] // These scorers must individually meet the threshold
+  minThreshold: 0.7, // 70% score required to pass (both overall and individual)
+  criticalScorers: ['Quality', 'Correctness', 'Security'] // These scorers must individually meet the threshold
 };
 
 async function runCIEvaluations(): Promise<boolean> {
@@ -71,10 +69,10 @@ async function runCIEvaluations(): Promise<boolean> {
       },
       // Only use LLM judges since we have no expected values
       scorers: [
-        createLLMJudge("overall command quality and appropriateness", judgeModelConf),
-        createLLMJudge("Unix/Linux command correctness and syntax", judgeModelConf),
-        createLLMJudge("security considerations and best practices", judgeModelConf),
-        // createLLMJudge("efficiency and performance of the command", judgeModelConf)
+        { ...createLLMJudge("overall command quality and appropriateness", judgeModelConf), name: "Quality" },
+        { ...createLLMJudge("Unix/Linux command correctness and syntax", judgeModelConf), name: "Correctness" },
+        { ...createLLMJudge("security considerations and best practices", judgeModelConf), name: "Security" },
+        // { ...createLLMJudge("efficiency and performance of the command", judgeModelConf), name: "Efficiency" }
       ],
     });
 
@@ -94,22 +92,22 @@ async function runCIEvaluations(): Promise<boolean> {
     if (CI_CONFIG.criticalScorers) {
       console.log("🔍 Critical scorer results:");
       for (const criticalScorer of CI_CONFIG.criticalScorers) {
-        const scoreKey = Object.keys(evalResult.averageScores).find(key => 
-          key.includes(criticalScorer)
-        );
+        const score = evalResult.averageScores[criticalScorer];
         
-        if (scoreKey) {
-          const score = evalResult.averageScores[scoreKey];
+        if (score !== undefined) {
           const passed = score >= CI_CONFIG.minThreshold;
-          console.log(`  ${scoreKey}: ${(score * 100).toFixed(1)}% ${passed ? '✅' : '❌'}`);
+          console.log(`  ${criticalScorer}: ${(score * 100).toFixed(1)}% ${passed ? '✅' : '❌'}`);
           if (!passed) criticalScoresPassed = false;
+        } else {
+          console.log(`  ${criticalScorer}: NOT FOUND ❌`);
+          criticalScoresPassed = false;
         }
       }
       console.log("");
     }
 
     // Determine if evaluation passed
-    const overallPassed = CI_CONFIG.minAvg ? overallAverage >= CI_CONFIG.minAvg : overallAverage >= CI_CONFIG.minThreshold;
+    const overallPassed = overallAverage >= CI_CONFIG.minThreshold;
     const allPassed = overallPassed && criticalScoresPassed;
 
     if (allPassed) {

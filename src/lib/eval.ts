@@ -2,6 +2,12 @@ import z from 'zod';
 import { generateObject } from 'ai';
 import { models, type ModelConfig } from './ai';
 
+const judgeModelConf: ModelConfig = {
+  model: models.groq('qwen-qwq-32b'),
+  provider: 'groq',
+  modelId: 'qwen-qwq-32b'
+}
+
 // 1. Core Types and Interfaces
 
 export interface TestData<TInput = any, TExpected = any> {
@@ -86,11 +92,6 @@ export function createLLMJudge(
     score: async (input: any, output: any, expected?: any): Promise<number> => {
       try {
 
-const judgeModelConf: ModelConfig = {
-  model: models.groq('qwen-qwq-32b'),
-  provider: 'groq',
-  modelId: 'qwen-qwq-32b'
-}
         const model = modelConfig || judgeModelConf;
         
         const prompt = `You are an expert evaluator. Please rate the following output based on ${criteria}.
