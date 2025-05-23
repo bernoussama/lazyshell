@@ -91,6 +91,8 @@ export function createLLMJudge(
     name,
     description: `AI-powered evaluation based on ${criteria}`,
     score: async (input: any, output: any, expected?: any): Promise<number> => {
+      // delay to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 1000));
       try {
 
         const model = modelConfig || judgeModelConf;

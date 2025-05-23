@@ -34,7 +34,7 @@ jobs:
   #     - name: Run tests
   #       run: pnpm test
 
-  evaluate:
+  evals:
     runs-on: ubuntu-latest
     
     steps:
@@ -55,12 +55,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
         
-      - name: Run CI evaluations
+      - name: Run CI evals
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: pnpm eval:ci
         
-      - name: Upload evaluation results
+      - name: Upload evals results
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -70,18 +70,18 @@ jobs:
             evaluation-*.json
           retention-days: 30
 
-  # Summary job that requires both test and evaluate to pass
-  ci-success:
+  # Summary job that requires both test and evals to pass
+  ci-check:
     runs-on: ubuntu-latest
-    needs: [evaluate]
+    needs: [evals]
     if: always()
     
     steps:
       - name: Check CI results
         run: |
-          if [[ "${{ needs.evaluate.result }}" == "skipped" ]]; then
+          if [[ "${{ needs.evals.result }}" == "skipped" ]]; then
             echo "⚠️  Evaluations skipped (missing API keys)"
-          elif [[ "${{ needs.evaluate.result }}" != "success" ]]; then
+          elif [[ "${{ needs.evals.result }}" != "success" ]]; then
             echo "❌ Evaluations failed"
             exit 1
           else
