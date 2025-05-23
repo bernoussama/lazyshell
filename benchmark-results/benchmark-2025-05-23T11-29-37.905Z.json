@@ -1,0 +1,226 @@
+{
+  "results": [
+    {
+      "modelName": "or-devstral",
+      "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+      "output": null,
+      "timeMs": 0,
+      "error": "Not Found"
+    },
+    {
+      "modelName": "gemini-2.0-flash-lite",
+      "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+      "output": {
+        "explanation": "This command uses 'find' to locate files of type 'f' (regular files) with a size greater than 100MB (+100M).  The '-print0' option and 'xargs -0' handle filenames with spaces or special characters safely.  Finally, 'ls -lh' provides a human-readable listing of the found files.",
+        "command": "find . -type f -size +100M -print0 | xargs -0 ls -lh"
+      },
+      "timeMs": 1928.9941199999998
+    },
+    {
+      "modelName": "ollama3.2",
+      "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+      "output": {
+        "explanation": "Find all files over 100MB in the current directory",
+        "command": "find . -type f -size +100M"
+      },
+      "timeMs": 5292.302884999999
+    },
+    {
+      "modelName": "llama-3.3-70b-versatile",
+      "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+      "output": {
+        "explanation": "The find command is used to search for files based on various conditions. The -size option is used to specify the size of the files to be found. The +100M option specifies that we want to find files larger than 100MB. The -print option is used to print the names of the files found.",
+        "command": "find . -type f -size +100M -print"
+      },
+      "timeMs": 774.803011
+    },
+    {
+      "modelName": "or-devstral",
+      "prompt": "Write a command to list all running docker containers with their memory usage",
+      "output": null,
+      "timeMs": 0,
+      "error": "Not Found"
+    },
+    {
+      "modelName": "gemini-2.0-flash-lite",
+      "prompt": "Write a command to list all running docker containers with their memory usage",
+      "output": {
+        "explanation": "This command lists all running Docker containers with their resource usage statistics, including memory.",
+        "command": "docker stats --no-stream"
+      },
+      "timeMs": 1102.817411
+    },
+    {
+      "modelName": "ollama3.2",
+      "prompt": "Write a command to list all running docker containers with their memory usage",
+      "output": {
+        "explanation": "List all running Docker containers and their memory usage",
+        "command": "docker ps -a --no-trunc --format \"{{.Names}}\t{{.Status}}\t{{.MemoryUsage/Total}}\t{{.MemoryUsage/Used}}\""
+      },
+      "timeMs": 3129.8398930000003
+    },
+    {
+      "modelName": "llama-3.3-70b-versatile",
+      "prompt": "Write a command to list all running docker containers with their memory usage",
+      "output": {
+        "explanation": "The command uses the docker ps option to list all running containers and the --format option to specify the format of the output. The {{.ID}} and {{.Names}} are placeholders for the container ID and name respectively, while {{.MemUsage}} is used to display the memory usage of each container.",
+        "command": "docker stats --format 'table {{.Container}}\t{{.MemUsage}}'"
+      },
+      "timeMs": 1014.618993
+    },
+    {
+      "modelName": "or-devstral",
+      "prompt": "Create a command to extract audio from a video file using ffmpeg",
+      "output": null,
+      "timeMs": 0,
+      "error": "Not Found"
+    },
+    {
+      "modelName": "gemini-2.0-flash-lite",
+      "prompt": "Create a command to extract audio from a video file using ffmpeg",
+      "output": {
+        "explanation": "This command extracts the audio from the input.mp4 video file and saves it as an AAC audio file named output.aac.  -i specifies the input file. -vn disables video recording. -acodec copy copies the audio stream without re-encoding.",
+        "command": "ffmpeg -i input.mp4 -vn -acodec copy output.aac"
+      },
+      "timeMs": 1420.1947370000016
+    },
+    {
+      "modelName": "ollama3.2",
+      "prompt": "Create a command to extract audio from a video file using ffmpeg",
+      "output": {
+        "explanation": "Extracting audio from a video file using ffmpeg",
+        "command": "ffmpeg -i input.mp4 -ab 128k output.wav"
+      },
+      "timeMs": 1998.4302480000006
+    },
+    {
+      "modelName": "llama-3.3-70b-versatile",
+      "prompt": "Create a command to extract audio from a video file using ffmpeg",
+      "output": {
+        "explanation": "This command uses ffmpeg to extract the audio from a video file and save it as an mp3 file.",
+        "command": "ffmpeg -i input.mp4 -ab 320k -map_metadata 0 -id3v2_version 3 output.mp3"
+      },
+      "timeMs": 804.2476999999999
+    },
+    {
+      "modelName": "or-devstral",
+      "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+      "output": null,
+      "timeMs": 0,
+      "error": "Not Found"
+    },
+    {
+      "modelName": "gemini-2.0-flash-lite",
+      "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+      "output": {
+        "explanation": "This command uses `find` to locate all JavaScript files, then uses `sed` to perform the find and replace operation. Replace `OLD_TEXT` and `NEW_TEXT` with the actual text you want to replace.",
+        "command": "find . -name \"*.js\" -print0 | xargs -0 sed -i 's/OLD_TEXT/NEW_TEXT/g'"
+      },
+      "timeMs": 1076.103164
+    },
+    {
+      "modelName": "ollama3.2",
+      "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+      "output": {
+        "explanation": "Recursive search and replacement of text in all JavaScript files",
+        "command": "find . -type f -name \".js\" -exec sed -i 's/old_text/new_text/g' {} \\;"
+      },
+      "timeMs": 2721.874090999998
+    },
+    {
+      "modelName": "llama-3.3-70b-versatile",
+      "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+      "output": {
+        "explanation": "This command uses sed to find and replace text in all JavaScript files recursively. The -i flag is used for in-place editing, and the -r flag enables extended regular expressions. The pattern 'old_text' is replaced with 'new_text' in all .js files.",
+        "command": "find . -type f -name '*.js' -exec sed -i 's/old_text/new_text/g' {} \\;"
+      },
+      "timeMs": 675.2402070000026
+    },
+    {
+      "modelName": "or-devstral",
+      "prompt": "Generate a command to check disk usage sorted by size",
+      "output": null,
+      "timeMs": 0,
+      "error": "Not Found"
+    },
+    {
+      "modelName": "gemini-2.0-flash-lite",
+      "prompt": "Generate a command to check disk usage sorted by size",
+      "output": {
+        "explanation": "This command checks disk usage, displays it in a human-readable format, limits the depth to one level, and sorts the output by size in reverse order.",
+        "command": "du -h --max-depth=1 | sort -hr"
+      },
+      "timeMs": 1195.776947000002
+    },
+    {
+      "modelName": "ollama3.2",
+      "prompt": "Generate a command to check disk usage sorted by size",
+      "output": {
+        "explanation": "Check disk usage sorted by size",
+        "command": "df -h | sort -r"
+      },
+      "timeMs": 1514.4408210000001
+    },
+    {
+      "modelName": "llama-3.3-70b-versatile",
+      "prompt": "Generate a command to check disk usage sorted by size",
+      "output": {
+        "explanation": "The du command is used to estimate disk usage. The -h option makes the output human-readable, and the --max-depth=1 option limits the output to the current directory level. The sort command is used to sort the output by size.",
+        "command": "du -h --max-depth=1 | sort -h"
+      },
+      "timeMs": 488.6457670000018
+    },
+    {
+      "modelName": "or-devstral",
+      "prompt": "docker show container images and their sizes",
+      "output": null,
+      "timeMs": 0,
+      "error": "Not Found"
+    },
+    {
+      "modelName": "gemini-2.0-flash-lite",
+      "prompt": "docker show container images and their sizes",
+      "output": {
+        "explanation": "This command lists Docker images with their IDs, repositories, tags, and sizes in a table format.",
+        "command": "docker images --format \"table {{.ID}}\\t{{.Repository}}\\t{{.Tag}}\\t{{.Size}}\""
+      },
+      "timeMs": 1537.262294
+    },
+    {
+      "modelName": "ollama3.2",
+      "prompt": "docker show container images and their sizes",
+      "output": {
+        "explanation": "Display information about Docker container images, including their sizes.",
+        "command": "docker images --size"
+      },
+      "timeMs": 1548.7633710000046
+    },
+    {
+      "modelName": "llama-3.3-70b-versatile",
+      "prompt": "docker show container images and their sizes",
+      "output": {
+        "explanation": "To show Docker container images and their sizes, you can use the Docker images command with the --all flag to display all images, and the --digests flag to display digests. However, to get the sizes, you don't need the --digests flag.",
+        "command": "docker images --all"
+      },
+      "timeMs": 598.8644070000009
+    }
+  ],
+  "summary": {
+    "or-devstral": {
+      "avgTime": 0,
+      "successCount": 0
+    },
+    "gemini-2.0-flash-lite": {
+      "avgTime": 1376.8581121666673,
+      "successCount": 6
+    },
+    "ollama3.2": {
+      "avgTime": 2700.941884833334,
+      "successCount": 6
+    },
+    "llama-3.3-70b-versatile": {
+      "avgTime": 726.0700141666675,
+      "successCount": 6
+    }
+  }
+}
