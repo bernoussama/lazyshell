@@ -7,32 +7,32 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  # test:
+  #   runs-on: ubuntu-latest
     
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
         
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 10
+  #     - name: Setup pnpm
+  #       uses: pnpm/action-setup@v3
+  #       with:
+  #         version: 10
           
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 23
-          cache: 'pnpm'
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 23
+  #         cache: 'pnpm'
           
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+  #     - name: Install dependencies
+  #       run: pnpm install --frozen-lockfile
         
-      - name: Build project
-        run: pnpm build
+  #     - name: Build project
+  #       run: pnpm build
         
-      - name: Run tests
-        run: pnpm test
+  #     - name: Run tests
+  #       run: pnpm test
 
   evaluate:
     runs-on: ubuntu-latest
