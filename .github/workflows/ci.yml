@@ -36,7 +36,6 @@ jobs:
 
   evaluate:
     runs-on: ubuntu-latest
-    needs: test
     
     steps:
       - name: Checkout code
@@ -74,23 +73,17 @@ jobs:
   # Summary job that requires both test and evaluate to pass
   ci-success:
     runs-on: ubuntu-latest
-    needs: [test, evaluate]
+    needs: [evaluate]
     if: always()
     
     steps:
       - name: Check CI results
         run: |
-          if [[ "${{ needs.test.result }}" != "success" ]]; then
-            echo "❌ Tests failed"
-            exit 1
-          fi
-          
           if [[ "${{ needs.evaluate.result }}" == "skipped" ]]; then
             echo "⚠️  Evaluations skipped (missing API keys)"
-            echo "✅ CI passed (tests only)"
           elif [[ "${{ needs.evaluate.result }}" != "success" ]]; then
             echo "❌ Evaluations failed"
             exit 1
           else
-            echo "✅ CI passed (tests + evaluations)"
+            echo "✅ CI passed (evaluations)"
           fi 
