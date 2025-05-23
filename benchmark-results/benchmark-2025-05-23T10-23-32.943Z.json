@@ -1,0 +1,212 @@
+[
+  {
+    "modelName": "openrouter-llama3.3",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": "find . -size +100M",
+    "timeMs": 1715.6418859999999
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": "find . -type f -size +100M",
+    "timeMs": 975.9025449999999
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": "find . -type f -size +100M",
+    "timeMs": 971.3502839999992
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": "find . -type f -size +100M",
+    "timeMs": 821.0759520000001
+  },
+  {
+    "modelName": "llama-3.3-70b-versatile",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": "find . -type f -size +100M",
+    "timeMs": 297.4394400000001
+  },
+  {
+    "modelName": "mistral-small",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": "find . -type f -size +100M",
+    "timeMs": 676.0653950000005
+  },
+  {
+    "modelName": "devstral",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": "find . -type f -size +100M",
+    "timeMs": 2497.8607869999996
+  },
+  {
+    "modelName": "openrouter-llama3.3",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": "sudo docker stats --all",
+    "timeMs": 1775.3307609999993
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": "docker ps -s",
+    "timeMs": 1158.7562249999992
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": "docker stats --no-stream --format \"table {{.ID}}\\t{{.Name}}\\t{{.CPUPerc}}\\t{{.MemUsage}}\\t{{.MemPerc}}\"",
+    "timeMs": 1166.6762260000014
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": "docker ps -a --no-trunc",
+    "timeMs": 640.8308620000007
+  },
+  {
+    "modelName": "llama-3.3-70b-versatile",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": "docker ps -a --format \"table {{.ID}}\\t{{.Names}}\\t{{.Status}}\\t{{.Size}}\" && docker stats --no-stream --format \"table {{.Container}}\\t{{.MemUsage}}\"",
+    "timeMs": 444.92402500000026
+  },
+  {
+    "modelName": "mistral-small",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": "docker ps --format \"table {{.ID}}\\t{{.Names}}\\t{{.Status}}\\t{{.MemoryUsage}}\"",
+    "timeMs": 811.4359569999997
+  },
+  {
+    "modelName": "devstral",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": "docker ps --format \"table {{.ID}}\\t{{.Names}}\\t{{.Status}}\\t{{.MemoryUsage}}\"",
+    "timeMs": 2515.4626150000004
+  },
+  {
+    "modelName": "openrouter-llama3.3",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": "ffmpeg -i input.mp4 -vn -ar 44100 -ac 2 -ab 192k output.wav",
+    "timeMs": 1875.1168539999999
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": "ffmpeg -i /home/oussama/personal/clai-ts/video.mp4 -c:a libmp3lame -b:a 128k /home/oussama/personal/clai-ts/audio.mp3",
+    "timeMs": 784.3453799999988
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": "ffmpeg -i input.mp4 -vn -acodec copy output.aac",
+    "timeMs": 847.8719930000007
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": "ffmpeg -i input.mp4 -c:a copy output.wav",
+    "timeMs": 882.9503939999995
+  },
+  {
+    "modelName": "llama-3.3-70b-versatile",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": "ffmpeg -i input.mp4 -ab 320k -map_metadata 0 output.mp3",
+    "timeMs": 337.45251700000154
+  },
+  {
+    "modelName": "mistral-small",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": "ffmpeg -i input.mp4 -q:a 0 -map a output.mp3",
+    "timeMs": 920.926099999997
+  },
+  {
+    "modelName": "devstral",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": "ffmpeg -i input.mp4 -q:a 0 -map a output.mp3",
+    "timeMs": 398.0729709999978
+  },
+  {
+    "modelName": "openrouter-llama3.3",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": "find . -name \"*.js\" -exec sed -i 's/old_text/new_text/g' {} \\;",
+    "timeMs": 1516.8801359999998
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": "find . -type f -name \"*.js\" -exec sed -i 's/old_text/new_text/g' {} \\;",
+    "timeMs": 315.4397420000023
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": "find . -name \"*.js\" -type f -print0 | xargs -0 sed -i 's/old_text/new_text/g'",
+    "timeMs": 957.5314490000019
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": "find . -name \"*.js\" -exec sed -i 's/old_text/new_text/g' {} \\;",
+    "timeMs": 1360.497930999998
+  },
+  {
+    "modelName": "llama-3.3-70b-versatile",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": "find . -type f -name \"*.js\" -exec sed -i 's/old_text/new_text/g' {} \\;",
+    "timeMs": 390.47987999999896
+  },
+  {
+    "modelName": "mistral-small",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": "find . -name \"*.js\" -exec sed -i 's/old-text/new-text/g' {} +\nIf you want to use a different delimiter, you can do so by replacing the '/' with any other character that is not present in the text you are searching for. For example, if you are searching for text that contains a '/', you can use a different delimiter like '|' or '#'.",
+    "timeMs": 1659.0125170000028
+  },
+  {
+    "modelName": "devstral",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": "find /home/oussama/personal/clai-ts -type f -name \"*.js\" -exec sed -i 's/oldText/newText/g' {} +",
+    "timeMs": 545.2157230000012
+  },
+  {
+    "modelName": "openrouter-llama3.3",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": "sudo du -h --sort=size /home/oussama/personal/clai-ts",
+    "timeMs": 1221.7732030000006
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": "du -shx */ | sort -h",
+    "timeMs": 324.82836999999927
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": "du -h --max-depth=1 | sort -hr",
+    "timeMs": 854.7903320000005
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": "ls -lh | sort -k 5",
+    "timeMs": 721.4925130000047
+  },
+  {
+    "modelName": "llama-3.3-70b-versatile",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": "du -h --max-depth=1 | sort -h",
+    "timeMs": 360.1470229999977
+  },
+  {
+    "modelName": "mistral-small",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": "sudo du -ahx / | sort -rh | head -n 20",
+    "timeMs": 895.5149949999977
+  },
+  {
+    "modelName": "devstral",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": "sudo du -ah / | sort -rh | head -n 20",
+    "timeMs": 356.843111999995
+  }
+]

@@ -8,6 +8,7 @@ import { anthropic } from '@ai-sdk/anthropic';
 import os from 'os';
 import z from 'zod';
 import type { Config, ProviderKey } from './config';
+import { mistral } from '@ai-sdk/mistral';
 
 // System information interface
 export interface SystemInfo {
@@ -58,7 +59,7 @@ export function getModelFromConfig(config: Config): ModelConfig {
         process.env.GROQ_API_KEY = apiKey || process.env.GROQ_API_KEY;
         model = groq(modelId);
         break;
-        
+
       case 'google':
         if (!apiKey && !process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
           throw new Error('Google AI API key is required');
@@ -66,7 +67,7 @@ export function getModelFromConfig(config: Config): ModelConfig {
         process.env.GOOGLE_GENERATIVE_AI_API_KEY = apiKey || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
         model = google(modelId);
         break;
-        
+
       case 'openrouter':
         if (!apiKey && !process.env.OPENROUTER_API_KEY) {
           throw new Error('OpenRouter API key is required');
@@ -74,7 +75,7 @@ export function getModelFromConfig(config: Config): ModelConfig {
         process.env.OPENROUTER_API_KEY = apiKey || process.env.OPENROUTER_API_KEY;
         model = openrouter(modelId);
         break;
-        
+
       case 'anthropic':
         if (!apiKey && !process.env.ANTHROPIC_API_KEY) {
           throw new Error('Anthropic API key is required');
@@ -82,7 +83,7 @@ export function getModelFromConfig(config: Config): ModelConfig {
         process.env.ANTHROPIC_API_KEY = apiKey || process.env.ANTHROPIC_API_KEY;
         model = anthropic(modelId);
         break;
-        
+
       case 'openai':
         if (!apiKey && !process.env.OPENAI_API_KEY) {
           throw new Error('OpenAI API key is required');
@@ -90,11 +91,11 @@ export function getModelFromConfig(config: Config): ModelConfig {
         process.env.OPENAI_API_KEY = apiKey || process.env.OPENAI_API_KEY;
         model = openai(modelId);
         break;
-        
+
       case 'ollama':
         model = ollama(modelId);
         break;
-        
+
       default:
         throw new Error(`Unsupported provider: ${provider}`);
     }
@@ -109,13 +110,13 @@ export function getModelFromConfig(config: Config): ModelConfig {
 function getDefaultModelId(provider: ProviderKey): string {
   const defaultModels: Record<ProviderKey, string> = {
     groq: 'llama-3.3-70b-versatile',
-    google: 'gemini-2.0-flash-lite', 
+    google: 'gemini-2.0-flash-lite',
     openrouter: 'meta-llama/llama-3.3-8b-instruct:free',
     anthropic: 'claude-3-5-haiku-latest',
     openai: 'gpt-4o-mini',
     ollama: 'llama3.2'
   };
-  
+
   return defaultModels[provider];
 }
 
@@ -163,11 +164,16 @@ export function getDefaultModel(): ModelConfig {
 // Get predefined models for benchmarking
 export function getBenchmarkModels(): Record<string, LanguageModel> {
   return {
-    'openrouter-llama3.3': openrouter('meta-llama/llama-3.3-8b-instruct:free'),
-    'groq-llama3-8b': groq('llama3-8b-8192'),
+    // 'or-qwq-32b': openrouter('qwen/qwq-32b:free'),
+    'or-devstral': openrouter('mistralai/devstral-small:free'),
+    // 'openrouter-mistral-7b': openrouter('mistralai/mistral-7b-instruct:free'),
+    // 'openrouter-llama3.3': openrouter('meta-llama/llama-3.3-8b-instruct:free'),// doesnt support tool calling or json
+    // 'groq-llama3-8b': groq('llama3-8b-8192'), // slower than llama-3.3-70b
     'gemini-2.0-flash-lite': google('gemini-2.0-flash-lite'),
     'ollama3.2': ollama('llama3.2'),
     'llama-3.3-70b-versatile': groq('llama-3.3-70b-versatile'),
+    // 'mistral-small': mistral('mistral-small-latest'), // too slow
+    // 'devstral': mistral('devstral-small-2505'),
   };
 }
 
@@ -218,7 +224,7 @@ const zCmd = z.object({
   command: z.string(),
 })
 
-type Command = z.infer<typeof zCmd>;
+export type Command = z.infer<typeof zCmd>;
 
 export async function generateCommandStruct(prompt: string, modelConfig?: ModelConfig): Promise<Command> {
   const modelConf = modelConfig || getDefaultModel();

@@ -1,0 +1,368 @@
+[
+  {
+    "modelName": "openrouter-mistral-7b",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": null,
+    "timeMs": 0,
+    "error": "Unprocessable Entity"
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": {
+      "explanation": "Find all files over 100MB in the current directory",
+      "command": "find . -type f -size +100M"
+    },
+    "timeMs": 634.1226739999997
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": {
+      "explanation": "This command uses 'find' to locate files of type 'f' (regular files) with a size greater than 100MB.  The '-print0' option and 'xargs -0' handle filenames with spaces or special characters safely.  'ls -lh' then provides a human-readable listing of the found files.",
+      "command": "find . -type f -size +100M -print0 | xargs -0 ls -lh"
+    },
+    "timeMs": 1705.5147909999996
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": {
+      "explanation": "Find all files over 100MB in the current directory",
+      "command": "find . -type f -size +100M"
+    },
+    "timeMs": 1709.0028730000004
+  },
+  {
+    "modelName": "llama-3.3-70b-versatile",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": {
+      "explanation": "The find command is used to search for files based on various conditions. The -size option is used to specify the size of the files to be found. The +100M option specifies that we want to find files larger than 100MB. The -print option is used to print the names of the files found.",
+      "command": "find . -type f -size +100M -print"
+    },
+    "timeMs": 550.079041
+  },
+  {
+    "modelName": "mistral-small",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": {
+      "explanation": "This command uses the find utility to search for files in the current directory that are larger than 100MB. The -type f flag ensures that only files are considered, and the -size +100M flag specifies the size criterion. The -exec ls -lh {} \";\" at the end is used to list the files in a human-readable format.",
+      "command": "find . -type f -size +100M -exec ls -lh {} \";\""
+    },
+    "timeMs": 6608.973827000001
+  },
+  {
+    "modelName": "devstral",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": {
+      "explanation": "This command uses the 'find' utility to search for files in the current directory that are larger than 100MB. The '-type f' flag ensures that only files are considered, and the '-size +100M' flag specifies the size criterion.",
+      "command": "find . -type f -size +100M"
+    },
+    "timeMs": 900.7294359999996
+  },
+  {
+    "modelName": "openrouter-mistral-7b",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": null,
+    "timeMs": 0,
+    "error": "Unprocessable Entity"
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": {
+      "explanation": "List all running Docker containers with their memory usage",
+      "command": "docker ps -s"
+    },
+    "timeMs": 712.8565060000001
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": {
+      "explanation": "This command lists all running Docker containers with their resource usage statistics, including memory.",
+      "command": "docker stats --no-stream"
+    },
+    "timeMs": 1334.1594889999978
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": {
+      "explanation": "List all running Docker containers and their memory usage",
+      "command": "docker ps -a --no-trunc --format \"{{.Names}}\t{{.Status}}\t{{.MemoryUsage/Total}}\t{{.MemoryUsage/Used}}\""
+    },
+    "timeMs": 3016.6662389999983
+  },
+  {
+    "modelName": "llama-3.3-70b-versatile",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": {
+      "explanation": "The command uses the docker ps option to list all running containers and the --format option to specify the format of the output. The {{.ID}} and {{.Names}} are placeholders for the container ID and name respectively, while {{.MemUsage}} is used to display the memory usage of each container.",
+      "command": "docker stats --format 'table {{.Container}}\t{{.MemUsage}}'"
+    },
+    "timeMs": 716.9688419999984
+  },
+  {
+    "modelName": "mistral-small",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": {
+      "explanation": "The command uses docker stats to get the memory usage of all running containers and docker ps to get the container IDs and names. The output is then combined using awk to display the memory usage along with the container IDs and names.",
+      "command": "docker stats --no-stream --format 'table {{.Container}}\t{{.Name}}\t{{.MemUsage}}' | awk 'NR==1{print \"CONTAINER ID\\tNAME\\tMEM USAGE\";next}{print $0}' && docker ps --format 'table {{.ID}}\t{{.Names}}\t{{.SizeRW}}'"
+    },
+    "timeMs": 8114.340647000001
+  },
+  {
+    "modelName": "devstral",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": {
+      "explanation": "The command 'docker ps --format \"table {{.ID}}\t{{.Names}}\t{{.Status}}\t{{.MemoryUsage}}\"' lists all running Docker containers with their memory usage. The '--format' flag is used to customize the output format, displaying the container ID, name, status, and memory usage in a tabular format.",
+      "command": "docker ps --format \"table {{.ID}}\t{{.Names}}\t{{.Status}}\t{{.MemoryUsage}}\""
+    },
+    "timeMs": 1807.0586440000006
+  },
+  {
+    "modelName": "openrouter-mistral-7b",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": null,
+    "timeMs": 0,
+    "error": "Unprocessable Entity"
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": {
+      "explanation": "Extracting audio from a video file using ffmpeg",
+      "command": "ffmpeg -i input.mp4 -b:a 192K output.mp3"
+    },
+    "timeMs": 2480.7885380000007
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": {
+      "explanation": "This command extracts the audio from the input.mp4 video file and saves it as an AAC audio file named output.aac.  -i specifies the input file. -vn disables video recording. -acodec copy copies the audio stream without re-encoding.",
+      "command": "ffmpeg -i input.mp4 -vn -acodec copy output.aac"
+    },
+    "timeMs": 1370.3341579999978
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": {
+      "explanation": "Extracting audio from a video file using ffmpeg",
+      "command": "ffmpeg -i input.mp4 -ab 128k output.wav"
+    },
+    "timeMs": 1721.7068600000057
+  },
+  {
+    "modelName": "llama-3.3-70b-versatile",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": {
+      "explanation": "This command uses ffmpeg to extract the audio from a video file and save it as an mp3 file.",
+      "command": "ffmpeg -i input.mp4 -ab 320k -map_metadata 0 -id3v2_version 3 output.mp3"
+    },
+    "timeMs": 458.12483200000133
+  },
+  {
+    "modelName": "mistral-small",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": {
+      "explanation": "This command uses ffmpeg to extract the audio from a video file and save it as an MP3 file. The -i flag specifies the input file, and the output file is specified at the end of the command. The -vn flag is used to discard the video stream, and -acodec libmp3lame is used to specify the audio codec for the output file.",
+      "command": "ffmpeg -i input.mp4 -vn -acodec libmp3lame output.mp3"
+    },
+    "timeMs": 5716.895724000002
+  },
+  {
+    "modelName": "devstral",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": {
+      "explanation": "This command uses ffmpeg to extract audio from a video file. The -i flag specifies the input file, and the -vn flag tells ffmpeg to skip the video stream. The output file is specified with the -f flag, where 'wav' is the format of the output audio file.",
+      "command": "ffmpeg -i input.mp4 -vn -f wav output.wav"
+    },
+    "timeMs": 1165.0273689999958
+  },
+  {
+    "modelName": "openrouter-mistral-7b",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": null,
+    "timeMs": 0,
+    "error": "Unprocessable Entity"
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": {
+      "explanation": "Using sed and find commands to recursively find and replace text in all JavaScript files",
+      "command": "find . -type f -name '*.js' -exec sed -i 's/old_text/new_text/g' {} ;"
+    },
+    "timeMs": 720.7640810000012
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": {
+      "explanation": "This command uses `find` to locate all JavaScript files, then uses `sed` to perform the find and replace operation. Replace `OLD_TEXT` and `NEW_TEXT` with the actual text you want to replace.",
+      "command": "find . -name \"*.js\" -print0 | xargs -0 sed -i 's/OLD_TEXT/NEW_TEXT/g'"
+    },
+    "timeMs": 1458.8651469999968
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": {
+      "explanation": "Recursive search and replacement of text in all JavaScript files",
+      "command": "find . -type f -name \".js\" -exec sed -i 's/old_text/new_text/g' {} \\;"
+    },
+    "timeMs": 2364.6675600000017
+  },
+  {
+    "modelName": "llama-3.3-70b-versatile",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": {
+      "explanation": "This command uses sed to find and replace text in all JavaScript files recursively. The -i flag is used for in-place editing, and the -r flag enables extended regular expressions. The pattern 'old_text' is replaced with 'new_text' in all .js files.",
+      "command": "find . -type f -name '*.js' -exec sed -i 's/old_text/new_text/g' {} \\;"
+    },
+    "timeMs": 601.3100269999995
+  },
+  {
+    "modelName": "mistral-small",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": {
+      "explanation": "This command uses the find command to locate all JavaScript files in the current directory and its subdirectories, and then uses the sed command to perform an in-place replacement of the specified text. The -i flag in sed is used for in-place editing, and the -E flag enables extended regular expressions. The 's/old_text/new_text/g' part is the substitution command where 'old_text' is the text to be replaced and 'new_text' is the text to replace it with. The 'g' at the end ensures that all occurrences in each line are replaced.",
+      "command": "find . -type f -name '*.js' -exec sed -i -E 's/old_text/new_text/g' {} +"
+    },
+    "timeMs": 14349.942397000006
+  },
+  {
+    "modelName": "devstral",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": {
+      "explanation": "This command uses the 'find' utility to locate all JavaScript files (with .js extension) in the current directory and its subdirectories. It then pipes the list of files to 'xargs' which applies the 'sed' command to each file. The 'sed' command performs an in-place replacement of the text 'oldText' with 'newText' in each file.",
+      "command": "find . -type f -name '*.js' -print0 | xargs -0 sed -i 's/oldText/newText/g'"
+    },
+    "timeMs": 30346.28331700001
+  },
+  {
+    "modelName": "openrouter-mistral-7b",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": null,
+    "timeMs": 0,
+    "error": "Unprocessable Entity"
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": {
+      "explanation": "Check disk usage sorted by size",
+      "command": "sudo du -sh /home/oussama/personal/clai-ts"
+    },
+    "timeMs": 851.909553000005
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": {
+      "explanation": "This command checks disk usage, displays it in a human-readable format, limits the depth to one level, and sorts the output by size in reverse order.",
+      "command": "du -h --max-depth=1 | sort -hr"
+    },
+    "timeMs": 1232.1534580000007
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": {
+      "explanation": "Check disk usage sorted by size",
+      "command": "df -h | sort -r"
+    },
+    "timeMs": 1308.9844870000088
+  },
+  {
+    "modelName": "llama-3.3-70b-versatile",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": {
+      "explanation": "The du command is used to estimate disk usage. The -h option makes the output human-readable, and the --max-depth=1 option limits the output to the current directory level. The sort command is used to sort the output by size.",
+      "command": "du -h --max-depth=1 | sort -h"
+    },
+    "timeMs": 540.7815619999892
+  },
+  {
+    "modelName": "mistral-small",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": {
+      "explanation": "This command uses the 'du' (disk usage) utility to summarize disk usage of each directory and file in the current directory, then pipes the output to 'sort' to sort the results by size in descending order. The '-h' flag makes the sizes human-readable, and the '-a' flag includes all files, not just directories.",
+      "command": "du -ah /home/oussama/personal/clai-ts | sort -hr"
+    },
+    "timeMs": 10465.153768000004
+  },
+  {
+    "modelName": "devstral",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": {
+      "explanation": "This command will check the disk usage of the current directory and sort it by size in a human-readable format.",
+      "command": "sudo du -ah / | sort -rh | head -n 20"
+    },
+    "timeMs": 658.8714829999954
+  },
+  {
+    "modelName": "openrouter-mistral-7b",
+    "prompt": "docker show container images and their sizes",
+    "output": null,
+    "timeMs": 0,
+    "error": "Unprocessable Entity"
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "docker show container images and their sizes",
+    "output": {
+      "explanation": "Show Docker container images and their sizes",
+      "command": "docker images --size"
+    },
+    "timeMs": 729.6578759999975
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "docker show container images and their sizes",
+    "output": {
+      "explanation": "This command lists Docker images with their IDs, repositories, tags, and sizes in a table format.",
+      "command": "docker images --format \"table {{.ID}}\\t{{.Repository}}\\t{{.Tag}}\\t{{.Size}}\""
+    },
+    "timeMs": 1350.1952309999906
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "docker show container images and their sizes",
+    "output": {
+      "explanation": "Display information about Docker container images, including their sizes.",
+      "command": "docker images --size"
+    },
+    "timeMs": 1442.0964749999985
+  },
+  {
+    "modelName": "llama-3.3-70b-versatile",
+    "prompt": "docker show container images and their sizes",
+    "output": {
+      "explanation": "To show Docker container images and their sizes, you can use the Docker images command with the --all flag to display all images, and the --digests flag to display digests. However, to get the sizes, you don't need the --digests flag.",
+      "command": "docker images --all"
+    },
+    "timeMs": 461.6867979999952
+  },
+  {
+    "modelName": "mistral-small",
+    "prompt": "docker show container images and their sizes",
+    "output": {
+      "explanation": "The command to show Docker container images and their sizes on a Linux system is 'docker images' with the '--format' flag to specify the output format. The format string '{{.Repository}}:{{.Tag}} {{.Size}}' will display the repository, tag, and size of each image.",
+      "command": "docker images --format '{{.Repository}}:{{.Tag}} {{.Size}}'"
+    },
+    "timeMs": 2362.979827999996
+  },
+  {
+    "modelName": "devstral",
+    "prompt": "docker show container images and their sizes",
+    "output": {
+      "explanation": "This command will list all Docker container images along with their sizes.",
+      "command": "docker images --format \"table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.Size}}\""
+    },
+    "timeMs": 683.5339789999998
+  }
+]

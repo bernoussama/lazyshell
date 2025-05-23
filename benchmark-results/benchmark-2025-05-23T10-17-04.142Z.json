@@ -1,0 +1,187 @@
+[
+  {
+    "modelName": "openrouter-llama3.3",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": "find . -size +100M",
+    "timeMs": 1788.8061819999998
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": "find . -type f -size +100M",
+    "timeMs": 712.2127100000002
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": "find . -type f -size +100M",
+    "timeMs": 878.2931570000001
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": "find . -type f -size +100M",
+    "timeMs": 4064.465703
+  },
+  {
+    "modelName": "llama-3.3-70b-versatile",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": "find . -type f -size +100M",
+    "timeMs": 751.3916319999989
+  },
+  {
+    "modelName": "mistral-small",
+    "prompt": "Generate a bash command to find all files over 100MB in the current directory",
+    "output": "",
+    "timeMs": 0,
+    "error": "Mistral API key is missing. Pass it using the 'apiKey' parameter or the MISTRAL_API_KEY environment variable."
+  },
+  {
+    "modelName": "openrouter-llama3.3",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": "sudo docker stats --no-stream",
+    "timeMs": 1875.5628420000012
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": "docker ps -s",
+    "timeMs": 417.4150520000003
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": "docker stats --no-stream --format \"table {{.ID}}\\t{{.Name}}\\t{{.CPUPerc}}\\t{{.MemUsage}}\\t{{.MemPerc}}\"",
+    "timeMs": 1045.7513660000004
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": "docker ps -a --no-trunc",
+    "timeMs": 864.9624619999995
+  },
+  {
+    "modelName": "llama-3.3-70b-versatile",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": "docker ps -a --format \"table {{.ID}}\\t{{.Names}}\\t{{.Status}}\\t{{.Size}}\" && docker stats --no-stream --format \"table {{.Container}}\\t{{.MemUsage}}\"",
+    "timeMs": 494.40969399999994
+  },
+  {
+    "modelName": "mistral-small",
+    "prompt": "Write a command to list all running docker containers with their memory usage",
+    "output": "",
+    "timeMs": 0,
+    "error": "Mistral API key is missing. Pass it using the 'apiKey' parameter or the MISTRAL_API_KEY environment variable."
+  },
+  {
+    "modelName": "openrouter-llama3.3",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": "ffmpeg -i input.mp4 -vn -ar 44100 -ac 2 -ab 192k output.wav",
+    "timeMs": 1230.3370840000007
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": "ffmpeg -i /home/oussama/personal/clai-ts/video.mp4 -c:a libmp3lame -b:a 128k /home/oussama/personal/clai-ts/audio.mp3",
+    "timeMs": 873.8973290000013
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": "ffmpeg -i input.mp4 -vn -acodec copy output.aac",
+    "timeMs": 585.3221369999992
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": "ffmpeg -i input.mp4 -c:a copy output.wav",
+    "timeMs": 864.7396570000019
+  },
+  {
+    "modelName": "llama-3.3-70b-versatile",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": "ffmpeg -i input.mp4 -ab 320k -map_metadata 0 output.mp3",
+    "timeMs": 399.09104500000103
+  },
+  {
+    "modelName": "mistral-small",
+    "prompt": "Create a command to extract audio from a video file using ffmpeg",
+    "output": "",
+    "timeMs": 0,
+    "error": "Mistral API key is missing. Pass it using the 'apiKey' parameter or the MISTRAL_API_KEY environment variable."
+  },
+  {
+    "modelName": "openrouter-llama3.3",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": "find . -name \"*.js\" -exec sed -i 's/old_text/new_text/g' {} \\;",
+    "timeMs": 1087.5728249999993
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": "find . -type f -name \"*.js\" -exec sed -i 's/old_text/new_text/g' {} \\;",
+    "timeMs": 926.7101799999982
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": "find . -name \"*.js\" -type f -print0 | xargs -0 sed -i 's/old_text/new_text/g'",
+    "timeMs": 686.0053100000005
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": "find . -name \"*.js\" -exec sed -i 's/old_text/new_text/g' {} \\;",
+    "timeMs": 1412.1046180000012
+  },
+  {
+    "modelName": "llama-3.3-70b-versatile",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": "find . -type f -name \"*.js\" -exec sed -i 's/old_text/new_text/g' {} \\;",
+    "timeMs": 357.59160500000144
+  },
+  {
+    "modelName": "mistral-small",
+    "prompt": "Write a one-liner to recursively find and replace text in all JavaScript files",
+    "output": "",
+    "timeMs": 0,
+    "error": "Mistral API key is missing. Pass it using the 'apiKey' parameter or the MISTRAL_API_KEY environment variable."
+  },
+  {
+    "modelName": "openrouter-llama3.3",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": "sudo du -h --sort=size /home/oussama/personal/clai-ts",
+    "timeMs": 1332.2171249999992
+  },
+  {
+    "modelName": "groq-llama3-8b",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": "du -shx */ | sort -h",
+    "timeMs": 353.93112499999916
+  },
+  {
+    "modelName": "gemini-2.0-flash-lite",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": "du -h --max-depth=1 | sort -hr",
+    "timeMs": 573.691899999998
+  },
+  {
+    "modelName": "ollama3.2",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": "ls -lh | sort -k 5",
+    "timeMs": 845.8218680000027
+  },
+  {
+    "modelName": "llama-3.3-70b-versatile",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": "du -h --max-depth=1 | sort -h",
+    "timeMs": 316.81078100000013
+  },
+  {
+    "modelName": "mistral-small",
+    "prompt": "Generate a command to check disk usage sorted by size",
+    "output": "",
+    "timeMs": 0,
+    "error": "Mistral API key is missing. Pass it using the 'apiKey' parameter or the MISTRAL_API_KEY environment variable."
+  }
+]
