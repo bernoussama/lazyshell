@@ -3,6 +3,7 @@ import path from 'path';
 import os from 'os';
 import { select, password } from '@inquirer/prompts';
 import chalk from 'chalk';
+import { version } from '../../package.json';
 
 // Supported AI providers
 export const SUPPORTED_PROVIDERS = {
@@ -202,7 +203,7 @@ export async function initializeConfig(): Promise<Config | null> {
       provider,
       apiKey,
       model: SUPPORTED_PROVIDERS[provider].defaultModel,
-      version: '1.0.0'
+      version
     };
 
     // Save configuration
