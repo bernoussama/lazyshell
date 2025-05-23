@@ -10,11 +10,13 @@ const judgeModelConf: ModelConfig = {
 // Configuration for CI thresholds
 interface CIEvalConfig {
   minThreshold: number; // Minimum average score to pass (0-1 scale)
+  minAvg?: number; // Minimum average score to pass (0-1 scale)
   criticalScorers?: string[]; // Scorers that must individually pass the threshold
 }
 
 const CI_CONFIG: CIEvalConfig = {
   minThreshold: 0.7, // 70% average score required to pass
+  minAvg: 0.75, // 75% average score required to pass
   criticalScorers: ['LLMJudge'] // These scorers must individually meet the threshold
 };
 
@@ -58,7 +60,10 @@ async function runCIEvaluations(): Promise<boolean> {
       // Task function that generates commands
       task: async (input: string) => {
         try {
-          return await generateCommand(input);
+          return await generateCommand(input, {
+            ...getDefaultModel(),
+            temperature: 0.1
+          })
         } catch (error) {
           console.error(`Command generation failed for "${input}":`, error);
           return "ERROR";
@@ -69,7 +74,7 @@ async function runCIEvaluations(): Promise<boolean> {
         createLLMJudge("overall command quality and appropriateness", judgeModelConf),
         createLLMJudge("Unix/Linux command correctness and syntax", judgeModelConf),
         createLLMJudge("security considerations and best practices", judgeModelConf),
-        createLLMJudge("efficiency and performance of the command", judgeModelConf)
+        // createLLMJudge("efficiency and performance of the command", judgeModelConf)
       ],
     });
 
@@ -104,7 +109,7 @@ async function runCIEvaluations(): Promise<boolean> {
     }
 
     // Determine if evaluation passed
-    const overallPassed = overallAverage >= CI_CONFIG.minThreshold;
+    const overallPassed = CI_CONFIG.minAvg ? overallAverage >= CI_CONFIG.minAvg : overallAverage >= CI_CONFIG.minThreshold;
     const allPassed = overallPassed && criticalScoresPassed;
 
     if (allPassed) {

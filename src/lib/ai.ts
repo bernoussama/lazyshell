@@ -208,9 +208,11 @@ export async function generateTextWithModel(
 
 const osInfo = getSystemInfo();
 const pwd = process.cwd();
+const currentShell = process.env.SHELL || 'SHELL env var not set';
 const systemPrompt = `You are an expert system administrator.
 Here is the system information: ${JSON.stringify(osInfo)}
 Here is the current working directory: ${pwd}
+Here is the current shell: ${currentShell}
 Your task is to generate ONLY the command to run, following user request.
 Do not use markdown NEVER or any other formatting for the command.
 If the prompt is already a valid *NIX command for the user's system, then just return the original input.
