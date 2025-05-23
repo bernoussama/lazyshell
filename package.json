@@ -11,7 +11,8 @@
     "build": "npx tsc",
     "dev": "npx tsc -w",
     "x": "npx tsc && node bin/lazyshell",
-    "test": "jest"
+    "test": "jest",
+    "eval:ci": "npx tsc && node bin/lib/ci-eval.js"
   },
   "keywords": [],
   "author": "bernoussama",

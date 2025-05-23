@@ -13,6 +13,7 @@ LazyShell is a command-line interface that helps you quickly generate and execut
 - 🚀 Fast and lightweight
 - 🔄 Automatic fallback to environment variables
 - 💾 Persistent configuration storage
+- 🧪 **Built-in evaluation system for testing AI performance**
 
 ## Installation 📦
 
@@ -110,6 +111,68 @@ lazyshell "list all docker containers with their memory usage"
 # File operations
 lazyshell "compress all .log files in this directory"
 ```
+
+## Evaluation System 🧪
+
+LazyShell includes a flexible evaluation system for testing and benchmarking AI performance:
+
+```typescript
+import { eval, Levenshtein } from './lib/eval';
+
+await eval("My Eval", {
+  // Test data function
+  data: async () => {
+    return [{ input: "Hello", expected: "Hello World!" }];
+  },
+  // Task to perform  
+  task: async (input) => {
+    return input + " World!";
+  },
+  // Scoring methods
+  scorers: [Levenshtein],
+});
+```
+
+### Built-in Scorers
+- **ExactMatch**: Perfect string matching
+- **Levenshtein**: Edit distance similarity  
+- **Contains**: Substring matching
+
+### Features
+- Generic TypeScript interfaces for any evaluation task
+- Multiple scoring methods per evaluation
+- Async support for LLM-based tasks
+- Detailed scoring reports with averages
+- Error handling for failed test cases
+
+See [docs/EVALUATION.md](docs/EVALUATION.md) for complete documentation.
+
+## CI Evaluations 🚦
+
+LazyShell includes automated quality assessments that run in CI to ensure consistent performance:
+
+### Overview
+- **Automated Testing**: Runs on every PR and push to main/develop
+- **Threshold-Based**: Configurable quality thresholds that must be met
+- **LLM Judges**: Uses AI to evaluate command quality, correctness, security, and efficiency
+- **GitHub Actions**: Integrated with CI/CD pipeline
+
+### Quick Setup
+1. Add `GROQ_API_KEY` to your GitHub repository secrets
+2. Evaluations run automatically with 70% threshold by default
+3. CI fails if quality scores drop below the threshold
+
+### Local Testing
+```bash
+# Run the same evaluations locally
+pnpm eval:ci
+
+# Manually build and run
+pnpm build
+node bin/lib/ci-eval.js
+```
+
+See [docs/CI_EVALUATIONS.md](docs/CI_EVALUATIONS.md) for complete setup and configuration guide.
 
 ## Development 🛠️
 

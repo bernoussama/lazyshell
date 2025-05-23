@@ -4,12 +4,12 @@
 name: Node.js Package
 
 on:
+  release:
+    types: [created]
   push:
     tags:
       - 'v*.*.*'
       - 'v*.*.*-*'
-  release:
-    types: [created]
 
 jobs:
   build:

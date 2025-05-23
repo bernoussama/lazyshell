@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 23
+          cache: 'pnpm'
+          
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        
+      - name: Build project
+        run: pnpm build
+        
+      - name: Run tests
+        run: pnpm test
+
+  evaluate:
+    runs-on: ubuntu-latest
+    needs: test
+    # Only run evaluations if we have the required API keys
+    if: ${{ vars.GROQ_API_KEY || secrets.GROQ_API_KEY }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 23
+          cache: 'pnpm'
+          
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        
+      - name: Run CI evaluations
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY || vars.GROQ_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY || vars.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY || vars.OPENAI_API_KEY }}
+        run: pnpm eval:ci
+        
+      - name: Upload evaluation results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evaluation-results
+          path: |
+            *.log
+            evaluation-*.json
+          retention-days: 30
+
+  # Summary job that requires both test and evaluate to pass
+  ci-success:
+    runs-on: ubuntu-latest
+    needs: [test, evaluate]
+    if: always()
+    
+    steps:
+      - name: Check CI results
+        run: |
+          if [[ "${{ needs.test.result }}" != "success" ]]; then
+            echo "❌ Tests failed"
+            exit 1
+          fi
+          
+          if [[ "${{ needs.evaluate.result }}" == "skipped" ]]; then
+            echo "⚠️  Evaluations skipped (missing API keys)"
+            echo "✅ CI passed (tests only)"
+          elif [[ "${{ needs.evaluate.result }}" != "success" ]]; then
+            echo "❌ Evaluations failed"
+            exit 1
+          else
+            echo "✅ CI passed (tests + evaluations)"
+          fi 
