@@ -1,6 +1,6 @@
 import z from 'zod';
 import { generateObject } from 'ai';
-import { getDefaultModel, type ModelConfig } from './ai';
+import { models, type ModelConfig } from './ai';
 
 // 1. Core Types and Interfaces
 
@@ -85,7 +85,13 @@ export function createLLMJudge(
     description: `AI-powered evaluation based on ${criteria}`,
     score: async (input: any, output: any, expected?: any): Promise<number> => {
       try {
-        const model = modelConfig || getDefaultModel();
+
+const judgeModelConf: ModelConfig = {
+  model: models.groq('qwen-qwq-32b'),
+  provider: 'groq',
+  modelId: 'qwen-qwq-32b'
+}
+        const model = modelConfig || judgeModelConf;
         
         const prompt = `You are an expert evaluator. Please rate the following output based on ${criteria}.
 

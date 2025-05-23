@@ -23,6 +23,7 @@ export interface ModelConfig {
   provider: string;
   modelId: string;
   model: LanguageModel;
+  temperature?: number;
 }
 
 // Text generation options
@@ -243,7 +244,7 @@ export async function generateCommand(prompt: string, modelConfig?: ModelConfig)
   const finalModelConfig = modelConfig || getDefaultModel();
 
   const result = await generateTextWithModel(finalModelConfig.model, prompt, {
-    temperature: 0,
+    temperature: finalModelConfig.temperature || 0,
     systemPrompt
   });
 

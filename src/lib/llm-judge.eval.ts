@@ -1,5 +1,11 @@
-import { generateCommand, getDefaultModel } from './ai';
+import { generateCommand, getDefaultModel, models, ModelConfig } from './ai';
 import { eval, LLMJudge, createLLMJudge } from './eval';
+
+const judgeModelConf: ModelConfig = {
+  model: models.groq('qwen-qwq-32b'),
+  provider: 'groq',
+  modelId: 'qwen-qwq-32b'
+}
 
 async function main() {
   console.log("Starting LLM Judge evaluation (no expected values)...\n");
@@ -46,10 +52,10 @@ async function main() {
     },
     // Only use LLM judges since we have no expected values
     scorers: [
-      createLLMJudge("overall command quality and appropriateness"),
-      createLLMJudge("Unix/Linux command correctness and syntax"),
-      createLLMJudge("security considerations and best practices"),
-      createLLMJudge("efficiency and performance of the command")
+      createLLMJudge("overall command quality and appropriateness", judgeModelConf),
+      createLLMJudge("Unix/Linux command correctness and syntax", judgeModelConf),
+      createLLMJudge("security considerations and best practices", judgeModelConf),
+      createLLMJudge("efficiency and performance of the command", judgeModelConf)
     ],
   });
 

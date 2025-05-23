@@ -147,6 +147,33 @@ await eval("My Eval", {
 
 See [docs/EVALUATION.md](docs/EVALUATION.md) for complete documentation.
 
+## CI Evaluations 🚦
+
+LazyShell includes automated quality assessments that run in CI to ensure consistent performance:
+
+### Overview
+- **Automated Testing**: Runs on every PR and push to main/develop
+- **Threshold-Based**: Configurable quality thresholds that must be met
+- **LLM Judges**: Uses AI to evaluate command quality, correctness, security, and efficiency
+- **GitHub Actions**: Integrated with CI/CD pipeline
+
+### Quick Setup
+1. Add `GROQ_API_KEY` to your GitHub repository secrets
+2. Evaluations run automatically with 70% threshold by default
+3. CI fails if quality scores drop below the threshold
+
+### Local Testing
+```bash
+# Run the same evaluations locally
+pnpm eval:ci
+
+# Manually build and run
+pnpm build
+node bin/lib/ci-eval.js
+```
+
+See [docs/CI_EVALUATIONS.md](docs/CI_EVALUATIONS.md) for complete setup and configuration guide.
+
 ## Development 🛠️
 
 ### Prerequisites
