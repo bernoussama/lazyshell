@@ -3,7 +3,8 @@ import { select, input } from '@inquirer/prompts';
 import chalk from 'chalk';
 import { runCommand } from './utils';
 import ora from 'ora';
-import { generateCommand, getDefaultModel } from './lib/ai';
+import { generateCommand, generateCommandStruct, getDefaultModel } from './lib/ai';
+import { Clipboard } from '@napi-rs/clipboard'
 
 async function genCommand(prompt: string) {
   const modelConfig = getDefaultModel();
@@ -52,18 +53,25 @@ program
     let currentPrompt = prompt_parts.join(" ");
     let shouldContinue = true;
 
+    const clipboard = new Clipboard()
     while (shouldContinue) {
       try {
-        const result = await genCommand(currentPrompt);
-        const command = result.text.trim();
+        // const result = await genCommand(currentPrompt);
+        // const command = result.text.trim();
+        const result = await generateCommandStruct(currentPrompt);
+        const command = result.command.trim();
+        // TODO: add command to clipboard
+
+        clipboard.setText(command)
 
         const action = await select({
-          message: `Command: ${chalk.green(command)}`,
+          message: `Explanation: ${chalk.yellow(result.explanation)}
+Command: ${chalk.green(command)}`,
           choices: [
-            { name: '✅ Execute command (Ctrl+I)', value: 'execute' },
+            { name: '✅ Execute command', value: 'execute' },
             // { name: '✏️  Edit command', value: 'edit' },
-            { name: '🔧 Refine prompt (Ctrl+R)', value: 'refine' },
-            { name: '❌ Cancel (Ctrl+C)', value: 'cancel' },
+            { name: '🔧 Refine prompt', value: 'refine' },
+            { name: '❌ Cancel', value: 'cancel' },
           ],
         });
 

@@ -10,28 +10,31 @@ importers:
     dependencies:
       '@ai-sdk/anthropic':
         specifier: ^1.2.12
-        version: 1.2.12(zod@3.25.16)
+        version: 1.2.12(zod@3.25.23)
       '@ai-sdk/google':
         specifier: ^1.2.18
-        version: 1.2.18(zod@3.25.16)
+        version: 1.2.18(zod@3.25.23)
       '@ai-sdk/groq':
         specifier: ^1.2.9
-        version: 1.2.9(zod@3.25.16)
+        version: 1.2.9(zod@3.25.23)
       '@ai-sdk/openai':
         specifier: ^1.3.22
-        version: 1.3.22(zod@3.25.16)
+        version: 1.3.22(zod@3.25.23)
       '@inquirer/prompts':
         specifier: ^7.5.1
         version: 7.5.1(@types/node@22.15.21)
+      '@napi-rs/clipboard':
+        specifier: ^1.1.2
+        version: 1.1.2
       '@openrouter/ai-sdk-provider':
         specifier: ^0.4.6
-        version: 0.4.6(zod@3.25.16)
+        version: 0.4.6(zod@3.25.23)
       '@types/json-schema':
         specifier: ^7.0.15
         version: 7.0.15
       ai:
         specifier: ^4.3.16
-        version: 4.3.16(react@19.1.0)(zod@3.25.16)
+        version: 4.3.16(react@19.1.0)(zod@3.25.23)
       chalk:
         specifier: ^5.4.1
         version: 5.4.1
@@ -43,10 +46,13 @@ importers:
         version: 1.8.1
       ollama-ai-provider:
         specifier: ^1.2.0
-        version: 1.2.0(zod@3.25.16)
+        version: 1.2.0(zod@3.25.23)
       ora:
         specifier: ^8.2.0
         version: 8.2.0
+      zod:
+        specifier: ^3.25.23
+        version: 3.25.23
     devDependencies:
       '@jest/types':
         specifier: ^29.6.3
@@ -522,6 +528,70 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
+
+  '@napi-rs/clipboard-darwin-arm64@1.1.2':
+    resolution: {integrity: sha512-PNNM+RVE2KMCMjYhzohAA5kvV+qyxdpByHqvzuqvVoD9tFpCOCQrnFX8yRDXrf5O55Stj39amN3p1Q67TxWRLw==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@napi-rs/clipboard-darwin-x64@1.1.2':
+    resolution: {integrity: sha512-Htz6x1MZ/Z0n30uYW2e09lfOwyTHDJgYnBLIi7+iMnwuKN+AN3YpVCDLkaq2xzMndov2Zf9bVC1XE/c0ExCovQ==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@napi-rs/clipboard-linux-arm-gnueabihf@1.1.2':
+    resolution: {integrity: sha512-pJJMQzdUSL6VeYO6Hc6vQTmDbeV71BEpcOCaD2fxrGfL7I2tW3FDnl5b3AAqyeeVGelPvBqZXf98J4uiLwaaWA==}
+    engines: {node: '>= 10'}
+    cpu: [arm]
+    os: [linux]
+
+  '@napi-rs/clipboard-linux-arm64-gnu@1.1.2':
+    resolution: {integrity: sha512-/d4FJKnZ/hva7cBUSBv4DxkffBzTPGkjXG7YQwxRyic4CKfCeMdvEqg2t13spDBXlQYl1KXGGSfzdM1r3hR6AQ==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+
+  '@napi-rs/clipboard-linux-arm64-musl@1.1.2':
+    resolution: {integrity: sha512-J8xzr9x3Wn9O3Tvb088mV/IxfIW1WK2WyOT1FvTGbpw+mpAzICJxDfEHkL3MBxV4w3JZXteGIEcU3xkC1XlrWA==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+
+  '@napi-rs/clipboard-linux-x64-gnu@1.1.2':
+    resolution: {integrity: sha512-FwgiM/8uHbwJjy0yGKFAbrMu10oDeXA9zU+xQZ2R7NyLe9exHUk6/KgMNrUUr+eIJnkirGy0N77VorXjAtFUVA==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+
+  '@napi-rs/clipboard-linux-x64-musl@1.1.2':
+    resolution: {integrity: sha512-3tMmRhpVb7iYWkEzobdoEpzFDGqNdtHP/LwLJYZOKreOBI8GszEIshbtjXIFhAfpD+x3RvjXiFowzNChX+CGNw==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+
+  '@napi-rs/clipboard-win32-arm64-msvc@1.1.2':
+    resolution: {integrity: sha512-hFJQwQdLz8C/ocG5FjbKM0/+OxdnaaLOdUFWZaSa69s6XcF53U5uTvTUlmKhMNuqllqf9V3R3bF5Ada7yeuWlg==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@napi-rs/clipboard-win32-ia32-msvc@1.1.2':
+    resolution: {integrity: sha512-ZI3dbHhf0zVIYJDF4G3lGlJSUQgliGgfDWc+1SEKgjIEmmX3cBh/vaL2N9hpNh5LyNk+RBMD/+N7hOG1/e6UJw==}
+    engines: {node: '>= 10'}
+    cpu: [ia32]
+    os: [win32]
+
+  '@napi-rs/clipboard-win32-x64-msvc@1.1.2':
+    resolution: {integrity: sha512-8dNtCAD6X7FaLrC4XBqp5ySU4PGB22Dpy0bGiPBOVNw8W9zw3EhtE0yNnGao03c4k/06GOOoFPeobWQfcja+hw==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [win32]
+
+  '@napi-rs/clipboard@1.1.2':
+    resolution: {integrity: sha512-q2AR+5XLWcUGoF5LVEc0kpm2tGRFnYPSNRO9Klhbw0BloyciicrGwMMO4khcQV5EIpYlmj9GEGfLoi/uWtE0DA==}
+    engines: {node: '>= 10'}
 
   '@openrouter/ai-sdk-provider@0.4.6':
     resolution: {integrity: sha512-oUa8xtssyUhiKEU/aW662lsZ0HUvIUTRk8vVIF3Ha3KI/DnqX54zmVIuzYnaDpermqhy18CHqblAY4dDt1JW3g==}
@@ -1677,50 +1747,50 @@ packages:
     peerDependencies:
       zod: ^3.24.1
 
-  zod@3.25.16:
-    resolution: {integrity: sha512-3lOav31WLa1MstEvkM0QlcsFjKmJ2TI9IFYlIVpLE3upguhaeiRfPOzqqtisS/Hetk4ri2fLLC3OtW15lS5jxQ==}
+  zod@3.25.23:
+    resolution: {integrity: sha512-Od2bdMosahjSrSgJtakrwjMDb1zM1A3VIHCPGveZt/3/wlrTWBya2lmEh2OYe4OIu8mPTmmr0gnLHIWQXdtWBg==}
 
 snapshots:
 
-  '@ai-sdk/anthropic@1.2.12(zod@3.25.16)':
+  '@ai-sdk/anthropic@1.2.12(zod@3.25.23)':
     dependencies:
       '@ai-sdk/provider': 1.1.3
-      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.16)
-      zod: 3.25.16
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.23)
+      zod: 3.25.23
 
-  '@ai-sdk/google@1.2.18(zod@3.25.16)':
+  '@ai-sdk/google@1.2.18(zod@3.25.23)':
     dependencies:
       '@ai-sdk/provider': 1.1.3
-      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.16)
-      zod: 3.25.16
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.23)
+      zod: 3.25.23
 
-  '@ai-sdk/groq@1.2.9(zod@3.25.16)':
+  '@ai-sdk/groq@1.2.9(zod@3.25.23)':
     dependencies:
       '@ai-sdk/provider': 1.1.3
-      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.16)
-      zod: 3.25.16
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.23)
+      zod: 3.25.23
 
-  '@ai-sdk/openai@1.3.22(zod@3.25.16)':
+  '@ai-sdk/openai@1.3.22(zod@3.25.23)':
     dependencies:
       '@ai-sdk/provider': 1.1.3
-      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.16)
-      zod: 3.25.16
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.23)
+      zod: 3.25.23
 
-  '@ai-sdk/provider-utils@2.1.10(zod@3.25.16)':
+  '@ai-sdk/provider-utils@2.1.10(zod@3.25.23)':
     dependencies:
       '@ai-sdk/provider': 1.0.9
       eventsource-parser: 3.0.2
       nanoid: 3.3.11
       secure-json-parse: 2.7.0
     optionalDependencies:
-      zod: 3.25.16
+      zod: 3.25.23
 
-  '@ai-sdk/provider-utils@2.2.8(zod@3.25.16)':
+  '@ai-sdk/provider-utils@2.2.8(zod@3.25.23)':
     dependencies:
       '@ai-sdk/provider': 1.1.3
       nanoid: 3.3.11
       secure-json-parse: 2.7.0
-      zod: 3.25.16
+      zod: 3.25.23
 
   '@ai-sdk/provider@1.0.9':
     dependencies:
@@ -1730,22 +1800,22 @@ snapshots:
     dependencies:
       json-schema: 0.4.0
 
-  '@ai-sdk/react@1.2.12(react@19.1.0)(zod@3.25.16)':
+  '@ai-sdk/react@1.2.12(react@19.1.0)(zod@3.25.23)':
     dependencies:
-      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.16)
-      '@ai-sdk/ui-utils': 1.2.11(zod@3.25.16)
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.23)
+      '@ai-sdk/ui-utils': 1.2.11(zod@3.25.23)
       react: 19.1.0
       swr: 2.3.3(react@19.1.0)
       throttleit: 2.1.0
     optionalDependencies:
-      zod: 3.25.16
+      zod: 3.25.23
 
-  '@ai-sdk/ui-utils@1.2.11(zod@3.25.16)':
+  '@ai-sdk/ui-utils@1.2.11(zod@3.25.23)':
     dependencies:
       '@ai-sdk/provider': 1.1.3
-      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.16)
-      zod: 3.25.16
-      zod-to-json-schema: 3.24.5(zod@3.25.16)
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.23)
+      zod: 3.25.23
+      zod-to-json-schema: 3.24.5(zod@3.25.23)
 
   '@ampproject/remapping@2.3.0':
     dependencies:
@@ -2253,11 +2323,54 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  '@openrouter/ai-sdk-provider@0.4.6(zod@3.25.16)':
+  '@napi-rs/clipboard-darwin-arm64@1.1.2':
+    optional: true
+
+  '@napi-rs/clipboard-darwin-x64@1.1.2':
+    optional: true
+
+  '@napi-rs/clipboard-linux-arm-gnueabihf@1.1.2':
+    optional: true
+
+  '@napi-rs/clipboard-linux-arm64-gnu@1.1.2':
+    optional: true
+
+  '@napi-rs/clipboard-linux-arm64-musl@1.1.2':
+    optional: true
+
+  '@napi-rs/clipboard-linux-x64-gnu@1.1.2':
+    optional: true
+
+  '@napi-rs/clipboard-linux-x64-musl@1.1.2':
+    optional: true
+
+  '@napi-rs/clipboard-win32-arm64-msvc@1.1.2':
+    optional: true
+
+  '@napi-rs/clipboard-win32-ia32-msvc@1.1.2':
+    optional: true
+
+  '@napi-rs/clipboard-win32-x64-msvc@1.1.2':
+    optional: true
+
+  '@napi-rs/clipboard@1.1.2':
+    optionalDependencies:
+      '@napi-rs/clipboard-darwin-arm64': 1.1.2
+      '@napi-rs/clipboard-darwin-x64': 1.1.2
+      '@napi-rs/clipboard-linux-arm-gnueabihf': 1.1.2
+      '@napi-rs/clipboard-linux-arm64-gnu': 1.1.2
+      '@napi-rs/clipboard-linux-arm64-musl': 1.1.2
+      '@napi-rs/clipboard-linux-x64-gnu': 1.1.2
+      '@napi-rs/clipboard-linux-x64-musl': 1.1.2
+      '@napi-rs/clipboard-win32-arm64-msvc': 1.1.2
+      '@napi-rs/clipboard-win32-ia32-msvc': 1.1.2
+      '@napi-rs/clipboard-win32-x64-msvc': 1.1.2
+
+  '@openrouter/ai-sdk-provider@0.4.6(zod@3.25.23)':
     dependencies:
       '@ai-sdk/provider': 1.0.9
-      '@ai-sdk/provider-utils': 2.1.10(zod@3.25.16)
-      zod: 3.25.16
+      '@ai-sdk/provider-utils': 2.1.10(zod@3.25.23)
+      zod: 3.25.23
 
   '@opentelemetry/api@1.9.0': {}
 
@@ -2343,15 +2456,15 @@ snapshots:
 
   acorn@8.14.1: {}
 
-  ai@4.3.16(react@19.1.0)(zod@3.25.16):
+  ai@4.3.16(react@19.1.0)(zod@3.25.23):
     dependencies:
       '@ai-sdk/provider': 1.1.3
-      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.16)
-      '@ai-sdk/react': 1.2.12(react@19.1.0)(zod@3.25.16)
-      '@ai-sdk/ui-utils': 1.2.11(zod@3.25.16)
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.23)
+      '@ai-sdk/react': 1.2.12(react@19.1.0)(zod@3.25.23)
+      '@ai-sdk/ui-utils': 1.2.11(zod@3.25.23)
       '@opentelemetry/api': 1.9.0
       jsondiffpatch: 0.6.0
-      zod: 3.25.16
+      zod: 3.25.23
     optionalDependencies:
       react: 19.1.0
 
@@ -3162,13 +3275,13 @@ snapshots:
     dependencies:
       path-key: 3.1.1
 
-  ollama-ai-provider@1.2.0(zod@3.25.16):
+  ollama-ai-provider@1.2.0(zod@3.25.23):
     dependencies:
       '@ai-sdk/provider': 1.1.3
-      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.16)
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.23)
       partial-json: 0.1.7
     optionalDependencies:
-      zod: 3.25.16
+      zod: 3.25.23
 
   once@1.4.0:
     dependencies:
@@ -3492,8 +3605,8 @@ snapshots:
 
   yoctocolors-cjs@2.1.2: {}
 
-  zod-to-json-schema@3.24.5(zod@3.25.16):
+  zod-to-json-schema@3.24.5(zod@3.25.23):
     dependencies:
-      zod: 3.25.16
+      zod: 3.25.23
 
-  zod@3.25.16: {}
+  zod@3.25.23: {}
