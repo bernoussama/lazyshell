@@ -1,6 +1,6 @@
 {
   "name": "lazyshell",
-  "version": "1.0.6-alpha",
+  "version": "1.0.7-beta",
   "description": "",
   "main": "bin/lazyshell",
   "bin": {
