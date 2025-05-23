@@ -13,6 +13,7 @@ LazyShell is a command-line interface that helps you quickly generate and execut
 - 🚀 Fast and lightweight
 - 🔄 Automatic fallback to environment variables
 - 💾 Persistent configuration storage
+- 🧪 **Built-in evaluation system for testing AI performance**
 
 ## Installation 📦
 
@@ -110,6 +111,41 @@ lazyshell "list all docker containers with their memory usage"
 # File operations
 lazyshell "compress all .log files in this directory"
 ```
+
+## Evaluation System 🧪
+
+LazyShell includes a flexible evaluation system for testing and benchmarking AI performance:
+
+```typescript
+import { eval, Levenshtein } from './lib/eval';
+
+await eval("My Eval", {
+  // Test data function
+  data: async () => {
+    return [{ input: "Hello", expected: "Hello World!" }];
+  },
+  // Task to perform  
+  task: async (input) => {
+    return input + " World!";
+  },
+  // Scoring methods
+  scorers: [Levenshtein],
+});
+```
+
+### Built-in Scorers
+- **ExactMatch**: Perfect string matching
+- **Levenshtein**: Edit distance similarity  
+- **Contains**: Substring matching
+
+### Features
+- Generic TypeScript interfaces for any evaluation task
+- Multiple scoring methods per evaluation
+- Async support for LLM-based tasks
+- Detailed scoring reports with averages
+- Error handling for failed test cases
+
+See [docs/EVALUATION.md](docs/EVALUATION.md) for complete documentation.
 
 ## Development 🛠️
 
