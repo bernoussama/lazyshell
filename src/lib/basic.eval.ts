@@ -1,5 +1,5 @@
 import { generateCommand, generateBenchmarkText, getDefaultModel, models } from './ai';
-import { eval, ExactMatch, Contains, Levenshtein } from './eval';
+import { eval, ExactMatch, Contains, Levenshtein, LLMJudge, createLLMJudge } from './eval';
 
 async function main() {
   console.log("Starting basic evaluations...\n");
@@ -36,8 +36,14 @@ async function main() {
         return "ERROR";
       }
     },
-    // Scoring methods
-    scorers: [ExactMatch, Contains, Levenshtein],
+    // Scoring methods - now includes LLM judge
+    scorers: [
+      ExactMatch, 
+      Contains, 
+      Levenshtein,
+      LLMJudge,
+      createLLMJudge("command correctness, Unix/Linux compatibility, and security best practices")
+    ],
   });
 
   console.log("✅ Basic evaluation completed!");

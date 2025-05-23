@@ -1,6 +1,6 @@
-import { generateObject, type LanguageModel } from 'ai';
 import z from 'zod';
-import { getModelFromConfig, type ModelConfig, getDefaultModel } from './ai'; // Assuming we'll use similar model config logic
+import { generateObject } from 'ai';
+import { getDefaultModel, type ModelConfig } from './ai';
 
 // 1. Core Types and Interfaces
 
@@ -69,6 +69,61 @@ export const Contains: Scorer<any, string, string> = {
     return String(output).toLowerCase().includes(String(expected).toLowerCase()) ? 1 : 0;
   }
 };
+
+// LLM Judge Scorer - for when no expected value is available
+const zLLMJudgeResult = z.object({
+  score: z.number().min(1).max(5).describe('A score from 1 to 5 rating the quality of the output'),
+  reasoning: z.string().describe('Brief explanation for the score')
+});
+
+export function createLLMJudge(
+  criteria: string = "quality, relevance, and correctness of the output",
+  modelConfig?: ModelConfig
+): Scorer<any, any, any> {
+  return {
+    name: 'LLMJudge',
+    description: `AI-powered evaluation based on ${criteria}`,
+    score: async (input: any, output: any, expected?: any): Promise<number> => {
+      try {
+        const model = modelConfig || getDefaultModel();
+        
+        const prompt = `You are an expert evaluator. Please rate the following output based on ${criteria}.
+
+Input/Task: ${JSON.stringify(input)}
+Output to evaluate: ${JSON.stringify(output)}
+
+Rate the output on a scale of 1-5 where:
+1 = Very poor (completely wrong, irrelevant, or unusable)
+2 = Poor (mostly wrong with some minor correct elements)
+3 = Average (partially correct but has significant issues)
+4 = Good (mostly correct with minor issues)
+5 = Excellent (completely correct, relevant, and well-formed)
+
+Provide both a score and brief reasoning for your evaluation.`;
+
+        const { object } = await generateObject({
+          model: model.model,
+          schema: zLLMJudgeResult,
+          prompt,
+          temperature: 0.1 // Low temperature for consistent scoring
+        });
+
+        // Transform 1-5 score to 0-1 scale: (score - 1) / 4
+        const normalizedScore = (object.score - 1) / 4;
+        
+        console.log(`    LLM Judge reasoning: ${object.reasoning}`);
+        
+        return normalizedScore;
+      } catch (error) {
+        console.error(`LLM Judge scoring failed: ${error}`);
+        return 0; // Default to 0 on error
+      }
+    }
+  };
+}
+
+// Convenience export for default LLM judge
+export const LLMJudge = createLLMJudge();
 
 // Helper function for Levenshtein distance
 function levenshteinDistance(str1: string, str2: string): number {
