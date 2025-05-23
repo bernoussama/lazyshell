@@ -7,6 +7,7 @@ import { openai } from '@ai-sdk/openai';
 import { anthropic } from '@ai-sdk/anthropic';
 import os from 'os';
 import z from 'zod';
+import type { Config, ProviderKey } from './config';
 
 // System information interface
 export interface SystemInfo {
@@ -40,7 +41,85 @@ export function getSystemInfo(): SystemInfo {
   };
 }
 
-// Get available model based on environment variables
+// Get model based on configuration
+export function getModelFromConfig(config: Config): ModelConfig {
+  const provider = config.provider;
+  const modelId = config.model || getDefaultModelId(provider);
+  const apiKey = config.apiKey;
+
+  let model: LanguageModel;
+
+  try {
+    switch (provider) {
+      case 'groq':
+        if (!apiKey && !process.env.GROQ_API_KEY) {
+          throw new Error('Groq API key is required');
+        }
+        process.env.GROQ_API_KEY = apiKey || process.env.GROQ_API_KEY;
+        model = groq(modelId);
+        break;
+        
+      case 'google':
+        if (!apiKey && !process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+          throw new Error('Google AI API key is required');
+        }
+        process.env.GOOGLE_GENERATIVE_AI_API_KEY = apiKey || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+        model = google(modelId);
+        break;
+        
+      case 'openrouter':
+        if (!apiKey && !process.env.OPENROUTER_API_KEY) {
+          throw new Error('OpenRouter API key is required');
+        }
+        process.env.OPENROUTER_API_KEY = apiKey || process.env.OPENROUTER_API_KEY;
+        model = openrouter(modelId);
+        break;
+        
+      case 'anthropic':
+        if (!apiKey && !process.env.ANTHROPIC_API_KEY) {
+          throw new Error('Anthropic API key is required');
+        }
+        process.env.ANTHROPIC_API_KEY = apiKey || process.env.ANTHROPIC_API_KEY;
+        model = anthropic(modelId);
+        break;
+        
+      case 'openai':
+        if (!apiKey && !process.env.OPENAI_API_KEY) {
+          throw new Error('OpenAI API key is required');
+        }
+        process.env.OPENAI_API_KEY = apiKey || process.env.OPENAI_API_KEY;
+        model = openai(modelId);
+        break;
+        
+      case 'ollama':
+        model = ollama(modelId);
+        break;
+        
+      default:
+        throw new Error(`Unsupported provider: ${provider}`);
+    }
+
+    return { provider, modelId, model };
+  } catch (error) {
+    throw new Error(`Failed to initialize ${provider} model: ${error}`);
+  }
+}
+
+// Get default model ID for a provider
+function getDefaultModelId(provider: ProviderKey): string {
+  const defaultModels: Record<ProviderKey, string> = {
+    groq: 'llama-3.3-70b-versatile',
+    google: 'gemini-2.0-flash-lite', 
+    openrouter: 'meta-llama/llama-3.3-8b-instruct:free',
+    anthropic: 'claude-3-5-haiku-latest',
+    openai: 'gpt-4o-mini',
+    ollama: 'llama3.2'
+  };
+  
+  return defaultModels[provider];
+}
+
+// Get available model based on environment variables (legacy function)
 export function getDefaultModel(): ModelConfig {
   let model: LanguageModel;
   let provider: string;
@@ -141,8 +220,8 @@ const zCmd = z.object({
 
 type Command = z.infer<typeof zCmd>;
 
-export async function generateCommandStruct(prompt: string): Promise<Command> {
-  const modelConf = getDefaultModel();
+export async function generateCommandStruct(prompt: string, modelConfig?: ModelConfig): Promise<Command> {
+  const modelConf = modelConfig || getDefaultModel();
   const { object } = await generateObject({
     model: modelConf.model,
     system: systemPrompt,
@@ -154,11 +233,10 @@ export async function generateCommandStruct(prompt: string): Promise<Command> {
 
 
 // Generate command using the default model with system admin context
-export async function generateCommand(prompt: string): Promise<string> {
-  const modelConfig = getDefaultModel();
+export async function generateCommand(prompt: string, modelConfig?: ModelConfig): Promise<string> {
+  const finalModelConfig = modelConfig || getDefaultModel();
 
-
-  const result = await generateTextWithModel(modelConfig.model, prompt, {
+  const result = await generateTextWithModel(finalModelConfig.model, prompt, {
     temperature: 0,
     systemPrompt
   });

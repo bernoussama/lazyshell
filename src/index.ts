@@ -3,11 +3,26 @@ import { select, input } from '@inquirer/prompts';
 import chalk from 'chalk';
 import { runCommand } from './utils';
 import ora from 'ora';
-import { generateCommand, generateCommandStruct, getDefaultModel } from './lib/ai';
+import { generateCommand, generateCommandStruct, getDefaultModel, getModelFromConfig } from './lib/ai';
 import { Clipboard } from '@napi-rs/clipboard'
+import { getOrInitializeConfig } from './lib/config';
 
 async function genCommand(prompt: string) {
-  const modelConfig = getDefaultModel();
+  // Get configuration first
+  const config = await getOrInitializeConfig();
+  if (!config) {
+    console.error(chalk.red('Failed to initialize configuration. Exiting.'));
+    process.exit(1);
+  }
+
+  let modelConfig;
+  try {
+    modelConfig = getModelFromConfig(config);
+  } catch (error) {
+    console.error(chalk.red(`Configuration error: ${error}`));
+    console.log(chalk.yellow('Falling back to environment variables...'));
+    modelConfig = getDefaultModel();
+  }
 
   // console log the model being used
   console.log(chalk.blue(`Using model: ${modelConfig.provider}/${modelConfig.modelId}`));
@@ -58,7 +73,26 @@ program
       try {
         // const result = await genCommand(currentPrompt);
         // const command = result.text.trim();
-        const result = await generateCommandStruct(currentPrompt);
+        
+        // Get configuration and use it for command generation
+        const config = await getOrInitializeConfig();
+        if (!config) {
+          console.error(chalk.red('Failed to initialize configuration. Exiting.'));
+          process.exit(1);
+        }
+
+        let modelConfig;
+        try {
+          modelConfig = getModelFromConfig(config);
+        } catch (error) {
+          console.error(chalk.red(`Configuration error: ${error}`));
+          console.log(chalk.yellow('Falling back to environment variables...'));
+          modelConfig = getDefaultModel();
+        }
+
+        console.log(chalk.blue(`Using model: ${modelConfig.provider}/${modelConfig.modelId}`));
+        
+        const result = await generateCommandStruct(currentPrompt, modelConfig);
         const command = result.command.trim();
         // TODO: add command to clipboard
 
