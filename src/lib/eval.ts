@@ -83,11 +83,12 @@ const zLLMJudgeResult = z.object({
 });
 
 export function createLLMJudge(
+  name: string,
   criteria: string = "quality, relevance, and correctness of the output",
   modelConfig?: ModelConfig
 ): Scorer<any, any, any> {
   return {
-    name: 'LLMJudge',
+    name,
     description: `AI-powered evaluation based on ${criteria}`,
     score: async (input: any, output: any, expected?: any): Promise<number> => {
       try {
@@ -130,7 +131,7 @@ Provide both a score and brief reasoning for your evaluation.`;
 }
 
 // Convenience export for default LLM judge
-export const LLMJudge = createLLMJudge();
+export const LLMJudge = createLLMJudge("LLMJudge");
 
 // Helper function for Levenshtein distance
 function levenshteinDistance(str1: string, str2: string): number {

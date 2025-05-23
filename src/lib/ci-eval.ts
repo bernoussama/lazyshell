@@ -69,10 +69,10 @@ async function runCIEvaluations(): Promise<boolean> {
       },
       // Only use LLM judges since we have no expected values
       scorers: [
-        { ...createLLMJudge("overall command quality and appropriateness", judgeModelConf), name: "Quality" },
-        { ...createLLMJudge("Unix/Linux command correctness and syntax", judgeModelConf), name: "Correctness" },
-        { ...createLLMJudge("security considerations and best practices", judgeModelConf), name: "Security" },
-        // { ...createLLMJudge("efficiency and performance of the command", judgeModelConf), name: "Efficiency" }
+        createLLMJudge("Quality", "overall command quality and appropriateness", judgeModelConf),
+        createLLMJudge("Correctness", "Unix/Linux command correctness and syntax", judgeModelConf),
+        createLLMJudge("Security", "security considerations and best practices", judgeModelConf),
+        // { ...createLLMJudge("Efficiency", "efficiency and performance of the command", judgeModelConf) }
         // efficiency and performance of the command are not important for the eval CI
       ],
     });

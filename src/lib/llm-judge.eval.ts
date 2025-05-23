@@ -52,10 +52,10 @@ async function main() {
     },
     // Only use LLM judges since we have no expected values
     scorers: [
-      createLLMJudge("overall command quality and appropriateness", judgeModelConf),
-      createLLMJudge("Unix/Linux command correctness and syntax", judgeModelConf),
-      createLLMJudge("security considerations and best practices", judgeModelConf),
-      createLLMJudge("efficiency and performance of the command", judgeModelConf)
+      createLLMJudge("Quality", "overall command quality and appropriateness", judgeModelConf),
+      createLLMJudge("Correctness", "Unix/Linux command correctness and syntax", judgeModelConf),
+      createLLMJudge("Security", "security considerations and best practices", judgeModelConf),
+      createLLMJudge("Efficiency", "efficiency and performance of the command", judgeModelConf)
     ],
   });
 
