@@ -67,7 +67,7 @@ async function runBenchmark() {
           timeMs,
         });
         //show output
-        console.log(chalk.blue(`Output: ${output.command}`));
+        console.log(chalk.blue(`Output: ${output?.command || 'No output'}`));
 
         spinner.succeed(`Completed in ${timeMs.toFixed(2)}ms`);
       } catch (error: any) {

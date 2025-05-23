@@ -42,6 +42,12 @@ export const SUPPORTED_PROVIDERS = {
     description: 'Local Ollama instance',
     envVar: null,
     defaultModel: 'llama3.2'
+  },
+  mistral: {
+    name: 'Mistral',
+    description: 'Mistral models',
+    envVar: null,
+    defaultModel: 'devstral-small-2505'
   }
 } as const;
 
