@@ -3,11 +3,10 @@
     "rootDir": "src",
     "outDir": "bin",
     "strict": true,
-    "target": "es6",
-    "module": "CommonJS",
+    "target": "ESNext",
+    "module": "NodeNext",
     "sourceMap": true,
     "esModuleInterop": true,
-    "moduleResolution": "node",
     "resolveJsonModule": true
   },
   // "include": ["*.ts"],
