@@ -7,13 +7,17 @@ LazyShell is a command-line interface that helps you quickly generate and execut
 ## Features ✨
 
 - 🔍 Generates shell commands from natural language descriptions
-- ⚡ Supports multiple AI providers (Groq, Google Gemini, OpenRouter, Anthropic, OpenAI, Ollama)
+- ⚡ Supports multiple AI providers (Groq, Google Gemini, OpenRouter, Anthropic, OpenAI, Ollama, Mistral)
 - 🔧 Interactive configuration system - no manual environment setup needed
 - 🔒 Safe execution with confirmation prompt
 - 🚀 Fast and lightweight
 - 🔄 Automatic fallback to environment variables
 - 💾 Persistent configuration storage
+- 📋 **Automatic clipboard integration** - generated commands are copied to clipboard
 - 🧪 **Built-in evaluation system for testing AI performance**
+- 🏆 **Model benchmarking capabilities**
+- 🤖 **LLM Judge evaluation system**
+- ⚙️ **CI/CD integration with automated quality checks**
 
 ## Installation 📦
 
@@ -46,8 +50,11 @@ pnpm add -g lazyshell
    - **Anthropic Claude** - Powerful reasoning capabilities
    - **OpenAI** - GPT models including GPT-4
    - **Ollama** - Local models (no API key required)
+   - **Mistral** - Mistral AI models for code generation
 
 3. **Automatic Configuration**: Your preferences are saved to `~/.lazyshell/config.json` and used for future runs.
+
+4. **Clipboard Integration**: Generated commands are automatically copied to your clipboard for easy pasting.
 
 ## Configuration 🔧
 
@@ -86,6 +93,7 @@ export OPENAI_API_KEY='your-api-key-here'
 | **Anthropic** | Claude 3.5 Haiku | Yes | Advanced reasoning capabilities |
 | **OpenAI** | GPT-4o Mini | Yes | Industry standard models |
 | **Ollama** | Local models | No | Run models locally |
+| **Mistral** | Devstral Small | No | Code-optimized models |
 
 ## Usage Examples 🚀
 
@@ -112,12 +120,18 @@ lazyshell "list all docker containers with their memory usage"
 lazyshell "compress all .log files in this directory"
 ```
 
+### Interactive Features
+- **Execute**: Run the generated command immediately
+- **Refine**: Modify your prompt to get a better command
+- **Cancel**: Exit without running anything
+- **Clipboard**: Commands are automatically copied for manual execution
+
 ## Evaluation System 🧪
 
 LazyShell includes a flexible evaluation system for testing and benchmarking AI performance:
 
 ```typescript
-import { eval, Levenshtein } from './lib/eval';
+import { eval, Levenshtein, LLMJudge, createLLMJudge } from './lib/eval';
 
 await eval("My Eval", {
   // Test data function
@@ -129,7 +143,7 @@ await eval("My Eval", {
     return input + " World!";
   },
   // Scoring methods
-  scorers: [Levenshtein],
+  scorers: [Levenshtein, LLMJudge],
 });
 ```
 
@@ -137,6 +151,14 @@ await eval("My Eval", {
 - **ExactMatch**: Perfect string matching
 - **Levenshtein**: Edit distance similarity  
 - **Contains**: Substring matching
+- **LLMJudge**: AI-powered quality evaluation
+- **createLLMJudge**: Custom AI judges with specific criteria
+
+### LLM Judge Features
+- **AI-Powered Evaluation**: Uses LLMs to evaluate command quality without expected outputs
+- **Multiple Criteria**: Quality, correctness, security, efficiency assessments
+- **Rate Limiting**: Built-in retry logic and exponential backoff
+- **Configurable Models**: Use different AI models for judging
 
 ### Features
 - Generic TypeScript interfaces for any evaluation task
@@ -146,6 +168,30 @@ await eval("My Eval", {
 - Error handling for failed test cases
 
 See [docs/EVALUATION.md](docs/EVALUATION.md) for complete documentation.
+
+## Model Benchmarking 🏆
+
+LazyShell includes comprehensive benchmarking capabilities to compare AI model performance:
+
+### Running Benchmarks
+```bash
+# Build and run benchmarks
+pnpm build
+node bin/lib/bench_models.js
+```
+
+### Benchmark Features
+- **Multi-Model Testing**: Compare Groq, Gemini, Ollama, Mistral, and OpenRouter models
+- **Performance Metrics**: Response time, success rate, and output quality
+- **Standardized Prompts**: Consistent test cases across all models
+- **JSON Reports**: Detailed results saved to `benchmark-results/` directory
+
+### Available Models
+- `llama-3.3-70b-versatile` (Groq)
+- `gemini-2.0-flash-lite` (Google)
+- `devstral` (Mistral)
+- `ollama3.2` (Ollama)
+- Various OpenRouter models
 
 ## CI Evaluations 🚦
 
@@ -170,6 +216,18 @@ pnpm eval:ci
 # Manually build and run
 pnpm build
 node bin/lib/ci-eval.js
+```
+
+### Custom Evaluation Scripts
+```bash
+# Run basic evaluations
+pnpm build && node bin/lib/basic.eval.js
+
+# Run LLM judge evaluation
+pnpm build && node bin/lib/llm-judge.eval.js
+
+# Test AI library
+pnpm build && node bin/lib/test-ai-lib.js
 ```
 
 See [docs/CI_EVALUATIONS.md](docs/CI_EVALUATIONS.md) for complete setup and configuration guide.
@@ -202,10 +260,26 @@ See [docs/CI_EVALUATIONS.md](docs/CI_EVALUATIONS.md) for complete setup and conf
    pnpm link --global
    ```
 
+### Available Scripts
+```bash
+pnpm start        # Run the built version
+pnpm build        # Compile TypeScript
+pnpm dev          # Watch mode compilation
+pnpm test         # Run Jest tests
+pnpm eval:ci      # Run CI evaluations
+pnpm x            # Build and run quickly
+```
+
 ### Running Tests
 ```bash
 pnpm test
 ```
+
+### Development Features
+- **TypeScript**: Full type safety and modern JavaScript features
+- **Jest Testing**: Comprehensive test suite
+- **Watch Mode**: Auto-compilation during development
+- **Modular Architecture**: Clean separation of concerns
 
 ## Troubleshooting 🔧
 
@@ -217,9 +291,20 @@ pnpm test
 ### Environment Variables
 LazyShell will automatically fall back to environment variables if the config file is invalid or incomplete.
 
+### Common Issues
+- **Clipboard not working**: Ensure your system supports clipboard operations
+- **Model timeout**: Some models (especially Ollama) may take longer to respond
+- **Rate limiting**: Built-in retry logic handles temporary rate limits
+
 ## Contributing 🤝
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+### Development Guidelines
+- Follow TypeScript best practices
+- Add tests for new features
+- Update documentation as needed
+- Run evaluations before submitting PRs
 
 ## License 📄
 
@@ -229,5 +314,7 @@ This project is licensed under the GPL-3.0 License - see the [LICENSE](LICENSE) 
 
 - Built with [Commander.js](https://github.com/tj/commander.js/)
 - Interactive prompts powered by [@inquirer/prompts](https://github.com/SBoudrias/Inquirer.js)
+- Clipboard integration via [@napi-rs/clipboard](https://github.com/napi-rs/node-rs)
+- AI SDK integration with [Vercel AI SDK](https://github.com/vercel/ai)
 - Powered by AI models from multiple providers
 - Inspired by the need to be lazy (in a good way!)
