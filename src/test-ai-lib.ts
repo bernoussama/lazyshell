@@ -1,13 +1,7 @@
 #!/usr/bin/env node
 
 // Simple test script to verify the AI library works correctly
-import { 
-  getDefaultModel, 
-  generateCommand, 
-  getBenchmarkModels, 
-  generateBenchmarkText,
-  getSystemInfo 
-} from './lib/ai';
+import { getDefaultModel, generateCommand, getBenchmarkModels, generateBenchmarkText, getSystemInfo } from './lib/ai';
 
 async function testAILibrary() {
   console.log('🧪 Testing AI Library...\n');
@@ -34,7 +28,6 @@ async function testAILibrary() {
     } catch (error) {
       console.log(`   ❌ Command generation failed: ${error}`);
     }
-
   } catch (error) {
     console.log(`   ❌ Failed to get default model: ${error}\n`);
   }
@@ -51,7 +44,7 @@ async function testAILibrary() {
   if (modelNames.length > 0) {
     const firstModelName = modelNames[0];
     const firstModel = benchmarkModels[firstModelName];
-    
+
     try {
       console.log(`   Testing with model: ${firstModelName}`);
       const result = await generateBenchmarkText(firstModel, 'show current directory');

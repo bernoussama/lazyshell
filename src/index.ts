@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import { runCommand } from './utils';
 import ora from 'ora';
 import { generateCommand, generateCommandStruct, getDefaultModel, getModelFromConfig } from './lib/ai';
-import { Clipboard } from '@napi-rs/clipboard'
+import { Clipboard } from '@napi-rs/clipboard';
 import { getOrInitializeConfig } from './lib/config';
 
 async function genCommand(prompt: string) {
@@ -61,19 +61,19 @@ async function refineCommand(currentPrompt: string, command: string): Promise<st
 
 const program = new Command();
 program
-  .version(require("../package.json").version)
-  .description(require("../package.json").description)
-  .argument("<prompt_parts...>", "prompt")
+  .version(require('../package.json').version)
+  .description(require('../package.json').description)
+  .argument('<prompt_parts...>', 'prompt')
   .action(async (prompt_parts: string[]) => {
-    let currentPrompt = prompt_parts.join(" ");
+    let currentPrompt = prompt_parts.join(' ');
     let shouldContinue = true;
 
-    const clipboard = new Clipboard()
+    const clipboard = new Clipboard();
     while (shouldContinue) {
       try {
         // const result = await genCommand(currentPrompt);
         // const command = result.text.trim();
-        
+
         // Get configuration and use it for command generation
         const config = await getOrInitializeConfig();
         if (!config) {
@@ -91,12 +91,12 @@ program
         }
 
         console.log(chalk.blue(`Using model: ${modelConfig.provider}/${modelConfig.modelId}`));
-        
+
         const result = await generateCommandStruct(currentPrompt, modelConfig);
         const command = result.command.trim();
         // TODO: add command to clipboard
 
-        clipboard.setText(command)
+        clipboard.setText(command);
 
         const action = await select({
           message: `Explanation: ${chalk.yellow(result.explanation)}
@@ -129,6 +129,6 @@ Command: ${chalk.green(command)}`,
         shouldContinue = false;
       }
     }
-  })
+  });
 
 program.parse(process.argv);

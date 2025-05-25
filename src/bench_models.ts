@@ -5,18 +5,17 @@ import chalk from 'chalk';
 import { performance } from 'perf_hooks';
 import { getBenchmarkModels, generateBenchmarkText, Command, generateCommandStruct, ModelConfig } from './lib/ai';
 
-
 // Get the models to benchmark from our AI library
 const models = getBenchmarkModels();
 
 // Define benchmark prompts
 const prompts = [
-  "Generate a bash command to find all files over 100MB in the current directory",
-  "Write a command to list all running docker containers with their memory usage",
-  "Create a command to extract audio from a video file using ffmpeg",
-  "Write a one-liner to recursively find and replace text in all JavaScript files",
-  "Generate a command to check disk usage sorted by size",
-  "docker show container images and their sizes"
+  'Generate a bash command to find all files over 100MB in the current directory',
+  'Write a command to list all running docker containers with their memory usage',
+  'Create a command to extract audio from a video file using ffmpeg',
+  'Write a one-liner to recursively find and replace text in all JavaScript files',
+  'Generate a command to check disk usage sorted by size',
+  'docker show container images and their sizes',
 ];
 
 interface BenchmarkResult {
@@ -87,11 +86,14 @@ async function runBenchmark() {
   console.log(chalk.blue('\nBenchmark Summary:'));
 
   // Group by model
-  const modelGroups = results.reduce((acc, result) => {
-    acc[result.modelName] = acc[result.modelName] || [];
-    acc[result.modelName].push(result);
-    return acc;
-  }, {} as Record<string, BenchmarkResult[]>);
+  const modelGroups = results.reduce(
+    (acc, result) => {
+      acc[result.modelName] = acc[result.modelName] || [];
+      acc[result.modelName].push(result);
+      return acc;
+    },
+    {} as Record<string, BenchmarkResult[]>
+  );
 
   const summary: Record<string, ModelSummary> = {};
   for (const [model, modelResults] of Object.entries(modelGroups)) {
@@ -100,8 +102,10 @@ async function runBenchmark() {
     summary[model] = {
       avgTime,
       successCount,
-    }
-    console.log(`${chalk.green(model)}: Avg time: ${avgTime.toFixed(2)}ms, Success rate: ${successCount}/${modelResults.length}`);
+    };
+    console.log(
+      `${chalk.green(model)}: Avg time: ${avgTime.toFixed(2)}ms, Success rate: ${successCount}/${modelResults.length}`
+    );
   }
 
   // Generate report

@@ -11,44 +11,44 @@ export const SUPPORTED_PROVIDERS = {
     name: 'Groq',
     description: 'Groq LLaMA models (fast inference)',
     envVar: 'GROQ_API_KEY',
-    defaultModel: 'llama-3.3-70b-versatile'
+    defaultModel: 'llama-3.3-70b-versatile',
   },
   google: {
     name: 'Google Gemini',
     description: 'Google AI Gemini models',
     envVar: 'GOOGLE_GENERATIVE_AI_API_KEY',
-    defaultModel: 'gemini-2.0-flash-lite'
+    defaultModel: 'gemini-2.0-flash-lite',
   },
   openrouter: {
     name: 'OpenRouter',
     description: 'OpenRouter API (multiple models)',
     envVar: 'OPENROUTER_API_KEY',
-    defaultModel: 'meta-llama/llama-3.3-8b-instruct:free'
+    defaultModel: 'meta-llama/llama-3.3-8b-instruct:free',
   },
   anthropic: {
     name: 'Anthropic Claude',
     description: 'Anthropic Claude models',
     envVar: 'ANTHROPIC_API_KEY',
-    defaultModel: 'claude-3-5-haiku-latest'
+    defaultModel: 'claude-3-5-haiku-latest',
   },
   openai: {
     name: 'OpenAI',
     description: 'OpenAI GPT models',
     envVar: 'OPENAI_API_KEY',
-    defaultModel: 'gpt-4o-mini'
+    defaultModel: 'gpt-4o-mini',
   },
   ollama: {
     name: 'Ollama (Local)',
     description: 'Local Ollama instance',
     envVar: null,
-    defaultModel: 'llama3.2'
+    defaultModel: 'llama3.2',
   },
   mistral: {
     name: 'Mistral',
     description: 'Mistral models',
     envVar: null,
-    defaultModel: 'devstral-small-2505'
-  }
+    defaultModel: 'devstral-small-2505',
+  },
 } as const;
 
 export type ProviderKey = keyof typeof SUPPORTED_PROVIDERS;
@@ -63,7 +63,7 @@ export interface Config {
 
 // Default configuration
 const DEFAULT_CONFIG: Partial<Config> = {
-  version: '1.0.0'
+  version: '1.0.0',
 };
 
 // Configuration file path
@@ -101,13 +101,13 @@ export async function loadConfig(): Promise<Config | null> {
   try {
     const configData = await fs.readFile(CONFIG_FILE, 'utf-8');
     const config = JSON.parse(configData) as Config;
-    
+
     // Validate config structure
     if (!config.provider || !SUPPORTED_PROVIDERS[config.provider]) {
       console.error(chalk.red('Invalid provider in config file'));
       return null;
     }
-    
+
     return config;
   } catch (error) {
     console.error(chalk.red('Failed to load config:'), error);
@@ -137,12 +137,12 @@ export function validateConfig(config: Config): boolean {
   if (!SUPPORTED_PROVIDERS[config.provider]) {
     return false;
   }
-  
+
   // Ollama doesn't need an API key
   if (config.provider === 'ollama') {
     return true;
   }
-  
+
   // All other providers need an API key
   return !!config.apiKey && config.apiKey.trim().length > 0;
 }
@@ -153,12 +153,12 @@ export function validateConfig(config: Config): boolean {
 export async function promptProvider(): Promise<ProviderKey> {
   const choices = Object.entries(SUPPORTED_PROVIDERS).map(([key, provider]) => ({
     name: `${provider.name} - ${provider.description}`,
-    value: key as ProviderKey
+    value: key as ProviderKey,
   }));
 
   const provider = await select({
     message: 'Select an AI provider:',
-    choices
+    choices,
   });
 
   return provider;
@@ -169,7 +169,7 @@ export async function promptProvider(): Promise<ProviderKey> {
  */
 export async function promptApiKey(provider: ProviderKey): Promise<string | undefined> {
   const providerInfo = SUPPORTED_PROVIDERS[provider];
-  
+
   // Ollama doesn't need an API key
   if (provider === 'ollama') {
     console.log(chalk.green('Ollama selected - no API key required.'));
@@ -177,14 +177,14 @@ export async function promptApiKey(provider: ProviderKey): Promise<string | unde
   }
 
   console.log(chalk.yellow(`\nYou'll need an API key for ${providerInfo.name}.`));
-  
+
   if (providerInfo.envVar) {
     console.log(chalk.gray(`Environment variable: ${providerInfo.envVar}`));
   }
-  
+
   const apiKey = await password({
     message: `Enter your ${providerInfo.name} API key:`,
-    mask: '*'
+    mask: '*',
   });
 
   return apiKey;
@@ -199,17 +199,17 @@ export async function initializeConfig(): Promise<Config | null> {
   try {
     // Prompt for provider
     const provider = await promptProvider();
-    
+
     // Prompt for API key
     const apiKey = await promptApiKey(provider);
-    
+
     // Create config object
     const config: Config = {
       ...DEFAULT_CONFIG,
       provider,
       apiKey,
       model: SUPPORTED_PROVIDERS[provider].defaultModel,
-      version
+      version,
     };
 
     // Save configuration
@@ -221,7 +221,6 @@ export async function initializeConfig(): Promise<Config | null> {
 
     console.log(chalk.green('\n✅ Configuration saved successfully!'));
     return config;
-    
   } catch (error) {
     console.error(chalk.red('Failed to initialize configuration:'), error);
     return null;
@@ -235,7 +234,7 @@ export async function getOrInitializeConfig(): Promise<Config | null> {
   // Check if config file exists
   if (await configExists()) {
     const config = await loadConfig();
-    
+
     if (config && validateConfig(config)) {
       return config;
     } else {
@@ -267,7 +266,7 @@ export function getEffectiveApiKey(config: Config): string | undefined {
   if (config.apiKey) {
     return config.apiKey;
   }
-  
+
   // Fall back to environment variable
   return getApiKeyFromEnv(config.provider);
-} 
+}

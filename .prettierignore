@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+bin/
+dist/
+build/
+
+# Generated files
+*.d.ts
+
+# Test and benchmark results
+benchmark-results/
+coverage/
+
+# Lock files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# CI files
+.github/
+
+# Documentation (optional, you might want to format these)
+*.md 

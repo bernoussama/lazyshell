@@ -1,10 +1,10 @@
 import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
-import { exec } from "child_process";
+import { exec } from 'child_process';
 
 export function runCommand(command: string) {
-  console.log("")
+  console.log('');
 
   const childProcess = exec(command, (error, stdout, stderr) => {
     if (error) {
@@ -37,11 +37,11 @@ export function runCommand(command: string) {
   }
 
   // Handle process output in real-time
-  childProcess.stdout?.on('data', (data) => {
+  childProcess.stdout?.on('data', data => {
     process.stdout.write(data);
   });
 
-  childProcess.stderr?.on('data', (data) => {
+  childProcess.stderr?.on('data', data => {
     process.stderr.write(data);
   });
 }

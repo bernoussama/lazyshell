@@ -50,7 +50,7 @@ describe('runCommand', () => {
     // Mock exec function
     const mockChildProcess = {
       stdout: { on: jest.fn() },
-      stderr: { on: jest.fn() }
+      stderr: { on: jest.fn() },
     };
     (childProcess.exec as unknown as jest.Mock).mockImplementation((cmd, callback) => {
       callback(null, 'command output', '');

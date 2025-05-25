@@ -39,7 +39,7 @@ export function getSystemInfo(): SystemInfo {
     platform: os.platform(),
     release: os.release(),
     type: os.type(),
-    arch: os.arch()
+    arch: os.arch(),
   };
 }
 
@@ -116,7 +116,7 @@ function getDefaultModelId(provider: ProviderKey): string {
     anthropic: 'claude-3-5-haiku-latest',
     openai: 'gpt-4o-mini',
     ollama: 'llama3.2',
-    mistral: 'devstral-small-2505'
+    mistral: 'devstral-small-2505',
   };
 
   return defaultModels[provider];
@@ -131,7 +131,7 @@ export function getDefaultModel(): ModelConfig {
   if (process.env.GROQ_API_KEY) {
     provider = 'groq';
     // modelId = 'llama-3.1-8b-instant';
-    modelId = 'llama-3.3-70b-versatile'
+    modelId = 'llama-3.3-70b-versatile';
 
     model = groq(modelId);
   } else if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
@@ -156,7 +156,9 @@ export function getDefaultModel(): ModelConfig {
       modelId = 'llama3.2';
       model = ollama(modelId);
     } catch (error) {
-      throw new Error("No API key found. Please set either GROQ_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY, OPENROUTER_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY. Or setup Ollama");
+      throw new Error(
+        'No API key found. Please set either GROQ_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY, OPENROUTER_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY. Or setup Ollama'
+      );
     }
   }
 
@@ -173,21 +175,13 @@ export function getBenchmarkModels(): Record<string, LanguageModel> {
     'gemini-2.0-flash-lite': google('gemini-2.0-flash-lite'),
     'ollama3.2': ollama('llama3.2'),
     'llama-3.3-70b-versatile': groq('llama-3.3-70b-versatile'),
-    'devstral': mistral('devstral-small-2505'),
+    devstral: mistral('devstral-small-2505'),
   };
 }
 
 // Generate text with a model
-export async function generateTextWithModel(
-  model: LanguageModel,
-  prompt: string,
-  options: GenerationOptions = {}
-) {
-  const {
-    temperature = 0,
-    systemPrompt,
-    maxTokens
-  } = options;
+export async function generateTextWithModel(model: LanguageModel, prompt: string, options: GenerationOptions = {}) {
+  const { temperature = 0, systemPrompt, maxTokens } = options;
 
   const generateOptions: any = {
     model,
@@ -225,7 +219,7 @@ Prefer relative paths when possible, only use absolute paths when necessary.`;
 const zCmd = z.object({
   explanation: z.string(),
   command: z.string(),
-})
+});
 
 export type Command = z.infer<typeof zCmd>;
 
@@ -240,27 +234,23 @@ export async function generateCommandStruct(prompt: string, modelConfig?: ModelC
   return object;
 }
 
-
 // Generate command using the default model with system admin context
 export async function generateCommand(prompt: string, modelConfig?: ModelConfig): Promise<string> {
   const finalModelConfig = modelConfig || getDefaultModel();
 
   const result = await generateTextWithModel(finalModelConfig.model, prompt, {
     temperature: finalModelConfig.temperature || 0,
-    systemPrompt
+    systemPrompt,
   });
 
   return result.text.trim();
 }
 
 // Generate text for benchmarking with simple system prompt
-export async function generateBenchmarkText(
-  model: LanguageModel,
-  prompt: string
-): Promise<string> {
+export async function generateBenchmarkText(model: LanguageModel, prompt: string): Promise<string> {
   const result = await generateTextWithModel(model, prompt, {
     temperature: 0,
-    systemPrompt
+    systemPrompt,
   });
 
   return result.text.trim();

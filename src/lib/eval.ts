@@ -5,8 +5,8 @@ import { models, type ModelConfig } from './ai';
 const judgeModelConf: ModelConfig = {
   model: models.groq('qwen-qwq-32b'),
   provider: 'groq',
-  modelId: 'qwen-qwq-32b'
-}
+  modelId: 'qwen-qwq-32b',
+};
 
 // 1. Core Types and Interfaces
 
@@ -52,7 +52,7 @@ export const ExactMatch: Scorer<any, any, any> = {
   description: 'Exact string match between output and expected',
   score: (input: any, output: any, expected: any): number => {
     return String(output) === String(expected) ? 1 : 0;
-  }
+  },
 };
 
 export const Levenshtein: Scorer<any, string, string> = {
@@ -61,11 +61,11 @@ export const Levenshtein: Scorer<any, string, string> = {
   score: (input: any, output: string, expected: string): number => {
     const distance = levenshteinDistance(String(output), String(expected));
     const maxLength = Math.max(String(output).length, String(expected).length);
-    
+
     if (maxLength === 0) return 1; // Both empty strings
-    
+
     return Math.max(0, 1 - distance / maxLength);
-  }
+  },
 };
 
 export const Contains: Scorer<any, string, string> = {
@@ -73,18 +73,18 @@ export const Contains: Scorer<any, string, string> = {
   description: 'Whether the output contains the expected string',
   score: (input: any, output: string, expected: string): number => {
     return String(output).toLowerCase().includes(String(expected).toLowerCase()) ? 1 : 0;
-  }
+  },
 };
 
 // LLM Judge Scorer - for when no expected value is available
 const zLLMJudgeResult = z.object({
   score: z.number().min(1).max(5).describe('A score from 1 to 5 rating the quality of the output'),
-  reasoning: z.string().describe('Brief explanation for the score')
+  reasoning: z.string().describe('Brief explanation for the score'),
 });
 
 export function createLLMJudge(
   name: string,
-  criteria: string = "quality, relevance, and correctness of the output",
+  criteria: string = 'quality, relevance, and correctness of the output',
   modelConfig?: ModelConfig,
   delayMs: number = 1000 // Make delay configurable
 ): Scorer<any, any, any> {
@@ -93,15 +93,16 @@ export function createLLMJudge(
     description: `AI-powered evaluation based on ${criteria}`,
     score: async (input: any, output: any, expected?: any): Promise<number> => {
       try {
-        return await withRetry(async () => {
-          // Optional delay for conservative rate limiting
-          // if (delayMs > 0) {
-          //   await createDelay(delayMs);
-          // }
+        return await withRetry(
+          async () => {
+            // Optional delay for conservative rate limiting
+            // if (delayMs > 0) {
+            //   await createDelay(delayMs);
+            // }
 
-          const model = modelConfig || judgeModelConf;
-          
-          const prompt = `You are an expert evaluator. Please rate the following output based on ${criteria}.
+            const model = modelConfig || judgeModelConf;
+
+            const prompt = `You are an expert evaluator. Please rate the following output based on ${criteria}.
 
 Input/Task: ${JSON.stringify(input)}
 Output to evaluate: ${JSON.stringify(output)}
@@ -115,36 +116,41 @@ Rate the output on a scale of 1-5 where:
 
 Provide both a score and brief reasoning for your evaluation.`;
 
-          const { object } = await generateObject({
-            model: model.model,
-            schema: zLLMJudgeResult,
-            prompt,
-            temperature: 0.1 // Low temperature for consistent scoring
-          });
+            const { object } = await generateObject({
+              model: model.model,
+              schema: zLLMJudgeResult,
+              prompt,
+              temperature: 0.1, // Low temperature for consistent scoring
+            });
 
-          // Transform 1-5 score to 0-1 scale: (score - 1) / 4
-          const normalizedScore = (object.score - 1) / 4;
-          
-          console.log(`    LLM Judge reasoning: ${object.reasoning}`);
-          
-          return normalizedScore;
-        }, 3, delayMs);
+            // Transform 1-5 score to 0-1 scale: (score - 1) / 4
+            const normalizedScore = (object.score - 1) / 4;
+
+            console.log(`    LLM Judge reasoning: ${object.reasoning}`);
+
+            return normalizedScore;
+          },
+          3,
+          delayMs
+        );
       } catch (error) {
         console.error(`LLM Judge scoring failed: ${error}`);
         return 0; // Default to 0 on error
       }
-    }
+    },
   };
 }
 
 // Convenience exports for different delay strategies
-export const LLMJudge = createLLMJudge("LLMJudge");
-export const LLMJudgeNoDelay = createLLMJudge("LLMJudgeNoDelay", undefined, undefined, 0);
-export const LLMJudgeFast = createLLMJudge("LLMJudgeFast", undefined, undefined, 500);
+export const LLMJudge = createLLMJudge('LLMJudge');
+export const LLMJudgeNoDelay = createLLMJudge('LLMJudgeNoDelay', undefined, undefined, 0);
+export const LLMJudgeFast = createLLMJudge('LLMJudgeFast', undefined, undefined, 500);
 
 // Helper function for Levenshtein distance
 function levenshteinDistance(str1: string, str2: string): number {
-  const matrix = Array(str2.length + 1).fill(null).map(() => Array(str1.length + 1).fill(null));
+  const matrix = Array(str2.length + 1)
+    .fill(null)
+    .map(() => Array(str1.length + 1).fill(null));
 
   for (let i = 0; i <= str1.length; i++) {
     matrix[0][i] = i;
@@ -184,21 +190,22 @@ export async function withRetry<T>(
       return await fn();
     } catch (error) {
       // Check if it's a rate limit error
-      const isRateLimitError = error && 
-        (String(error).toLowerCase().includes('rate limit') || 
-         String(error).toLowerCase().includes('too many requests'));
-      
+      const isRateLimitError =
+        error &&
+        (String(error).toLowerCase().includes('rate limit') ||
+          String(error).toLowerCase().includes('too many requests'));
+
       if (!isRateLimitError || attempt === maxRetries - 1) {
         throw error;
       }
-      
+
       // Exponential backoff: wait longer each retry
       const delayMs = baseDelayMs * Math.pow(2, attempt);
       console.log(`Rate limited, retrying in ${delayMs}ms (attempt ${attempt + 1}/${maxRetries})`);
       await createDelay(delayMs);
     }
   }
-  
+
   throw new Error('Max retries exceeded');
 }
 
@@ -215,7 +222,7 @@ export async function runEval<TInput = any, TOutput = any, TExpected = any>(
 
   // Get test data
   const testData = await Promise.resolve(data());
-  
+
   if (!Array.isArray(testData) || testData.length === 0) {
     throw new Error('Data function must return a non-empty array of test cases');
   }
@@ -231,22 +238,22 @@ export async function runEval<TInput = any, TOutput = any, TExpected = any>(
   // Run evaluation for each test case
   for (let i = 0; i < testData.length; i++) {
     const testCase = testData[i];
-    
+
     console.log(`🔄 Test ${i + 1}/${testData.length}: ${JSON.stringify(testCase.input)}`);
 
     try {
       // Run the task
       const output = await Promise.resolve(task(testCase.input));
-      
+
       // Calculate scores
       const scores: Record<string, number> = {};
-      
+
       for (const scorer of scorers) {
         try {
           const score = await Promise.resolve(scorer.score(testCase.input, output, testCase.expected));
           scores[scorer.name] = score;
           scoreAccumulators[scorer.name].push(score);
-          
+
           console.log(`  ${scorer.name}: ${score.toFixed(3)}`);
         } catch (error) {
           console.error(`  ${scorer.name}: ERROR - ${error}`);
@@ -258,12 +265,11 @@ export async function runEval<TInput = any, TOutput = any, TExpected = any>(
       results.push({
         testCase,
         output,
-        scores
+        scores,
       });
-
     } catch (error) {
       console.error(`  Task failed: ${error}`);
-      
+
       const errorScores: Record<string, number> = {};
       scorers.forEach(scorer => {
         errorScores[scorer.name] = 0;
@@ -274,7 +280,7 @@ export async function runEval<TInput = any, TOutput = any, TExpected = any>(
         testCase,
         output: undefined as any,
         scores: errorScores,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
     }
 
@@ -301,7 +307,7 @@ export async function runEval<TInput = any, TOutput = any, TExpected = any>(
     name,
     totalTests: testData.length,
     averageScores,
-    results
+    results,
   };
 }
 
@@ -362,4 +368,4 @@ export async function batchEvaluateGenerations(
 //   // Potentially use a specific model known for good evaluation, or a cost-effective one
 //   // For now, reuses the logic from ai.ts
 //   return getDefaultModel(); // Or a more specific configuration
-// } 
+// }
