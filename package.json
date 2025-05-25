@@ -2,7 +2,6 @@
   "name": "lazyshell",
   "version": "1.0.9",
   "description": "",
-  "type": "module",
   "main": "bin/lazyshell",
   "bin": {
     "lazyshell": "./bin/lazyshell"
@@ -11,6 +10,7 @@
     "start": "node bin/lazyshell",
     "build": "npx tsc",
     "lint": "npx eslint . && npx prettier --check .",
+    "lint:fix": "npx eslint . --fix && npx prettier --write .",
     "dev": "npx tsc -w",
     "x": "npx tsc && node bin/lazyshell",
     "test": "jest",

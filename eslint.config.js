@@ -12,7 +12,7 @@ export default [
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
-        ecmaVersion: 2022,
+        ecmaVersion: 'latest',
         sourceType: 'module',
         project: './tsconfig.json',
       },
@@ -69,29 +69,7 @@ export default [
   },
 
   // JavaScript configuration
-  {
-    files: ['**/*.js', '**/*.cjs', '**/*.mjs'],
-    languageOptions: {
-      ecmaVersion: 2022,
-      sourceType: 'module',
-      globals: {
-        console: 'readonly',
-        process: 'readonly',
-        Buffer: 'readonly',
-        __dirname: 'readonly',
-        __filename: 'readonly',
-        exports: 'writable',
-        module: 'writable',
-        require: 'readonly',
-        global: 'readonly',
-      },
-    },
-    rules: {
-      'prefer-const': 'error',
-      'no-var': 'error',
-      'no-console': 'off',
-    },
-  },
+  { files: ['**/*.js'], plugins: { js }, extends: ['js/recommended'] },
 
   // Test files configuration
   {
