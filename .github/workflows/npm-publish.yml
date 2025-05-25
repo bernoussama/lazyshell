@@ -4,10 +4,11 @@
 name: Node.js Package
 
 on:
+  pull_request:
   push:
+    # run only against tags
     tags:
-      - 'v*.*.*'
-      - 'v*.*.*-*'
+      - "*"
 
 jobs:
   build:
