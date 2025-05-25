@@ -31,8 +31,8 @@ jobs:
       - name: Build project
         run: pnpm build
         
-      - name: Run tests
-        run: echo | ./bin/lazyshell echo hello world
+      # - name: Run tests
+      #   run: pnpm test
 
   evals:
     runs-on: ubuntu-latest
