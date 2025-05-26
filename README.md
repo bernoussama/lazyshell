@@ -312,8 +312,7 @@ This project is licensed under the GPL-3.0 License - see the [LICENSE](LICENSE) 
 
 ## Acknowledgments
 
-- Built with [Commander.js](https://github.com/tj/commander.js/)
-- Interactive prompts powered by [@inquirer/prompts](https://github.com/SBoudrias/Inquirer.js)
+- Interactive prompts powered by [@clack/prompts](https://github.com/natemoo-re/clack)
 - Clipboard integration via [@napi-rs/clipboard](https://github.com/napi-rs/node-rs)
 - AI SDK integration with [Vercel AI SDK](https://github.com/vercel/ai)
 - Powered by AI models from multiple providers

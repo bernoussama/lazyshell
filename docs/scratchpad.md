@@ -9,7 +9,7 @@ This file tracks the current implementation tasks and progress for the CLAI-TS p
 ## Lessons Learned
 
 - [2024-05-23] Configuration feature implementation:
-  - Using `@inquirer/prompts` provides excellent UX for interactive setup
+  - Using `@clack/prompts` provides excellent UX for interactive setup
   - Storing config in `~/.lazyshell/config.json` works well for persistence
   - Fallback to environment variables ensures backwards compatibility
   - TypeScript interfaces help maintain code quality and type safety

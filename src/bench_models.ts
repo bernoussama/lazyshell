@@ -1,4 +1,4 @@
-import ora from 'ora';
+import { spinner } from '@clack/prompts';
 import fs from 'fs/promises';
 import path from 'path';
 import chalk from 'chalk';
@@ -47,7 +47,8 @@ async function runBenchmark() {
     for (const [modelName, model] of Object.entries(models)) {
       console.log(chalk.green(`\nTesting model: ${modelName}`));
 
-      const spinner = ora(`Running prompt ${i + 1}/${prompts.length}: "${prompt.substring(0, 30)}..."`).start();
+      const s = spinner();
+      s.start(`Running prompt ${i + 1}/${prompts.length}: "${prompt.substring(0, 30)}..."`);
 
       try {
         const startTime = performance.now();
@@ -68,9 +69,9 @@ async function runBenchmark() {
         //show output
         console.log(chalk.blue(`Output: ${output?.command || 'No output'}`));
 
-        spinner.succeed(`Completed in ${timeMs.toFixed(2)}ms`);
+        s.stop(`Completed in ${timeMs.toFixed(2)}ms`);
       } catch (error: any) {
-        spinner.fail(`Failed: ${error.message}`);
+        s.stop(`Failed: ${error.message}`);
         results.push({
           modelName,
           prompt,

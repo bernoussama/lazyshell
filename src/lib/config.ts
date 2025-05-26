@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
-import { select, password } from '@inquirer/prompts';
+import { select, password } from '@clack/prompts';
 import chalk from 'chalk';
 import { version } from '../../package.json';
 
@@ -151,17 +151,17 @@ export function validateConfig(config: Config): boolean {
  * Prompt user to select a provider
  */
 export async function promptProvider(): Promise<ProviderKey> {
-  const choices = Object.entries(SUPPORTED_PROVIDERS).map(([key, provider]) => ({
-    name: `${provider.name} - ${provider.description}`,
+  const options = Object.entries(SUPPORTED_PROVIDERS).map(([key, provider]) => ({
+    label: `${provider.name} - ${provider.description}`,
     value: key as ProviderKey,
   }));
 
   const provider = await select({
     message: 'Select an AI provider:',
-    choices,
+    options,
   });
 
-  return provider;
+  return provider as ProviderKey;
 }
 
 /**
@@ -184,10 +184,9 @@ export async function promptApiKey(provider: ProviderKey): Promise<string | unde
 
   const apiKey = await password({
     message: `Enter your ${providerInfo.name} API key:`,
-    mask: '*',
   });
 
-  return apiKey;
+  return apiKey as string;
 }
 
 /**
