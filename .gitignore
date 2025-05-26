@@ -3,3 +3,4 @@ bin/*.js
 bin/*.map
 bin/**/*.js
 bin/lib
+dist
