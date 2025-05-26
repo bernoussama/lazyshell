@@ -3,8 +3,12 @@ name: CI
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'src/lib/ai.ts'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'src/lib/ai.ts'
 
 jobs:
   test:
@@ -39,7 +43,6 @@ jobs:
 
   evals:
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
