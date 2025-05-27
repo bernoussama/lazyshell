@@ -18,6 +18,8 @@ LazyShell is a command-line interface that helps you quickly generate and execut
 - 🏆 **Model benchmarking capabilities**
 - 🤖 **LLM Judge evaluation system**
 - ⚙️ **CI/CD integration with automated quality checks**
+- 🖥️ **System-aware command generation** - detects OS, distro, and package manager
+- 🔄 **Command refinement** - iteratively improve commands with AI feedback
 
 ## Installation 📦
 
@@ -41,6 +43,8 @@ pnpm add -g lazyshell
 1. **First Run**: LazyShell will automatically prompt you to select an AI provider and enter your API key:
    ```bash
    lazyshell "find all files larger than 100MB"
+   # or use the short alias
+   lsh "find all files larger than 100MB"
    ```
    
 2. **Interactive Setup**: Choose from supported providers:
@@ -100,6 +104,14 @@ export OPENAI_API_KEY='your-api-key-here'
 ### Basic Usage
 ```bash
 lazyshell "your natural language command description"
+# or use the short alias
+lsh "your natural language command description"
+```
+
+### Silent Mode
+```bash
+lazyshell -s "find all JavaScript files"  # No explanation, just the command
+lsh --silent "show disk usage"            # Same with long flag
 ```
 
 ### Examples
@@ -118,6 +130,9 @@ lazyshell "list all docker containers with their memory usage"
 
 # File operations
 lazyshell "compress all .log files in this directory"
+
+# Package management (system-aware)
+lazyshell "install docker"  # Uses apt/yum/pacman/etc based on your distro
 ```
 
 ### Interactive Features
@@ -125,6 +140,18 @@ lazyshell "compress all .log files in this directory"
 - **Refine**: Modify your prompt to get a better command
 - **Cancel**: Exit without running anything
 - **Clipboard**: Commands are automatically copied for manual execution
+
+## System Intelligence 🧠
+
+LazyShell automatically detects your system environment:
+
+- **Operating System**: Linux, macOS, Windows
+- **Linux Distribution**: Ubuntu, Fedora, Arch, etc.
+- **Package Manager**: apt, yum, dnf, pacman, zypper, etc.
+- **Shell**: bash, zsh, fish, etc.
+- **Current Directory**: Provides context for relative paths
+
+This enables LazyShell to generate system-appropriate commands and suggest the right package manager for installations.
 
 ## Evaluation System 🧪
 
@@ -177,7 +204,7 @@ LazyShell includes comprehensive benchmarking capabilities to compare AI model p
 ```bash
 # Build and run benchmarks
 pnpm build
-node bin/lib/bench_models.js
+node dist/bench_models.mjs
 ```
 
 ### Benchmark Features
@@ -189,9 +216,9 @@ node bin/lib/bench_models.js
 ### Available Models
 - `llama-3.3-70b-versatile` (Groq)
 - `gemini-2.0-flash-lite` (Google)
-- `devstral` (Mistral)
+- `devstral-small-2505` (Mistral)
 - `ollama3.2` (Ollama)
-- Various OpenRouter models
+- `or-devstral` (OpenRouter)
 
 ## CI Evaluations 🚦
 
@@ -210,24 +237,24 @@ LazyShell includes automated quality assessments that run in CI to ensure consis
 
 ### Local Testing
 ```bash
-# Run the same evaluations locally
-pnpm eval:ci
-
-# Manually build and run
+# Run CI evaluations locally
 pnpm build
-node bin/lib/ci-eval.js
+node dist/lib/ci-eval.mjs
 ```
 
 ### Custom Evaluation Scripts
 ```bash
 # Run basic evaluations
-pnpm build && node bin/lib/basic.eval.js
+pnpm build && node dist/lib/basic.eval.mjs
 
 # Run LLM judge evaluation
-pnpm build && node bin/lib/llm-judge.eval.js
+pnpm build && node dist/lib/llm-judge.eval.mjs
 
 # Test AI library
-pnpm build && node bin/lib/test-ai-lib.js
+pnpm build && node dist/test-ai-lib.mjs
+
+# Run example evaluations
+pnpm build && node dist/lib/example.eval.mjs
 ```
 
 See [docs/CI_EVALUATIONS.md](docs/CI_EVALUATIONS.md) for complete setup and configuration guide.
@@ -262,24 +289,42 @@ See [docs/CI_EVALUATIONS.md](docs/CI_EVALUATIONS.md) for complete setup and conf
 
 ### Available Scripts
 ```bash
-pnpm start        # Run the built version
-pnpm build        # Compile TypeScript
-pnpm dev          # Watch mode compilation
-pnpm test         # Run Jest tests
-pnpm eval:ci      # Run CI evaluations
-pnpm x            # Build and run quickly
+pnpm x                    # Quick run with jiti (development)
+pnpm build               # Compile TypeScript with pkgroll
+pnpm typecheck           # Type checking only
+pnpm lint                # Check code formatting and linting
+pnpm lint:fix            # Fix formatting and linting issues
+pnpm release:patch       # Build, version bump, publish, and push
+pnpm prerelease          # Build, prerelease version, publish, and push
 ```
 
-### Running Tests
-```bash
-pnpm test
+### Project Structure
+```
+src/
+├── index.ts              # Main CLI entry point
+├── utils.ts              # Utility functions (command execution, history)
+├── bench_models.ts       # Model benchmarking script
+├── test-ai-lib.ts        # AI library testing script
+├── helpers/
+│   ├── index.ts          # Helper exports
+│   └── package-manager.ts # System package manager detection
+└── lib/
+    ├── ai.ts             # AI provider integrations and command generation
+    ├── config.ts         # Configuration management
+    ├── eval.ts           # Evaluation framework
+    ├── basic.eval.ts     # Basic evaluation examples
+    ├── ci-eval.ts        # CI evaluation script
+    ├── example.eval.ts   # Example evaluation scenarios
+    └── llm-judge.eval.ts # LLM judge evaluation examples
 ```
 
 ### Development Features
 - **TypeScript**: Full type safety and modern JavaScript features
-- **Jest Testing**: Comprehensive test suite
+- **pkgroll**: Modern bundling with tree-shaking
+- **jiti**: Fast development with TypeScript execution
 - **Watch Mode**: Auto-compilation during development
 - **Modular Architecture**: Clean separation of concerns
+- **ESM**: Modern ES modules throughout
 
 ## Troubleshooting 🔧
 
@@ -295,6 +340,13 @@ LazyShell will automatically fall back to environment variables if the config fi
 - **Clipboard not working**: Ensure your system supports clipboard operations
 - **Model timeout**: Some models (especially Ollama) may take longer to respond
 - **Rate limiting**: Built-in retry logic handles temporary rate limits
+- **Command not found**: Make sure the package is properly installed globally
+
+### Debug Mode
+For troubleshooting, you can check:
+- Configuration file: `~/.lazyshell/config.json`
+- System detection: The AI considers your OS, distro, and package manager
+- Command history: Generated commands are added to your shell history
 
 ## Contributing 🤝
 
@@ -305,6 +357,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 - Add tests for new features
 - Update documentation as needed
 - Run evaluations before submitting PRs
+- Use the KISS principle (Keep It Simple Stupid)
+- Follow GitHub flow (create feature branches)
 
 ## License 📄
 
@@ -313,8 +367,9 @@ This project is licensed under the GPL-3.0 License - see the [LICENSE](LICENSE) 
 ## Acknowledgments
 
 - Built with [Commander.js](https://github.com/tj/commander.js/)
-- Interactive prompts powered by [@inquirer/prompts](https://github.com/SBoudrias/Inquirer.js)
+- Interactive prompts powered by [@clack/prompts](https://github.com/natemoo-re/clack)
 - Clipboard integration via [@napi-rs/clipboard](https://github.com/napi-rs/node-rs)
 - AI SDK integration with [Vercel AI SDK](https://github.com/vercel/ai)
+- Bundled with [pkgroll](https://github.com/privatenumber/pkgroll)
 - Powered by AI models from multiple providers
 - Inspired by the need to be lazy (in a good way!)
