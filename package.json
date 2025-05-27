@@ -16,8 +16,9 @@
     "lint": "prettier --check . && eslint",
     "lint:fix": "prettier --write . && eslint --fix",
     "build": "pkgroll",
-    "release:patch": "npm run build && npm version patch && npm run build && npm publish && git push --follow-tags",
-    "prerelease": "npm run build && npm version prerelease && npm run build && npm publish && git push --follow-tags"
+    "release:patch": "pnpm run build && npm version patch && npm run build && npm publish && git push --follow-tags",
+    "prerelease": "pnpm run build && npm version prerelease && npm run build && npm publish && git push --follow-tags",
+    "eval:ci": "jiti src/lib/ci-eval.ts"
   },
   "keywords": ["ai", "cli", "shell", "command", "generator", "shell-command", "shell-generator","lazyshell"],
   "author": "bernoussama",

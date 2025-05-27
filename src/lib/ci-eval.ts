@@ -1,5 +1,5 @@
 import { generateCommand, getDefaultModel, models, ModelConfig } from './ai';
-import { eval, LLMJudge, createLLMJudge, EvalSummary } from './eval';
+import { eval as runEval, LLMJudge, createLLMJudge, EvalSummary } from './eval';
 
 const judgeModelConf: ModelConfig = {
   model: models.groq('qwen-qwq-32b'),
@@ -25,7 +25,7 @@ async function runCIEvaluations(): Promise<boolean> {
 
   try {
     // Run the LLM Judge evaluation
-    const evalResult: EvalSummary = await eval('CI Command Generation Quality Assessment', {
+    const evalResult: EvalSummary = await runEval('CI Command Generation Quality Assessment', {
       // Test data without expected values - just inputs to evaluate
       data: async () => {
         return [
@@ -147,7 +147,7 @@ async function main() {
 }
 
 // Run if this file is executed directly
-if (require.main === module) {
+if (require.main === module || require.main === undefined) {
   main().catch(error => {
     console.error('❌ Fatal error:', error);
     process.exit(1);

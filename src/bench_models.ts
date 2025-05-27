@@ -1,9 +1,9 @@
-import ora from 'ora';
 import fs from 'fs/promises';
 import path from 'path';
 import chalk from 'chalk';
 import { performance } from 'perf_hooks';
 import { getBenchmarkModels, generateBenchmarkText, Command, generateCommandStruct, ModelConfig } from './lib/ai';
+import { spinner } from '@clack/prompts';
 
 // Get the models to benchmark from our AI library
 const models = getBenchmarkModels();
@@ -47,7 +47,8 @@ async function runBenchmark() {
     for (const [modelName, model] of Object.entries(models)) {
       console.log(chalk.green(`\nTesting model: ${modelName}`));
 
-      const spinner = ora(`Running prompt ${i + 1}/${prompts.length}: "${prompt.substring(0, 30)}..."`).start();
+      const spin = spinner() 
+      spin.start(`Running prompt ${i + 1}/${prompts.length}: "${prompt.substring(0, 30)}..."`);
 
       try {
         const startTime = performance.now();
@@ -68,9 +69,9 @@ async function runBenchmark() {
         //show output
         console.log(chalk.blue(`Output: ${output?.command || 'No output'}`));
 
-        spinner.succeed(`Completed in ${timeMs.toFixed(2)}ms`);
+        spin.stop(chalk.green(`Completed in ${timeMs.toFixed(2)}ms`));
       } catch (error: any) {
-        spinner.fail(`Failed: ${error.message}`);
+        spin.stop(chalk.red(`Failed: ${error.message}`));
         results.push({
           modelName,
           prompt,
