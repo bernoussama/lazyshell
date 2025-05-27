@@ -1,14 +1,16 @@
 name: Evals
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'src/lib/ai.ts'
   pull_request:
     branches: [ main ]
     paths:
       - 'src/lib/ai.ts'
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/lib/ai.ts'
+      - 'src/lib/ci-eval.ts'
+      - 'src/lib/eval.ts'
 
 jobs:
   evals:
