@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
-import { select, password } from '@inquirer/prompts';
+import { select, password, cancel, isCancel } from '@clack/prompts';
 import chalk from 'chalk';
 import { version } from '../../package.json';
 
@@ -151,15 +151,23 @@ export function validateConfig(config: Config): boolean {
  * Prompt user to select a provider
  */
 export async function promptProvider(): Promise<ProviderKey> {
-  const choices = Object.entries(SUPPORTED_PROVIDERS).map(([key, provider]) => ({
+  const options = Object.entries(SUPPORTED_PROVIDERS).map(([key, provider]) => ({
     name: `${provider.name} - ${provider.description}`,
     value: key as ProviderKey,
   }));
 
   const provider = await select({
     message: 'Select an AI provider:',
-    choices,
+    options,
   });
+  if (isCancel(provider)) {
+    cancel('Provider selection cancelled');
+    process.exit(0);
+  }
+
+  if (typeof provider === 'symbol') {
+    throw new Error('Provider selection cancelled');
+  }
 
   return provider;
 }
@@ -180,12 +188,20 @@ export async function promptApiKey(provider: ProviderKey): Promise<string | unde
 
   if (providerInfo.envVar) {
     console.log(chalk.gray(`Environment variable: ${providerInfo.envVar}`));
+    const apiKey = getApiKeyFromEnv(provider);
+    if (apiKey) {
+      return apiKey;
+    }
   }
 
   const apiKey = await password({
     message: `Enter your ${providerInfo.name} API key:`,
     mask: '*',
   });
+
+  if (typeof apiKey === 'symbol') {
+    throw new Error('apiKey entry cancelled');
+  }
 
   return apiKey;
 }
@@ -269,4 +285,7 @@ export function getEffectiveApiKey(config: Config): string | undefined {
 
   // Fall back to environment variable
   return getApiKeyFromEnv(config.provider);
+}
+function iscancelled(provider: string | symbol) {
+  throw new Error('Function not implemented.');
 }
