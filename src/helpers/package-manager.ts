@@ -7,14 +7,20 @@ import fs from 'fs';
 export function getDistroPackageManager(): string | undefined {
   try {
     // Check for common package managers by looking for their binaries/directories
+    if (fs.existsSync('/usr/bin/brew')) {
+      return 'brew'; // Homebrew
+    }
     if (fs.existsSync('/usr/bin/apt') || fs.existsSync('/usr/bin/apt-get')) {
       return 'apt'; // Debian/Ubuntu
+    }
+    if (fs.existsSync('/usr/bin/dnf')) {
+      return 'dnf'; // Fedora/RHEL 8+
     }
     if (fs.existsSync('/usr/bin/yum')) {
       return 'yum'; // RHEL/CentOS (older)
     }
-    if (fs.existsSync('/usr/bin/dnf')) {
-      return 'dnf'; // Fedora/RHEL 8+
+    if (fs.existsSync('/usr/bin/yay')) {
+      return 'yay'; // Arch Linux (AUR)
     }
     if (fs.existsSync('/usr/bin/pacman')) {
       return 'pacman'; // Arch Linux

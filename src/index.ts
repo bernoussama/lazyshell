@@ -1,11 +1,11 @@
 import { Command } from 'commander';
-import { select, input } from '@inquirer/prompts';
+import { select, text as input, spinner, stream, outro, isCancel, cancel } from '@clack/prompts';
 import chalk from 'chalk';
 import { runCommand } from './utils';
-import ora from 'ora';
 import { generateCommand, generateCommandStruct, getDefaultModel, getModelFromConfig } from './lib/ai';
 import { Clipboard } from '@napi-rs/clipboard';
 import { getOrInitializeConfig } from './lib/config';
+import dedent from 'dedent';
 
 async function genCommand(prompt: string) {
   // Get configuration first
@@ -25,16 +25,17 @@ async function genCommand(prompt: string) {
   }
 
   // console log the model being used
-  console.log(chalk.blue(`Using model: ${modelConfig.provider}/${modelConfig.modelId}`));
+  // console.log(chalk.blue(`Using model: ${modelConfig.provider}/${modelConfig.modelId}`));
 
   // Show spinner while generating command
-  const spinner = ora('Generating command...').start();
+  const spin = spinner();
+  spin.start('Generating command...');
   try {
     const result = await generateCommand(prompt);
-    spinner.succeed();
+    spin.stop('Command generated successfully!');
     return { text: result };
   } catch (error) {
-    spinner.fail('Failed to generate command');
+    spin.stop(chalk.red('Failed to generate command'));
     throw error;
   }
 }
@@ -44,19 +45,23 @@ async function editPrompt(command: string): Promise<string> {
   // In a real implementation, this would open an editor
   const editedCommand = await input({
     message: 'How would you like to edit the command?',
-    default: command,
+    placeholder: command,
   });
+  if (isCancel(editedCommand)) {
+    cancel('Editing cancelled.');
+    process.exit(0);
+  }
   return editedCommand;
 }
 
 async function refineCommand(currentPrompt: string, command: string): Promise<string> {
   const refineText = await input({
     message: 'How would you like to refine the command?',
-    default: '',
+    placeholder: '',
   });
 
   // Combine the original prompt with the refinement
-  return `former prompt:${currentPrompt} its command is ${command} refining prompt: ${refineText}`;
+  return `former prompt:${currentPrompt} its command is ${command} refining prompt: ${refineText as string}`;
 }
 
 const program = new Command();
@@ -64,9 +69,11 @@ program
   .version(require('../package.json').version)
   .description(require('../package.json').description)
   .argument('<prompt_parts...>', 'prompt')
-  .action(async (prompt_parts: string[]) => {
+  .option('-s, --silent', 'run in silent mode (no explanation)')
+  .action(async (prompt_parts: string[], options) => {
     let currentPrompt = prompt_parts.join(' ');
     let shouldContinue = true;
+    const silent = options.silent || false;
 
     const clipboard = new Clipboard();
     while (shouldContinue) {
@@ -92,36 +99,57 @@ program
 
         console.log(chalk.blue(`Using model: ${modelConfig.provider}/${modelConfig.modelId}`));
 
-        const result = await generateCommandStruct(currentPrompt, modelConfig);
+        const spin = spinner();
+        spin.start('Generating command...');
+        const result = await generateCommandStruct(currentPrompt, modelConfig, !silent);
+
+        spin.stop('Your command: ');
         const command = result.command.trim();
-        // TODO: add command to clipboard
+        await stream.message(
+          (function* () {
+            yield `${command}`;
+          })()
+        );
+        if ('explanation' in result && result.explanation) {
+          await stream.info(
+            (function* () {
+              yield `Explanation:\
+${result.explanation.trim()}
+`;
+            })()
+          );
+        }
 
         clipboard.setText(command);
 
         const action = await select({
-          message: `Explanation: ${chalk.yellow(result.explanation)}
-Command: ${chalk.green(command)}`,
-          choices: [
-            { name: '✅ Execute command', value: 'execute' },
+          message: 'Run command?',
+          options: [
+            { label: '✅ Yes', value: 'execute' },
             // { name: '✏️  Edit command', value: 'edit' },
-            { name: '🔧 Refine prompt', value: 'refine' },
-            { name: '❌ Cancel', value: 'cancel' },
+            { label: '🔧 Refine', value: 'refine' },
+            { label: '❌ Cancel', value: 'cancel' },
           ],
         });
+        if (isCancel(action)) {
+          cancel('Operation cancelled.');
+          process.exit(0);
+        }
 
         switch (action) {
           case 'execute':
+            outro(`running command: ${chalk.green(command)}`);
             runCommand(command);
             shouldContinue = false;
             break;
-          case 'edit':
-            currentPrompt = await editPrompt(command);
-            break;
+          // case 'edit':
+          //   currentPrompt = await editPrompt(command);
+          //   break;
           case 'refine':
             currentPrompt = await refineCommand(currentPrompt, command);
             break;
           case 'cancel':
-            console.log(chalk.yellow('Command cancelled.'));
+            outro(chalk.yellow('Command cancelled.'));
             return;
         }
       } catch (error) {

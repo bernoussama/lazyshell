@@ -10,12 +10,14 @@ import z from 'zod';
 import type { Config, ProviderKey } from './config';
 import { mistral } from '@ai-sdk/mistral';
 import dedent from 'dedent';
+import { getDistroPackageManager } from '../helpers/package-manager';
 
 // System information interface
 export interface SystemInfo {
   platform: string;
   release: string;
   distro?: string; // Only for Linux
+  packageManager?: string; // Only for Linux
   type: string;
   arch: string;
 }
@@ -56,6 +58,7 @@ export function getSystemInfo(): SystemInfo {
   };
   if (os.platform() === 'linux') {
     sysinfo.distro = getLinuxDistro(); // Get Linux distribution name simply
+    sysinfo.packageManager = getDistroPackageManager();
   }
   return sysinfo;
 }
