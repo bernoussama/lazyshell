@@ -108,6 +108,18 @@ lazyshell "your natural language command description"
 lsh "your natural language command description"
 ```
 
+### Configuration Management
+```bash
+lazyshell config  # Open interactive configuration UI
+```
+
+The config command provides a user-friendly interface to:
+- **View current configuration**: See your active provider, model, and API key status
+- **Edit provider**: Switch between AI providers (Groq, Google, OpenRouter, etc.)
+- **Update API key**: Change or set your API key for the current provider
+- **Change model**: Select a different model for your provider
+- **Reset configuration**: Start fresh with a new configuration
+
 ### Silent Mode
 ```bash
 lazyshell -s "find all JavaScript files"  # No explanation, just the command
@@ -329,9 +341,9 @@ src/
 ## Troubleshooting 🔧
 
 ### Configuration Issues
-- **Invalid configuration**: Delete `~/.lazyshell/config.json` to reset
-- **API key errors**: Run LazyShell again to re-enter your API key
-- **Provider not working**: Try switching to a different provider in the configuration
+- **Invalid configuration**: Delete `~/.lazyshell/config.json` to reset, or run `lazyshell config` for guided setup
+- **API key errors**: Run `lazyshell config` to update your API key
+- **Provider not working**: Use `lazyshell config` to switch to a different provider
 
 ### Environment Variables
 LazyShell will automatically fall back to environment variables if the config file is invalid or incomplete.

@@ -2,57 +2,10 @@ import { Command } from 'commander';
 import { select, text as input, spinner, stream, outro, isCancel, cancel } from '@clack/prompts';
 import chalk from 'chalk';
 import { runCommand } from './utils';
-import { generateCommand, generateCommandStruct, getDefaultModel, getModelFromConfig } from './lib/ai';
+import { generateCommandStruct, getDefaultModel, getModelFromConfig } from './lib/ai';
 import { Clipboard } from '@napi-rs/clipboard';
 import { getOrInitializeConfig } from './lib/config';
-import dedent from 'dedent';
-
-async function genCommand(prompt: string) {
-  // Get configuration first
-  const config = await getOrInitializeConfig();
-  if (!config) {
-    console.error(chalk.red('Failed to initialize configuration. Exiting.'));
-    process.exit(1);
-  }
-
-  let modelConfig;
-  try {
-    modelConfig = getModelFromConfig(config);
-  } catch (error) {
-    console.error(chalk.red(`Configuration error: ${error}`));
-    console.log(chalk.yellow('Falling back to environment variables...'));
-    modelConfig = getDefaultModel();
-  }
-
-  // console log the model being used
-  // console.log(chalk.blue(`Using model: ${modelConfig.provider}/${modelConfig.modelId}`));
-
-  // Show spinner while generating command
-  const spin = spinner();
-  spin.start('Generating command...');
-  try {
-    const result = await generateCommand(prompt);
-    spin.stop('Command generated successfully!');
-    return { text: result };
-  } catch (error) {
-    spin.stop(chalk.red('Failed to generate command'));
-    throw error;
-  }
-}
-
-async function editPrompt(command: string): Promise<string> {
-  // For now, just return the command as is
-  // In a real implementation, this would open an editor
-  const editedCommand = await input({
-    message: 'How would you like to edit the command?',
-    placeholder: command,
-  });
-  if (isCancel(editedCommand)) {
-    cancel('Editing cancelled.');
-    process.exit(0);
-  }
-  return editedCommand;
-}
+import { showConfigUI } from './commands/config';
 
 async function refineCommand(currentPrompt: string, command: string): Promise<string> {
   const refineText = await input({
@@ -157,6 +110,13 @@ ${result.explanation.trim()}
         shouldContinue = false;
       }
     }
+  });
+
+program
+  .command('config')
+  .description('Open configuration UI')
+  .action(async () => {
+    await showConfigUI();
   });
 
 program.parse(process.argv);
