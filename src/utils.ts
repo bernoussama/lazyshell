@@ -47,18 +47,18 @@ export function runCommand(command: string) {
   });
 }
 
-export async function print(msg: string){
-          await stream.message(
-            (function* () {
-              yield `${msg}`;
-            })()
-          );
+export async function print(msg: string) {
+  await stream.message(
+    (function* () {
+      yield `${msg}`;
+    })()
+  );
 }
 
-export async function info(msg: string){
-          await stream.info(
-            (function* () {
-              yield `${msg}`;
-            })()
-          );
+export async function info(msg: string) {
+  await stream.info(
+    (function* () {
+      yield `${msg}`;
+    })()
+  );
 }

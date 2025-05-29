@@ -1,13 +1,12 @@
 import { Command } from 'commander';
 import { select, text as input, spinner, stream, outro, isCancel, cancel, intro } from '@clack/prompts';
 import chalk from 'chalk';
-import { info, runCommand } from './utils';
+import { info, print, runCommand } from './utils';
 import { generateCommand, generateCommandStruct, getDefaultModel, getModelFromConfig } from './lib/ai';
 import { Clipboard } from '@napi-rs/clipboard';
 import { getOrInitializeConfig } from './lib/config';
 import dedent from 'dedent';
 import { showConfigUI } from './commands/config';
-import { print } from './utils';
 
 async function genCommand(prompt: string) {
   // Get configuration first
@@ -110,7 +109,7 @@ program
         const command = result.command.trim();
         await print(`${command}`);
         if ('explanation' in result && result.explanation) {
-          await info("Explanation:");
+          await info('Explanation:');
           await print(`${result.explanation.trim()}`);
         }
 
@@ -152,7 +151,7 @@ program
       }
     }
   });
-  program
+program
   .command('config')
   .description('Open configuration UI')
   .action(async () => {

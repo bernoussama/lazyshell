@@ -1,6 +1,15 @@
 import { select, text as input, confirm, isCancel, outro, intro } from '@clack/prompts';
 import chalk from 'chalk';
-import { getOrInitializeConfig, loadConfig, saveConfig, promptProvider, promptApiKey, SUPPORTED_PROVIDERS, Config, configExists } from '../lib/config';
+import {
+  getOrInitializeConfig,
+  loadConfig,
+  saveConfig,
+  promptProvider,
+  promptApiKey,
+  SUPPORTED_PROVIDERS,
+  Config,
+  configExists,
+} from '../lib/config';
 import { info, print } from '../utils';
 
 export async function showConfigUI() {
@@ -12,12 +21,12 @@ export async function showConfigUI() {
     const shouldCreate = await confirm({
       message: 'Would you like to create a new configuration?',
     });
-    
+
     if (isCancel(shouldCreate) || !shouldCreate) {
       outro(chalk.gray('Configuration UI closed.'));
       return;
     }
-    
+
     const config = await getOrInitializeConfig();
     if (config) {
       await info(chalk.green('✅ Configuration created successfully!'));
@@ -33,7 +42,7 @@ export async function showConfigUI() {
   }
 
   await showCurrentConfig(config);
-  
+
   const action = await select({
     message: 'What would you like to do?',
     options: [
@@ -70,7 +79,7 @@ async function showCurrentConfig(config: Config) {
   const provider = SUPPORTED_PROVIDERS[config.provider];
   const hasApiKey = config.apiKey && config.apiKey.length > 0;
   const maskedApiKey = hasApiKey ? `${config.apiKey!.slice(0, 8)}...` : 'Not set';
-  
+
   await info(chalk.blue('📋 Current Configuration:'));
   await print(`${chalk.cyan('Provider:')} ${provider.name}`);
   await print(`${chalk.cyan('Description:')} ${provider.description}`);
@@ -81,11 +90,11 @@ async function showCurrentConfig(config: Config) {
 
 async function editProvider(config: Config) {
   // console.log(chalk.blue('🔄 Change Provider'));
-  
+
   const newProvider = await promptProvider();
   config.provider = newProvider;
   config.model = SUPPORTED_PROVIDERS[newProvider].defaultModel;
-  
+
   // If the new provider requires an API key, prompt for it
   if (SUPPORTED_PROVIDERS[newProvider].envVar) {
     const newApiKey = await promptApiKey(newProvider);
@@ -93,7 +102,7 @@ async function editProvider(config: Config) {
   } else {
     config.apiKey = undefined;
   }
-  
+
   const saved = await saveConfig(config);
   if (saved) {
     await showCurrentConfig(config);
@@ -105,15 +114,15 @@ async function editProvider(config: Config) {
 
 async function editApiKey(config: Config) {
   // console.log(chalk.blue('🔑 Update API Key'));
-  
+
   if (!SUPPORTED_PROVIDERS[config.provider].envVar) {
-    print(chalk.yellow(`${SUPPORTED_PROVIDERS[config.provider].name} doesn't require an API key.`));
+    await print(chalk.yellow(`${SUPPORTED_PROVIDERS[config.provider].name} doesn't require an API key.`));
     return;
   }
-  
+
   const newApiKey = await promptApiKey(config.provider);
   config.apiKey = newApiKey;
-  
+
   const saved = await saveConfig(config);
   if (saved) {
     await showCurrentConfig(config);
@@ -125,21 +134,21 @@ async function editApiKey(config: Config) {
 
 async function editModel(config: Config) {
   // console.log(chalk.blue('🤖 Change Model'));
-  
+
   const currentModel = config.model || SUPPORTED_PROVIDERS[config.provider].defaultModel;
-  
+
   const newModel = await input({
     message: `Enter model name for ${SUPPORTED_PROVIDERS[config.provider].name}:`,
     placeholder: currentModel,
     initialValue: currentModel,
   });
-  
+
   if (isCancel(newModel)) {
     return;
   }
-  
+
   config.model = newModel;
-  
+
   const saved = await saveConfig(config);
   if (saved) {
     await showCurrentConfig(config);
@@ -151,19 +160,19 @@ async function editModel(config: Config) {
 
 async function resetConfiguration() {
   // console.log(chalk.blue('🔄 Reset Configuration'));
-  
+
   const confirmed = await confirm({
     message: chalk.yellow('Are you sure you want to reset your configuration? This will delete your current settings.'),
   });
-  
+
   if (isCancel(confirmed) || !confirmed) {
     await info(chalk.gray('Reset cancelled.'));
     return;
   }
-  
+
   await info(chalk.blue('🔧 Creating new configuration...'));
   const newConfig = await getOrInitializeConfig();
-  
+
   if (newConfig) {
     await showCurrentConfig(newConfig);
     outro(chalk.green('✅ Configuration reset successfully!'));
