@@ -1,11 +1,13 @@
 import { Command } from 'commander';
-import { select, text as input, spinner, stream, outro, isCancel, cancel } from '@clack/prompts';
+import { select, text as input, spinner, stream, outro, isCancel, cancel, intro } from '@clack/prompts';
 import chalk from 'chalk';
-import { runCommand } from './utils';
+import { info, runCommand } from './utils';
 import { generateCommand, generateCommandStruct, getDefaultModel, getModelFromConfig } from './lib/ai';
 import { Clipboard } from '@napi-rs/clipboard';
 import { getOrInitializeConfig } from './lib/config';
 import dedent from 'dedent';
+import { showConfigUI } from './commands/config';
+import { print } from './utils';
 
 async function genCommand(prompt: string) {
   // Get configuration first
@@ -29,7 +31,7 @@ async function genCommand(prompt: string) {
 
   // Show spinner while generating command
   const spin = spinner();
-  spin.start('Generating command...');
+  spin.start('Loading...');
   try {
     const result = await generateCommand(prompt);
     spin.stop('Command generated successfully!');
@@ -71,6 +73,7 @@ program
   .argument('<prompt_parts...>', 'prompt')
   .option('-s, --silent', 'run in silent mode (no explanation)')
   .action(async (prompt_parts: string[], options) => {
+    intro(chalk.bgGreen('LazyShell'));
     let currentPrompt = prompt_parts.join(' ');
     let shouldContinue = true;
     const silent = options.silent || false;
@@ -97,25 +100,18 @@ program
           modelConfig = getDefaultModel();
         }
 
-        console.log(chalk.blue(`Using model: ${modelConfig.provider}/${modelConfig.modelId}`));
+        // console.log(chalk.blue(`Using model: ${modelConfig.provider}/${modelConfig.modelId}`));
 
         const spin = spinner();
-        spin.start('Generating command...');
+        spin.start('Loading...');
         const result = await generateCommandStruct(currentPrompt, modelConfig, !silent);
 
         spin.stop('Your command: ');
         const command = result.command.trim();
-        await stream.message(
-          (function* () {
-            yield `${command}`;
-          })()
-        );
+        await print(`${command}`);
         if ('explanation' in result && result.explanation) {
-          await stream.info(
-            (function* () {
-              yield `Explanation:\n${result.explanation.trim()}`;
-            })()
-          );
+          await info(`Explanation:`.trim());
+          await print(`${result.explanation.trim()}`.trim());
         }
 
         clipboard.setText(command);
@@ -155,6 +151,12 @@ program
         shouldContinue = false;
       }
     }
+  });
+  program
+  .command('config')
+  .description('Open configuration UI')
+  .action(async () => {
+    await showConfigUI();
   });
 
 program.parse(process.argv);

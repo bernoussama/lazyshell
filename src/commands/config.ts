@@ -1,14 +1,14 @@
-import { select, text as input, confirm, isCancel, outro } from '@clack/prompts';
+import { select, text as input, confirm, isCancel, outro, intro } from '@clack/prompts';
 import chalk from 'chalk';
 import { getOrInitializeConfig, loadConfig, saveConfig, promptProvider, promptApiKey, SUPPORTED_PROVIDERS, Config, configExists } from '../lib/config';
+import { info, print } from '../utils';
 
 export async function showConfigUI() {
-  console.log(chalk.blue('\n🔧 LazyShell Configuration'));
-  console.log(chalk.gray('════════════════════════════\n'));
+  intro(chalk.blue('🔧 LazyShell Configuration'));
 
   const configFile = await configExists();
   if (!configFile) {
-    console.log(chalk.yellow('📄 No configuration file found.'));
+    await info(chalk.yellow('📄 No configuration file found.'));
     const shouldCreate = await confirm({
       message: 'Would you like to create a new configuration?',
     });
@@ -20,7 +20,7 @@ export async function showConfigUI() {
     
     const config = await getOrInitializeConfig();
     if (config) {
-      console.log(chalk.green('\n✅ Configuration created successfully!'));
+      await info(chalk.green('✅ Configuration created successfully!'));
       await showCurrentConfig(config);
     }
     return;
@@ -28,7 +28,7 @@ export async function showConfigUI() {
 
   const config = await loadConfig();
   if (!config) {
-    console.log(chalk.red('❌ Failed to load configuration file.'));
+    await info(chalk.red('❌ Failed to load configuration file.'));
     return;
   }
 
@@ -71,19 +71,16 @@ async function showCurrentConfig(config: Config) {
   const hasApiKey = config.apiKey && config.apiKey.length > 0;
   const maskedApiKey = hasApiKey ? `${config.apiKey!.slice(0, 8)}...` : 'Not set';
   
-  console.log(chalk.blue('📋 Current Configuration:'));
-  console.log(chalk.gray('──────────────────────────'));
-  console.log(`${chalk.cyan('Provider:')} ${provider.name}`);
-  console.log(`${chalk.cyan('Description:')} ${provider.description}`);
-  console.log(`${chalk.cyan('Model:')} ${config.model || provider.defaultModel}`);
-  console.log(`${chalk.cyan('API Key:')} ${hasApiKey ? chalk.green(maskedApiKey) : chalk.yellow(maskedApiKey)}`);
-  console.log(`${chalk.cyan('Config File:')} ~/.lazyshell/config.json`);
-  console.log('');
+  await info(chalk.blue('📋 Current Configuration:'));
+  await print(`${chalk.cyan('Provider:')} ${provider.name}`);
+  await print(`${chalk.cyan('Description:')} ${provider.description}`);
+  await print(`${chalk.cyan('Model:')} ${config.model || provider.defaultModel}`);
+  await print(`${chalk.cyan('API Key:')} ${hasApiKey ? chalk.green(maskedApiKey) : chalk.yellow(maskedApiKey)}`);
+  await print(`${chalk.cyan('Config File:')} ~/.lazyshell/config.json`);
 }
 
 async function editProvider(config: Config) {
-  console.log(chalk.blue('\n🔄 Change Provider'));
-  console.log(chalk.gray('──────────────────'));
+  // console.log(chalk.blue('🔄 Change Provider'));
   
   const newProvider = await promptProvider();
   config.provider = newProvider;
@@ -99,19 +96,18 @@ async function editProvider(config: Config) {
   
   const saved = await saveConfig(config);
   if (saved) {
-    console.log(chalk.green('\n✅ Provider updated successfully!'));
     await showCurrentConfig(config);
+    outro(chalk.green('✅ Provider updated successfully!'));
   } else {
-    console.log(chalk.red('\n❌ Failed to save configuration.'));
+    outro(chalk.red('❌ Failed to save configuration.'));
   }
 }
 
 async function editApiKey(config: Config) {
-  console.log(chalk.blue('\n🔑 Update API Key'));
-  console.log(chalk.gray('─────────────────'));
+  // console.log(chalk.blue('🔑 Update API Key'));
   
   if (!SUPPORTED_PROVIDERS[config.provider].envVar) {
-    console.log(chalk.yellow(`${SUPPORTED_PROVIDERS[config.provider].name} doesn't require an API key.`));
+    print(chalk.yellow(`${SUPPORTED_PROVIDERS[config.provider].name} doesn't require an API key.`));
     return;
   }
   
@@ -120,16 +116,15 @@ async function editApiKey(config: Config) {
   
   const saved = await saveConfig(config);
   if (saved) {
-    console.log(chalk.green('\n✅ API key updated successfully!'));
     await showCurrentConfig(config);
+    outro(chalk.green('✅ API key updated successfully!'));
   } else {
-    console.log(chalk.red('\n❌ Failed to save configuration.'));
+    outro(chalk.red('❌ Failed to save configuration.'));
   }
 }
 
 async function editModel(config: Config) {
-  console.log(chalk.blue('\n🤖 Change Model'));
-  console.log(chalk.gray('───────────────'));
+  // console.log(chalk.blue('🤖 Change Model'));
   
   const currentModel = config.model || SUPPORTED_PROVIDERS[config.provider].defaultModel;
   
@@ -147,33 +142,32 @@ async function editModel(config: Config) {
   
   const saved = await saveConfig(config);
   if (saved) {
-    console.log(chalk.green('\n✅ Model updated successfully!'));
     await showCurrentConfig(config);
+    outro(chalk.green('✅ Model updated successfully!'));
   } else {
-    console.log(chalk.red('\n❌ Failed to save configuration.'));
+    outro(chalk.red('❌ Failed to save configuration.'));
   }
 }
 
 async function resetConfiguration() {
-  console.log(chalk.blue('\n🔄 Reset Configuration'));
-  console.log(chalk.gray('────────────────────────'));
+  // console.log(chalk.blue('🔄 Reset Configuration'));
   
   const confirmed = await confirm({
     message: chalk.yellow('Are you sure you want to reset your configuration? This will delete your current settings.'),
   });
   
   if (isCancel(confirmed) || !confirmed) {
-    console.log(chalk.gray('Reset cancelled.'));
+    await info(chalk.gray('Reset cancelled.'));
     return;
   }
   
-  console.log(chalk.blue('\n🔧 Creating new configuration...'));
+  await info(chalk.blue('🔧 Creating new configuration...'));
   const newConfig = await getOrInitializeConfig();
   
   if (newConfig) {
-    console.log(chalk.green('\n✅ Configuration reset successfully!'));
     await showCurrentConfig(newConfig);
+    outro(chalk.green('✅ Configuration reset successfully!'));
   } else {
-    console.log(chalk.red('\n❌ Failed to reset configuration.'));
+    outro(chalk.red('❌ Failed to reset configuration.'));
   }
 }
