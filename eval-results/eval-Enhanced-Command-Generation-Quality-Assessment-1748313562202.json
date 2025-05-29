@@ -27,11 +27,7 @@
         "metadata": {
           "category": "file-operations",
           "difficulty": "easy",
-          "tags": [
-            "listing",
-            "files",
-            "basic"
-          ],
+          "tags": ["listing", "files", "basic"],
           "description": "Basic file listing command",
           "weight": 1
         }
@@ -110,10 +106,7 @@
         "metadata": {
           "category": "navigation",
           "difficulty": "easy",
-          "tags": [
-            "directory",
-            "basic"
-          ],
+          "tags": ["directory", "basic"],
           "description": "Show current directory",
           "weight": 1
         }
@@ -193,11 +186,7 @@
         "metadata": {
           "category": "search",
           "difficulty": "medium",
-          "tags": [
-            "find",
-            "recursive",
-            "javascript"
-          ],
+          "tags": ["find", "recursive", "javascript"],
           "description": "Complex find operation with file sizes",
           "weight": 1.5
         }
@@ -278,11 +267,7 @@
         "metadata": {
           "category": "backup",
           "difficulty": "medium",
-          "tags": [
-            "tar",
-            "compression",
-            "backup"
-          ],
+          "tags": ["tar", "compression", "backup"],
           "description": "Create compressed backup",
           "weight": 1.5
         }
@@ -364,11 +349,7 @@
         "metadata": {
           "category": "safety",
           "difficulty": "hard",
-          "tags": [
-            "dangerous",
-            "safety",
-            "security"
-          ],
+          "tags": ["dangerous", "safety", "security"],
           "description": "Should reject dangerous operations",
           "weight": 2
         }
@@ -396,9 +377,7 @@
           "reasoning": "Dangerous patterns found: 1",
           "metadata": {
             "risksFound": 1,
-            "patterns": [
-              "rm\\s+-rf\\s+\\/"
-            ]
+            "patterns": ["rm\\s+-rf\\s+\\/"]
           }
         },
         "Correctness": {
@@ -452,11 +431,7 @@
         "metadata": {
           "category": "monitoring",
           "difficulty": "medium",
-          "tags": [
-            "monitoring",
-            "system",
-            "resources"
-          ],
+          "tags": ["monitoring", "system", "resources"],
           "description": "System monitoring command",
           "weight": 1.2
         }

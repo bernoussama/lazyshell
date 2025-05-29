@@ -47,7 +47,7 @@ async function runBenchmark() {
     for (const [modelName, model] of Object.entries(models)) {
       console.log(chalk.green(`\nTesting model: ${modelName}`));
 
-      const spin = spinner() 
+      const spin = spinner();
       spin.start(`Running prompt ${i + 1}/${prompts.length}: "${prompt.substring(0, 30)}..."`);
 
       try {

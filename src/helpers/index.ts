@@ -1,1 +1,1 @@
-export { getDistroPackageManager, getInstallCommand } from './package-manager'; 
+export { getDistroPackageManager, getInstallCommand } from './package-manager';

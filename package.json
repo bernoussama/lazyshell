@@ -20,7 +20,16 @@
     "prerelease": "pnpm run build && npm version prerelease && npm run build && npm publish && git push --follow-tags",
     "eval:ci": "jiti src/lib/ci-eval.ts"
   },
-  "keywords": ["ai", "cli", "shell", "command", "generator", "shell-command", "shell-generator","lazyshell"],
+  "keywords": [
+    "ai",
+    "cli",
+    "shell",
+    "command",
+    "generator",
+    "shell-command",
+    "shell-generator",
+    "lazyshell"
+  ],
   "author": "bernoussama",
   "license": "GPL-3.0",
   "packageManager": "pnpm@10.11.0",
