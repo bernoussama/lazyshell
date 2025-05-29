@@ -4,6 +4,7 @@ import os from 'os';
 import { select, password, cancel, isCancel } from '@clack/prompts';
 import chalk from 'chalk';
 import { version } from '../../package.json';
+import { print } from '../utils';
 
 // Supported AI providers
 export const SUPPORTED_PROVIDERS = {
@@ -180,14 +181,14 @@ export async function promptApiKey(provider: ProviderKey): Promise<string | unde
 
   // Ollama doesn't need an API key
   if (provider === 'ollama') {
-    console.log(chalk.green('Ollama selected - no API key required.'));
+    await print(chalk.green('Ollama selected - no API key required.'));
     return undefined;
   }
 
-  console.log(chalk.yellow(`\nYou'll need an API key for ${providerInfo.name}.`));
+  await print(chalk.yellow(`\nYou'll need an API key for ${providerInfo.name}.`));
 
   if (providerInfo.envVar) {
-    console.log(chalk.gray(`Environment variable: ${providerInfo.envVar}`));
+    await print(chalk.gray(`Environment variable: ${providerInfo.envVar}`));
     const apiKey = getApiKeyFromEnv(provider);
     if (apiKey) {
       return apiKey;

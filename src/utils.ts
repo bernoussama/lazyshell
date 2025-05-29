@@ -2,6 +2,7 @@ import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
 import { exec } from 'child_process';
+import { stream } from '@clack/prompts';
 
 export function runCommand(command: string) {
   console.log('');
@@ -44,4 +45,20 @@ export function runCommand(command: string) {
   childProcess.stderr?.on('data', data => {
     process.stderr.write(data);
   });
+}
+
+export async function print(msg: string) {
+  await stream.message(
+    (function* () {
+      yield `${msg}`;
+    })()
+  );
+}
+
+export async function info(msg: string) {
+  await stream.info(
+    (function* () {
+      yield `${msg}`;
+    })()
+  );
 }
