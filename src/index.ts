@@ -2,57 +2,10 @@ import { Command } from 'commander';
 import { select, text as input, spinner, stream, outro, isCancel, cancel } from '@clack/prompts';
 import chalk from 'chalk';
 import { runCommand } from './utils';
-import { generateCommand, generateCommandStruct, getDefaultModel, getModelFromConfig } from './lib/ai';
+import { generateCommandStruct, getDefaultModel, getModelFromConfig } from './lib/ai';
 import { Clipboard } from '@napi-rs/clipboard';
 import { getOrInitializeConfig } from './lib/config';
-import dedent from 'dedent';
-
-async function genCommand(prompt: string) {
-  // Get configuration first
-  const config = await getOrInitializeConfig();
-  if (!config) {
-    console.error(chalk.red('Failed to initialize configuration. Exiting.'));
-    process.exit(1);
-  }
-
-  let modelConfig;
-  try {
-    modelConfig = getModelFromConfig(config);
-  } catch (error) {
-    console.error(chalk.red(`Configuration error: ${error}`));
-    console.log(chalk.yellow('Falling back to environment variables...'));
-    modelConfig = getDefaultModel();
-  }
-
-  // console log the model being used
-  // console.log(chalk.blue(`Using model: ${modelConfig.provider}/${modelConfig.modelId}`));
-
-  // Show spinner while generating command
-  const spin = spinner();
-  spin.start('Generating command...');
-  try {
-    const result = await generateCommand(prompt);
-    spin.stop('Command generated successfully!');
-    return { text: result };
-  } catch (error) {
-    spin.stop(chalk.red('Failed to generate command'));
-    throw error;
-  }
-}
-
-async function editPrompt(command: string): Promise<string> {
-  // For now, just return the command as is
-  // In a real implementation, this would open an editor
-  const editedCommand = await input({
-    message: 'How would you like to edit the command?',
-    placeholder: command,
-  });
-  if (isCancel(editedCommand)) {
-    cancel('Editing cancelled.');
-    process.exit(0);
-  }
-  return editedCommand;
-}
+import { runAgentCommand } from './lib/agent';
 
 async function refineCommand(currentPrompt: string, command: string): Promise<string> {
   const refineText = await input({
@@ -67,7 +20,10 @@ async function refineCommand(currentPrompt: string, command: string): Promise<st
 const program = new Command();
 program
   .version(require('../package.json').version)
-  .description(require('../package.json').description)
+  .description(require('../package.json').description);
+
+// Main command for interactive mode
+program
   .argument('<prompt_parts...>', 'prompt')
   .option('-s, --silent', 'run in silent mode (no explanation)')
   .action(async (prompt_parts: string[], options) => {
@@ -156,6 +112,61 @@ ${result.explanation.trim()}
         console.error(chalk.red(error));
         shouldContinue = false;
       }
+    }
+  });
+
+// Agent command for autonomous execution
+program
+  .command('agent')
+  .description('Run command in autonomous agent mode')
+  .argument('<prompt_parts...>', 'task description for the agent')
+  .option('-r, --retries <number>', 'maximum number of retries', '3')
+  .option('-y, --yes', 'skip interactive confirmations for safe commands')
+  .option('--unsafe', 'disable safety mode (allow potentially dangerous commands)')
+  .action(async (prompt_parts: string[], options) => {
+    const prompt = prompt_parts.join(' ');
+    
+    // Get configuration
+    const config = await getOrInitializeConfig();
+    if (!config) {
+      console.error(chalk.red('Failed to initialize configuration. Exiting.'));
+      process.exit(1);
+    }
+
+    const agentOptions = {
+      maxRetries: parseInt(options.retries, 10),
+      interactive: !options.yes,
+      safetyMode: !options.unsafe,
+    };
+
+    console.log(chalk.blue('🤖 Starting LazyShell Agent...'));
+    console.log(chalk.gray(`Task: ${prompt}`));
+    
+    try {
+      const result = await runAgentCommand(prompt, config, agentOptions);
+      
+      if (result.success) {
+        console.log(chalk.green('\n✅ Task completed successfully!'));
+        console.log(chalk.blue(`Final command: ${result.finalCommand}`));
+        console.log(chalk.gray(`Completed in ${result.iterations} iteration(s)`));
+      } else {
+        console.log(chalk.red('\n❌ Task failed'));
+        if (result.reason) {
+          console.log(chalk.red(`Reason: ${result.reason}`));
+        }
+        console.log(chalk.gray(`Attempted ${result.iterations} iteration(s)`));
+        
+        if (result.results.length > 0) {
+          console.log(chalk.yellow('\nExecution history:'));
+          result.results.forEach((cmd, i) => {
+            console.log(chalk.gray(`${i + 1}. ${cmd.command} ${cmd.success ? '✅' : '❌'}`));
+          });
+        }
+        process.exit(1);
+      }
+    } catch (error) {
+      console.error(chalk.red('Agent execution failed:'), error);
+      process.exit(1);
     }
   });
 

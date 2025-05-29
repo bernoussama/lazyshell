@@ -122,8 +122,8 @@ export function getModelFromConfig(config: Config): ModelConfig {
     }
 
     return { provider, modelId, model };
-  } catch (error) {
-    throw new Error(`Failed to initialize ${provider} model: ${error}`);
+  } catch {
+    throw new Error(`Failed to initialize ${provider} model`);
   }
 }
 
@@ -175,7 +175,7 @@ export function getDefaultModel(): ModelConfig {
       provider = 'ollama';
       modelId = 'llama3.2';
       model = ollama(modelId);
-    } catch (error) {
+    } catch {
       throw new Error(
         'No API key found. Please set either GROQ_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY, OPENROUTER_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY. Or setup Ollama'
       );
@@ -217,7 +217,7 @@ export async function generateTextWithModel(model: LanguageModel, prompt: string
     generateOptions.maxTokens = maxTokens;
   }
 
-  return await generateText(generateOptions);
+  return generateText(generateOptions);
 }
 
 const osInfo = getSystemInfo();
@@ -278,8 +278,17 @@ const zCmdExp = z.object({
   explanation: z.string().describe('Brief explanation of what the command does and why it was chosen'),
 });
 
+// New schema for agent commands with safety assessment
+const zAgentCmd = z.object({
+  command: z.string().describe('The command to execute, without any formatting or markdown'),
+  explanation: z.string().describe('Brief explanation of what the command does and why it was chosen'),
+  safe: z.boolean().describe('Whether this command is safe to execute automatically (true for safe operations, false for potentially dangerous ones)'),
+  reasoning: z.string().describe('Reasoning behind the safety assessment'),
+});
+
 export type Command = z.infer<typeof zCmd>;
 export type CommandWithExplanation = z.infer<typeof zCmdExp>;
+export type AgentCommand = z.infer<typeof zAgentCmd>;
 
 export async function generateCommandStruct(
   prompt: string,
@@ -297,6 +306,45 @@ export async function generateCommandStruct(
     model: modelConf.model,
     system: systemPrompt,
     schema: zShema,
+    prompt,
+  });
+  return object;
+}
+
+// Generate command for agent execution with safety assessment
+export async function generateAgentCommand(
+  prompt: string,
+  modelConfig?: ModelConfig
+): Promise<AgentCommand> {
+  const modelConf = modelConfig || getDefaultModel();
+  
+  const enhancedSystemPrompt = `${systemPrompt}
+
+AGENT COMMAND EXECUTION MODE:
+You are generating commands for autonomous execution. Be extra careful about safety assessment.
+
+SAFETY ASSESSMENT CRITERIA:
+- Mark as SAFE (true) if the command:
+  * Reads or displays information (ls, cat, grep, ps, etc.)
+  * Installs common software packages through package managers
+  * Creates files/directories in user space
+  * Basic file operations in current directory or user home
+  * Common development tasks (git, npm, etc.)
+
+- Mark as UNSAFE (false) if the command:
+  * Modifies system files or directories (/etc, /bin, /usr, etc.)
+  * Changes permissions or ownership of system files
+  * Deletes files/directories recursively or with wildcards
+  * Modifies network configuration
+  * Runs with elevated privileges (sudo)
+  * Could potentially harm the system or data
+
+When in doubt, err on the side of caution and mark as unsafe.`;
+
+  const { object } = await generateObject({
+    model: modelConf.model,
+    system: enhancedSystemPrompt,
+    schema: zAgentCmd,
     prompt,
   });
   return object;
