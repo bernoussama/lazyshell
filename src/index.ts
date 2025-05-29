@@ -110,8 +110,8 @@ program
         const command = result.command.trim();
         await print(`${command}`);
         if ('explanation' in result && result.explanation) {
-          await info(`Explanation:`.trim());
-          await print(`${result.explanation.trim()}`.trim());
+          await info("Explanation:");
+          await print(`${result.explanation.trim()}`);
         }
 
         clipboard.setText(command);
