@@ -1,6 +1,6 @@
 {
   "name": "lazyshell",
-  "version": "1.0.10-3",
+  "version": "1.0.10-4",
   "description": "AI CLI that generates shell commands",
   "type": "module",
   "bin": {
