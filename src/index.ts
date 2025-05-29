@@ -113,9 +113,7 @@ program
         if ('explanation' in result && result.explanation) {
           await stream.info(
             (function* () {
-              yield `Explanation:\
-${result.explanation.trim()}
-`;
+              yield `Explanation:\n${result.explanation.trim()}`;
             })()
           );
         }
