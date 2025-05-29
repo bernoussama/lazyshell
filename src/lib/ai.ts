@@ -258,15 +258,27 @@ SAFETY GUIDELINES:
 - Validate that requested operations are reasonable and safe
 
 PLATFORM-SPECIFIC ADAPTATIONS:
-${osInfo.platform === 'linux' ? `- Use GNU/Linux command variants and flags
+${
+  osInfo.platform === 'linux'
+    ? `- Use GNU/Linux command variants and flags
 - Leverage ${osInfo.packageManager || 'available package manager'} for installations
-- Consider distribution-specific paths and conventions` : ''}
-${osInfo.platform === 'darwin' ? `- Use macOS/BSD command variants
+- Consider distribution-specific paths and conventions`
+    : ''
+}
+${
+  osInfo.platform === 'darwin'
+    ? `- Use macOS/BSD command variants
 - Consider Homebrew for package management
-- Use macOS-specific paths and conventions` : ''}
-${osInfo.platform === 'win32' ? `- Use PowerShell/Windows command syntax
+- Use macOS-specific paths and conventions`
+    : ''
+}
+${
+  osInfo.platform === 'win32'
+    ? `- Use PowerShell/Windows command syntax
 - Consider Windows-specific paths and conventions
-- Use appropriate Windows tools and utilities` : ''}
+- Use appropriate Windows tools and utilities`
+    : ''
+}
 
 Remember: Your primary goal is to be helpful while maintaining system safety and security.`;
 

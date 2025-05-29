@@ -37,7 +37,7 @@ export function getDistroPackageManager(): string | undefined {
     if (fs.existsSync('/usr/bin/xbps-install')) {
       return 'xbps'; // Void Linux
     }
-    
+
     return undefined;
   } catch {
     return undefined;
@@ -51,19 +51,19 @@ export function getDistroPackageManager(): string | undefined {
  */
 export function getInstallCommand(packageName: string): string | undefined {
   const pm = getDistroPackageManager();
-  
+
   if (!pm) return undefined;
-  
+
   const installCommands: Record<string, string> = {
-    'apt': `sudo apt install ${packageName}`,
-    'yum': `sudo yum install ${packageName}`,
-    'dnf': `sudo dnf install ${packageName}`,
-    'pacman': `sudo pacman -S ${packageName}`,
-    'zypper': `sudo zypper install ${packageName}`,
-    'emerge': `sudo emerge ${packageName}`,
-    'apk': `sudo apk add ${packageName}`,
-    'xbps': `sudo xbps-install ${packageName}`,
+    apt: `sudo apt install ${packageName}`,
+    yum: `sudo yum install ${packageName}`,
+    dnf: `sudo dnf install ${packageName}`,
+    pacman: `sudo pacman -S ${packageName}`,
+    zypper: `sudo zypper install ${packageName}`,
+    emerge: `sudo emerge ${packageName}`,
+    apk: `sudo apk add ${packageName}`,
+    xbps: `sudo xbps-install ${packageName}`,
   };
-  
+
   return installCommands[pm];
-} 
+}
