@@ -72,7 +72,7 @@ program
   .argument('<prompt_parts...>', 'prompt')
   .option('-s, --silent', 'run in silent mode (no explanation)')
   .action(async (prompt_parts: string[], options) => {
-    intro(chalk.bgGreen('LazyShell'));
+    intro(chalk.bgBlue(chalk.black('LazyShell')));
     let currentPrompt = prompt_parts.join(' ');
     let shouldContinue = true;
     const silent = options.silent || false;
