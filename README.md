@@ -77,6 +77,12 @@ On first run, LazyShell will guide you through:
 2. Entering your API key (if required)
 3. Automatically saving the configuration
 
+### Configuration Management
+```bash
+# Open configuration UI
+lazyshell config
+```
+
 ### Manual Environment Variables (Optional)
 You can still use environment variables as before:
 
@@ -167,9 +173,9 @@ This enables LazyShell to generate system-appropriate commands and suggest the r
 LazyShell includes a flexible evaluation system for testing and benchmarking AI performance:
 
 ```typescript
-import { eval, Levenshtein, LLMJudge, createLLMJudge } from './lib/eval';
+import { runEval, Levenshtein, LLMJudge, createLLMJudge } from './lib/eval';
 
-await eval("My Eval", {
+await runEval("My Eval", {
   // Test data function
   data: async () => {
     return [{ input: "Hello", expected: "Hello World!" }];
@@ -247,8 +253,7 @@ LazyShell includes automated quality assessments that run in CI to ensure consis
 ### Local Testing
 ```bash
 # Run CI evaluations locally
-pnpm build
-node dist/lib/ci-eval.mjs
+pnpm eval:ci
 ```
 
 ### Custom Evaluation Scripts
@@ -277,7 +282,7 @@ See [docs/CI_EVALUATIONS.md](docs/CI_EVALUATIONS.md) for complete setup and conf
 ### Setup
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/lazyshell.git
+   git clone https://github.com/bernoussama/lazyshell.git
    cd lazyshell
    ```
 
@@ -303,6 +308,7 @@ pnpm build               # Compile TypeScript with pkgroll
 pnpm typecheck           # Type checking only
 pnpm lint                # Check code formatting and linting
 pnpm lint:fix            # Fix formatting and linting issues
+pnpm eval:ci             # Run CI evaluations locally
 pnpm release:patch       # Build, version bump, publish, and push
 pnpm prerelease          # Build, prerelease version, publish, and push
 ```
@@ -314,6 +320,8 @@ src/
 ├── utils.ts              # Utility functions (command execution, history)
 ├── bench_models.ts       # Model benchmarking script
 ├── test-ai-lib.ts        # AI library testing script
+├── commands/
+│   └── config.ts         # Configuration UI command
 ├── helpers/
 │   ├── index.ts          # Helper exports
 │   └── package-manager.ts # System package manager detection
@@ -338,8 +346,8 @@ src/
 ## Troubleshooting 🔧
 
 ### Configuration Issues
-- **Invalid configuration**: Delete `~/.lazyshell/config.json` to reset
-- **API key errors**: Run LazyShell again to re-enter your API key
+- **Invalid configuration**: Delete `~/.lazyshell/config.json` to reset or use `lazyshell config`
+- **API key errors**: Run `lazyshell config` to re-enter your API key
 - **Provider not working**: Try switching to a different provider in the configuration
 
 ### Environment Variables
