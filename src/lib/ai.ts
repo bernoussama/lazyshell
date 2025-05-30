@@ -5,6 +5,7 @@ import { ollama } from 'ollama-ai-provider';
 import { openrouter } from '@openrouter/ai-sdk-provider';
 import { openai } from '@ai-sdk/openai';
 import { anthropic } from '@ai-sdk/anthropic';
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import os from 'os';
 import z from 'zod';
 import type { Config, ProviderKey } from './config';
@@ -30,6 +31,7 @@ export interface ModelConfig {
   modelId: string;
   model: LanguageModel;
   temperature?: number;
+  maxRetries?: number | undefined;
 }
 
 // Text generation options
@@ -73,7 +75,7 @@ export function getModelFromConfig(config: Config): ModelConfig {
   const apiKey = config.apiKey;
 
   let model: LanguageModel;
-
+  let maxRetries: number | undefined = undefined;
   try {
     switch (provider) {
       case 'groq':
@@ -118,7 +120,19 @@ export function getModelFromConfig(config: Config): ModelConfig {
 
       case 'ollama':
         model = ollama(modelId);
+        maxRetries = 1;
         break;
+
+      case 'lmstudio': {
+        const baseUrl = config.baseUrl || 'http://localhost:1234/v1';
+        const lmstudio = createOpenAICompatible({
+          name: 'lmstudio',
+          baseURL: baseUrl,
+        });
+        model = lmstudio(modelId);
+        maxRetries = 1;
+        break;
+      }
 
       default:
         throw new Error(`Unsupported provider: ${provider}`);
@@ -135,11 +149,12 @@ function getDefaultModelId(provider: ProviderKey): string {
   const defaultModels: Record<ProviderKey, string> = {
     groq: 'llama-3.3-70b-versatile',
     google: 'gemini-2.0-flash-lite',
-    openrouter: 'meta-llama/llama-3.3-8b-instruct:free',
+    openrouter: 'google/gemini-2.0-flash-001',
     anthropic: 'claude-3-5-haiku-latest',
     openai: 'gpt-4o-mini',
     ollama: 'llama3.2',
     mistral: 'devstral-small-2505',
+    lmstudio: 'deepseek/deepseek-r1-0528-qwen3-8b',
   };
 
   return defaultModels[provider];
@@ -163,7 +178,7 @@ export function getDefaultModel(): ModelConfig {
     model = google(modelId);
   } else if (process.env.OPENROUTER_API_KEY) {
     provider = 'openrouter';
-    modelId = 'meta-llama/llama-3.3-8b-instruct:free';
+    modelId = 'google/gemini-2.0-flash-001';
     model = openrouter(modelId);
   } else if (process.env.ANTHROPIC_API_KEY) {
     provider = 'anthropic';
@@ -180,7 +195,7 @@ export function getDefaultModel(): ModelConfig {
       model = ollama(modelId);
     } catch (error) {
       throw new Error(
-        'No API key found. Please set either GROQ_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY, OPENROUTER_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY. Or setup Ollama'
+        'No API key found. Please set either GROQ_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY, OPENROUTER_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY. Or setup Ollama/LM Studio'
       );
     }
   }
@@ -199,6 +214,13 @@ export function getBenchmarkModels(): Record<string, LanguageModel> {
     'ollama3.2': ollama('llama3.2'),
     'llama-3.3-70b-versatile': groq('llama-3.3-70b-versatile'),
     devstral: mistral('devstral-small-2505'),
+    'lmstudio-llama': (() => {
+      const lmstudio = createOpenAICompatible({
+        name: 'lmstudio',
+        baseURL: 'http://localhost:1234/v1',
+      });
+      return lmstudio('llama-3.2-1b');
+    })(),
   };
 }
 
@@ -309,13 +331,20 @@ export async function generateCommandStruct(
   } else {
     zShema = zCmd;
   }
-  const { object } = await generateObject({
-    model: modelConf.model,
-    system: systemPrompt,
-    schema: zShema,
-    prompt,
-  });
-  return object;
+  try {
+    const result = await generateObject({
+      model: modelConf.model,
+      system: systemPrompt,
+      schema: zShema,
+      prompt,
+      temperature: modelConf.temperature || 0.1,
+      maxRetries: modelConf.maxRetries || undefined,
+    });
+    return result.object;
+  } catch (error) {
+    const result = await generateCommand(prompt, modelConf);
+    return { command: result, explanation: '' };
+  }
 }
 
 // Generate command using the default model with system admin context
@@ -323,7 +352,7 @@ export async function generateCommand(prompt: string, modelConfig?: ModelConfig)
   const finalModelConfig = modelConfig || getDefaultModel();
 
   const result = await generateTextWithModel(finalModelConfig.model, prompt, {
-    temperature: finalModelConfig.temperature || 0,
+    temperature: finalModelConfig.temperature || 0.1,
     systemPrompt,
   });
 
@@ -344,8 +373,15 @@ export async function generateBenchmarkText(model: LanguageModel, prompt: string
 export const models = {
   groq: (modelId: string = 'llama-3.1-8b-instant') => groq(modelId),
   google: (modelId: string = 'gemini-2.0-flash-lite') => google(modelId),
-  openrouter: (modelId: string = 'meta-llama/llama-3.3-8b-instruct:free') => openrouter(modelId),
+  openrouter: (modelId: string = 'google/gemini-2.0-flash-001') => openrouter(modelId),
   anthropic: (modelId: string = 'claude-3-5-haiku-latest') => anthropic(modelId),
   openai: (modelId: string = 'gpt-4o-mini') => openai(modelId),
   ollama: (modelId: string = 'llama3.2') => ollama(modelId),
+  lmstudio: (modelId: string = 'deepseek/deepseek-r1-0528-qwen3-8b', baseUrl: string = 'http://localhost:1234/v1') => {
+    const lmstudio = createOpenAICompatible({
+      name: 'lmstudio',
+      baseURL: baseUrl,
+    });
+    return lmstudio(modelId);
+  },
 };

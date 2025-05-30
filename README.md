@@ -64,6 +64,7 @@ pnpm add -g lazyshell
    - **OpenAI** - GPT models including GPT-4
    - **Ollama** - Local models (no API key required)
    - **Mistral** - Mistral AI models for code generation
+   - **LMStudio** - Local models via LMStudio (experimental, no API key required)
 
 3. **Automatic Configuration**: Your preferences are saved to `~/.lazyshell/config.json` and used for future runs.
 
@@ -98,6 +99,8 @@ export ANTHROPIC_API_KEY='your-api-key-here'
 export OPENAI_API_KEY='your-api-key-here'
 ```
 
+> **Note**: Ollama and LMStudio don't require API keys as they run models locally.
+
 ### Configuration File Location
 - **Linux/macOS**: `~/.lazyshell/config.json`
 - **Windows**: `%USERPROFILE%\.lazyshell\config.json`
@@ -113,6 +116,7 @@ export OPENAI_API_KEY='your-api-key-here'
 | **OpenAI** | GPT-4o Mini | Yes | Industry standard models |
 | **Ollama** | Local models | No | Run models locally |
 | **Mistral** | Devstral Small | No | Code-optimized models |
+| **LMStudio** | Local models | No | **Experimental** - Local models via LMStudio |
 
 ## Usage Examples 🚀
 
