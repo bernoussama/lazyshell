@@ -227,16 +227,16 @@ export async function promptApiKey(provider: ProviderKey): Promise<string | unde
  */
 export async function promptBaseUrl(provider: ProviderKey): Promise<string | undefined> {
   const providerInfo = SUPPORTED_PROVIDERS[provider];
-  
+
   // Only prompt for base URL if the provider supports it
   if (!('supportsCustomBaseUrl' in providerInfo) || !providerInfo.supportsCustomBaseUrl) {
     return undefined;
   }
 
   const defaultBaseUrl = 'defaultBaseUrl' in providerInfo ? providerInfo.defaultBaseUrl : undefined;
-  
+
   await print(chalk.yellow(`\nYou can configure a custom base URL for ${providerInfo.name}.`));
-  
+
   const { text } = await import('@clack/prompts');
   const baseUrl = await text({
     message: `Enter base URL for ${providerInfo.name}:`,

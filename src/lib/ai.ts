@@ -118,16 +118,15 @@ export function getModelFromConfig(config: Config): ModelConfig {
         model = ollama(modelId);
         break;
 
-      case 'lmstudio':
-        {
-          const baseUrl = config.baseUrl || 'http://localhost:1234/v1';
-          const lmstudio = createOpenAICompatible({
-            name: 'lmstudio',
-            baseURL: baseUrl,
-          });
-          model = lmstudio(modelId);
-          break;
-        }
+      case 'lmstudio': {
+        const baseUrl = config.baseUrl || 'http://localhost:1234/v1';
+        const lmstudio = createOpenAICompatible({
+          name: 'lmstudio',
+          baseURL: baseUrl,
+        });
+        model = lmstudio(modelId);
+        break;
+      }
 
       default:
         throw new Error(`Unsupported provider: ${provider}`);

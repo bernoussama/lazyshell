@@ -90,14 +90,14 @@ async function showCurrentConfig(config: Config) {
   await print(`${chalk.cyan('Description:')} ${provider.description}`);
   await print(`${chalk.cyan('Model:')} ${config.model || provider.defaultModel}`);
   await print(`${chalk.cyan('API Key:')} ${hasApiKey ? chalk.green(maskedApiKey) : chalk.yellow(maskedApiKey)}`);
-  
+
   // Show base URL for providers that support it
   if ('supportsCustomBaseUrl' in provider && provider.supportsCustomBaseUrl) {
     const defaultBaseUrl = 'defaultBaseUrl' in provider ? provider.defaultBaseUrl : 'http://localhost:1234/v1';
     const currentBaseUrl = config.baseUrl || defaultBaseUrl;
     await print(`${chalk.cyan('Base URL:')} ${currentBaseUrl}`);
   }
-  
+
   await print(`${chalk.cyan('Config File:')} ~/.lazyshell/config.json`);
 }
 
@@ -179,7 +179,7 @@ async function editBaseUrl(config: Config) {
   // console.log(chalk.blue('🌐 Change Base URL'));
 
   const providerInfo = SUPPORTED_PROVIDERS[config.provider];
-  
+
   // Check if the provider supports custom base URL
   if (!('supportsCustomBaseUrl' in providerInfo) || !providerInfo.supportsCustomBaseUrl) {
     await print(chalk.yellow(`${providerInfo.name} doesn't support custom base URL configuration.`));
