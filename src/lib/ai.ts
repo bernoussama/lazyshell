@@ -11,6 +11,7 @@ import type { Config, ProviderKey } from './config';
 import { mistral } from '@ai-sdk/mistral';
 import dedent from 'dedent';
 import { getDistroPackageManager } from '../helpers/package-manager';
+import { getHardwareInfo } from '../helpers/hardware';
 
 // System information interface
 export interface SystemInfo {
@@ -20,6 +21,7 @@ export interface SystemInfo {
   packageManager?: string; // Only for Linux
   type: string;
   arch: string;
+  hardware?: any; // Hardware info for Linux systems
 }
 
 // Model configuration interface
@@ -59,6 +61,7 @@ export function getSystemInfo(): SystemInfo {
   if (os.platform() === 'linux') {
     sysinfo.distro = getLinuxDistro(); // Get Linux distribution name simply
     sysinfo.packageManager = getDistroPackageManager();
+    sysinfo.hardware = getHardwareInfo();
   }
   return sysinfo;
 }

@@ -51,7 +51,28 @@ async function getGpuInfo(): Promise<string> {
   }
 }
 
-export async function getHardwareInfo(): Promise<HardwareInfo> {
+// Synchronous version for immediate use
+export function getHardwareInfo(): HardwareInfo {
+  try {
+    const cpu = os.cpus()[0]?.model || 'Unknown CPU';
+    const memory = `${Math.round(os.totalmem() / 1024 / 1024 / 1024)} GB`;
+    const arch = os.arch();
+    const gpu = 'Detecting GPU...'; // Placeholder for sync version
+    
+    return { cpu, memory, arch, gpu };
+  } catch (error) {
+    console.error('Error getting hardware info:', error);
+    return {
+      cpu: 'Unknown CPU',
+      memory: 'Unknown Memory',
+      arch: 'Unknown Architecture',
+      gpu: 'Unknown GPU'
+    };
+  }
+}
+
+// Async version for detailed hardware info including GPU
+export async function getDetailedHardwareInfo(): Promise<HardwareInfo> {
   try {
     const cpu = os.cpus()[0]?.model || 'Unknown CPU';
     const memory = `${Math.round(os.totalmem() / 1024 / 1024 / 1024)} GB`;
@@ -60,7 +81,7 @@ export async function getHardwareInfo(): Promise<HardwareInfo> {
     
     return { cpu, memory, arch, gpu };
   } catch (error) {
-    console.error('Error getting hardware info:', error);
+    console.error('Error getting detailed hardware info:', error);
     return {
       cpu: 'Unknown CPU',
       memory: 'Unknown Memory',
