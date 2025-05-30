@@ -212,7 +212,7 @@ export async function promptApiKey(provider: ProviderKey): Promise<string | unde
     await print(chalk.yellow('\nOpenAI Compatible provider selected.'));
     await print(chalk.gray('API key is optional - only needed for hosted services that require authentication.'));
     await print(chalk.gray('Leave empty if connecting to a local server without authentication.'));
-    
+
     // Check environment variable first
     const envApiKey = getApiKeyFromEnv(provider);
     if (envApiKey) {

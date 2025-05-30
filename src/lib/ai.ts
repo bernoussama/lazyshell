@@ -136,12 +136,12 @@ export function getModelFromConfig(config: Config): ModelConfig {
 
       case 'openaiCompatible': {
         const baseUrl = config.baseUrl || 'http://localhost:8000/v1';
-        
+
         // Set API key if provided
         if (apiKey) {
           process.env.OPENAI_COMPATIBLE_API_KEY = apiKey;
         }
-        
+
         const openaiCompatible = createOpenAICompatible({
           name: 'openaiCompatible',
           baseURL: baseUrl,
@@ -283,8 +283,16 @@ SYSTEM CONTEXT:
   - CPU: ${osInfo.hardware?.cpu}
   - Memory: ${osInfo.hardware?.memory}
   - GPU: ${osInfo.hardware?.gpu}
-- Distribution: ${osInfo.distro || 'N/A'}
-- Package Manager: ${osInfo.packageManager || 'N/A'}
+${
+  osInfo.distro
+    ? `- Distribution: ${osInfo.distro}`
+    : ''
+}
+${
+  osInfo.packageManager
+    ? `- Package Manager: ${osInfo.packageManager}`
+    : ''
+}
 - Shell: ${currentShell}
 - Working Directory: ${pwd}
 
