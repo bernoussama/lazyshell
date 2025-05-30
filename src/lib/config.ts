@@ -24,7 +24,8 @@ export const SUPPORTED_PROVIDERS = {
     name: 'OpenRouter',
     description: 'OpenRouter API (multiple models)',
     envVar: 'OPENROUTER_API_KEY',
-    defaultModel: 'meta-llama/llama-3.3-8b-instruct:free',
+    defaultModel: 'google/gemini-2.0-flash-001',
+    // defaultModel: 'google/gemma-3-27b-it:free',
   },
   anthropic: {
     name: 'Anthropic Claude',
@@ -50,6 +51,14 @@ export const SUPPORTED_PROVIDERS = {
     envVar: null,
     defaultModel: 'devstral-small-2505',
   },
+  lmstudio: {
+    name: 'LM Studio (Local)',
+    description: 'Local LM Studio instance',
+    envVar: null,
+    defaultModel: 'deepseek/deepseek-r1-0528-qwen3-8b',
+    defaultBaseUrl: 'http://localhost:1234/v1',
+    supportsCustomBaseUrl: true,
+  },
 } as const;
 
 export type ProviderKey = keyof typeof SUPPORTED_PROVIDERS;
@@ -59,6 +68,7 @@ export interface Config {
   provider: ProviderKey;
   apiKey?: string;
   model?: string;
+  baseUrl?: string; // For OpenAI compatible providers like LM Studio
   version: string;
 }
 
@@ -139,8 +149,8 @@ export function validateConfig(config: Config): boolean {
     return false;
   }
 
-  // Ollama doesn't need an API key
-  if (config.provider === 'ollama') {
+  // Ollama and LM Studio don't need an API key
+  if (config.provider === 'ollama' || config.provider === 'lmstudio') {
     return true;
   }
 
@@ -179,9 +189,14 @@ export async function promptProvider(): Promise<ProviderKey> {
 export async function promptApiKey(provider: ProviderKey): Promise<string | undefined> {
   const providerInfo = SUPPORTED_PROVIDERS[provider];
 
-  // Ollama doesn't need an API key
+  // Ollama and LM Studio don't need an API key
   if (provider === 'ollama') {
     await print(chalk.green('Ollama selected - no API key required.'));
+    return undefined;
+  }
+
+  if (provider === 'lmstudio') {
+    await print(chalk.green('LM Studio selected - no API key required.'));
     return undefined;
   }
 
@@ -208,6 +223,36 @@ export async function promptApiKey(provider: ProviderKey): Promise<string | unde
 }
 
 /**
+ * Prompt user to enter base URL for OpenAI compatible providers
+ */
+export async function promptBaseUrl(provider: ProviderKey): Promise<string | undefined> {
+  const providerInfo = SUPPORTED_PROVIDERS[provider];
+
+  // Only prompt for base URL if the provider supports it
+  if (!('supportsCustomBaseUrl' in providerInfo) || !providerInfo.supportsCustomBaseUrl) {
+    return undefined;
+  }
+
+  const defaultBaseUrl = 'defaultBaseUrl' in providerInfo ? providerInfo.defaultBaseUrl : undefined;
+
+  await print(chalk.yellow(`\nYou can configure a custom base URL for ${providerInfo.name}.`));
+
+  const { text } = await import('@clack/prompts');
+  const baseUrl = await text({
+    message: `Enter base URL for ${providerInfo.name}:`,
+    placeholder: defaultBaseUrl || 'http://localhost:1234/v1',
+    initialValue: defaultBaseUrl,
+  });
+
+  if (isCancel(baseUrl)) {
+    cancel('Base URL configuration cancelled');
+    process.exit(0);
+  }
+
+  return baseUrl || defaultBaseUrl;
+}
+
+/**
  * Initialize configuration through user prompts
  */
 export async function initializeConfig(): Promise<Config | null> {
@@ -220,12 +265,16 @@ export async function initializeConfig(): Promise<Config | null> {
     // Prompt for API key
     const apiKey = await promptApiKey(provider);
 
+    // Prompt for base URL
+    const baseUrl = await promptBaseUrl(provider);
+
     // Create config object
     const config: Config = {
       ...DEFAULT_CONFIG,
       provider,
       apiKey,
       model: SUPPORTED_PROVIDERS[provider].defaultModel,
+      baseUrl,
       version,
     };
 
@@ -287,6 +336,7 @@ export function getEffectiveApiKey(config: Config): string | undefined {
   // Fall back to environment variable
   return getApiKeyFromEnv(config.provider);
 }
+
 function iscancelled(provider: string | symbol) {
   throw new Error('Function not implemented.');
 }

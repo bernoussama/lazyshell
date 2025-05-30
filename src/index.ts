@@ -20,8 +20,8 @@ async function genCommand(prompt: string) {
   try {
     modelConfig = getModelFromConfig(config);
   } catch (error) {
-    console.error(chalk.red(`Configuration error: ${error}`));
-    console.log(chalk.yellow('Falling back to environment variables...'));
+    await print(chalk.red(`Configuration error: ${error}`));
+    await print(chalk.yellow('Falling back to environment variables...'));
     modelConfig = getDefaultModel();
   }
 
