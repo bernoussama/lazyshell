@@ -29,6 +29,7 @@ export interface ModelConfig {
   modelId: string;
   model: LanguageModel;
   temperature?: number;
+  maxRetries?: number | undefined;
 }
 
 // Text generation options
@@ -71,7 +72,7 @@ export function getModelFromConfig(config: Config): ModelConfig {
   const apiKey = config.apiKey;
 
   let model: LanguageModel;
-
+  let maxRetries: number | undefined = undefined;
   try {
     switch (provider) {
       case 'groq':
@@ -116,6 +117,7 @@ export function getModelFromConfig(config: Config): ModelConfig {
 
       case 'ollama':
         model = ollama(modelId);
+        maxRetries = 1;
         break;
 
       case 'lmstudio': {
@@ -125,6 +127,7 @@ export function getModelFromConfig(config: Config): ModelConfig {
           baseURL: baseUrl,
         });
         model = lmstudio(modelId);
+        maxRetries = 1;
         break;
       }
 
@@ -212,6 +215,7 @@ export function getBenchmarkModels(): Record<string, LanguageModel> {
       const lmstudio = createOpenAICompatible({
         name: 'lmstudio',
         baseURL: 'http://localhost:1234/v1',
+        
       });
       return lmstudio('llama-3.2-1b');
     })(),
@@ -331,6 +335,7 @@ export async function generateCommandStruct(
       schema: zShema,
       prompt,
       temperature: modelConf.temperature || 0.1,
+      maxRetries: modelConf.maxRetries || undefined,
     });
     return result.object;
   } catch (error) {
