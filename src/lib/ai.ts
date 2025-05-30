@@ -283,16 +283,8 @@ SYSTEM CONTEXT:
   - CPU: ${osInfo.hardware?.cpu}
   - Memory: ${osInfo.hardware?.memory}
   - GPU: ${osInfo.hardware?.gpu}
-${
-  osInfo.distro
-    ? `- Distribution: ${osInfo.distro}`
-    : ''
-}
-${
-  osInfo.packageManager
-    ? `- Package Manager: ${osInfo.packageManager}`
-    : ''
-}
+${osInfo.distro ? `- Distribution: ${osInfo.distro}` : ''}
+${osInfo.packageManager ? `- Package Manager: ${osInfo.packageManager}` : ''}
 - Shell: ${currentShell}
 - Working Directory: ${pwd}
 
