@@ -141,12 +141,12 @@ function getDefaultModelId(provider: ProviderKey): string {
   const defaultModels: Record<ProviderKey, string> = {
     groq: 'llama-3.3-70b-versatile',
     google: 'gemini-2.0-flash-lite',
-    openrouter: 'meta-llama/llama-3.3-8b-instruct:free',
+    openrouter: 'deepseek/deepseek-r1-0528:free',
     anthropic: 'claude-3-5-haiku-latest',
     openai: 'gpt-4o-mini',
     ollama: 'llama3.2',
     mistral: 'devstral-small-2505',
-    lmstudio: 'llama-3.2-1b',
+    lmstudio: 'deepseek/deepseek-r1-0528-qwen3-8b',
   };
 
   return defaultModels[provider];
@@ -170,7 +170,7 @@ export function getDefaultModel(): ModelConfig {
     model = google(modelId);
   } else if (process.env.OPENROUTER_API_KEY) {
     provider = 'openrouter';
-    modelId = 'meta-llama/llama-3.3-8b-instruct:free';
+    modelId = 'deepseek/deepseek-r1-0528:free';
     model = openrouter(modelId);
   } else if (process.env.ANTHROPIC_API_KEY) {
     provider = 'anthropic';
@@ -322,13 +322,23 @@ export async function generateCommandStruct(
   } else {
     zShema = zCmd;
   }
-  const { object } = await generateObject({
+  try {
+  const result = await generateObject({
     model: modelConf.model,
     system: systemPrompt,
     schema: zShema,
     prompt,
-  });
-  return object;
+    temperature: modelConf.temperature || 0.1,
+    });
+    return result.object;
+  } catch (error) {
+    try{
+      const result = await generateCommand(prompt, modelConf);
+      return { command: result, explanation: '' };
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 // Generate command using the default model with system admin context
@@ -336,7 +346,7 @@ export async function generateCommand(prompt: string, modelConfig?: ModelConfig)
   const finalModelConfig = modelConfig || getDefaultModel();
 
   const result = await generateTextWithModel(finalModelConfig.model, prompt, {
-    temperature: finalModelConfig.temperature || 0,
+    temperature: finalModelConfig.temperature || 0.1,
     systemPrompt,
   });
 
@@ -357,11 +367,11 @@ export async function generateBenchmarkText(model: LanguageModel, prompt: string
 export const models = {
   groq: (modelId: string = 'llama-3.1-8b-instant') => groq(modelId),
   google: (modelId: string = 'gemini-2.0-flash-lite') => google(modelId),
-  openrouter: (modelId: string = 'meta-llama/llama-3.3-8b-instruct:free') => openrouter(modelId),
+  openrouter: (modelId: string = 'deepseek/deepseek-r1-0528:free') => openrouter(modelId),
   anthropic: (modelId: string = 'claude-3-5-haiku-latest') => anthropic(modelId),
   openai: (modelId: string = 'gpt-4o-mini') => openai(modelId),
   ollama: (modelId: string = 'llama3.2') => ollama(modelId),
-  lmstudio: (modelId: string = 'llama-3.2-1b') => {
+  lmstudio: (modelId: string = 'deepseek/deepseek-r1-0528-qwen3-8b') => {
     const lmstudio = createOpenAICompatible({
       name: 'lmstudio',
       baseURL: 'http://localhost:1234/v1',

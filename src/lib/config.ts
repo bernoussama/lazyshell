@@ -24,7 +24,8 @@ export const SUPPORTED_PROVIDERS = {
     name: 'OpenRouter',
     description: 'OpenRouter API (multiple models)',
     envVar: 'OPENROUTER_API_KEY',
-    defaultModel: 'meta-llama/llama-3.3-8b-instruct:free',
+    defaultModel: 'google/gemini-2.0-flash-001',
+    // defaultModel: 'google/gemma-3-27b-it:free',
   },
   anthropic: {
     name: 'Anthropic Claude',
@@ -54,7 +55,7 @@ export const SUPPORTED_PROVIDERS = {
     name: 'LM Studio (Local)',
     description: 'Local LM Studio instance',
     envVar: null,
-    defaultModel: 'llama-3.2-1b',
+    defaultModel: 'deepseek/deepseek-r1-0528-qwen3-8b',
   },
 } as const;
 
