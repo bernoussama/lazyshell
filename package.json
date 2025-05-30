@@ -61,6 +61,7 @@
     "commander": "^14.0.0",
     "dedent": "^1.6.0",
     "ollama-ai-provider": "^1.2.0",
+    "systeminformation": "^5.27.1",
     "zod": "^3.25.39"
   }
 }
