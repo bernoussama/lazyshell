@@ -12,7 +12,7 @@ import type { Config, ProviderKey } from './config';
 import { mistral } from '@ai-sdk/mistral';
 import dedent from 'dedent';
 import { getDistroPackageManager } from '../helpers/package-manager';
-import { getHardwareInfo } from '../helpers/hardware';
+import { getHardwareInfo, type HardwareInfo } from '../helpers/hardware';
 
 // System information interface
 export interface SystemInfo {
@@ -22,7 +22,7 @@ export interface SystemInfo {
   packageManager?: string; // Only for Linux
   type: string;
   arch: string;
-  hardware?: any; // Hardware info for Linux systems
+  hardware?: HardwareInfo; // Hardware info for Linux systems
 }
 
 // Model configuration interface
@@ -53,7 +53,7 @@ function getLinuxDistro(): string | undefined {
 }
 
 // Get system information for context
-export function getSystemInfo(): SystemInfo {
+export async function getSystemInfo(): Promise<SystemInfo> {
   const sysinfo: SystemInfo = {
     platform: os.platform(),
     release: os.release(),
@@ -63,7 +63,7 @@ export function getSystemInfo(): SystemInfo {
   if (os.platform() === 'linux') {
     sysinfo.distro = getLinuxDistro(); // Get Linux distribution name simply
     sysinfo.packageManager = getDistroPackageManager();
-    sysinfo.hardware = getHardwareInfo();
+    sysinfo.hardware = await getHardwareInfo();
   }
   return sysinfo;
 }
@@ -245,7 +245,7 @@ export async function generateTextWithModel(model: LanguageModel, prompt: string
   return await generateText(generateOptions);
 }
 
-const osInfo = getSystemInfo();
+const osInfo = await getSystemInfo();
 const pwd = process.cwd();
 const currentShell = os.platform() == 'win32' ? 'powershell' : process.env.SHELL || os.userInfo().shell || 'unknown';
 const systemPrompt = dedent`You are an expert system administrator and command-line specialist.
@@ -253,7 +253,10 @@ const systemPrompt = dedent`You are an expert system administrator and command-l
 SYSTEM CONTEXT:
 - Platform: ${osInfo.platform}
 - Architecture: ${osInfo.arch}
-- Hardware: ${osInfo.hardware}
+- Hardware:
+  - CPU: ${osInfo.hardware?.cpu}
+  - Memory: ${osInfo.hardware?.memory}
+  - GPU: ${osInfo.hardware?.gpu}
 - Distribution: ${osInfo.distro || 'N/A'}
 - Package Manager: ${osInfo.packageManager || 'N/A'}
 - Shell: ${currentShell}

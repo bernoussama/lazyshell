@@ -1,6 +1,6 @@
 import os from 'os';
 
-interface HardwareInfo {
+export interface HardwareInfo {
   cpu: string;
   memory: string;
   arch: string;
