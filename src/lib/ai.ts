@@ -5,6 +5,7 @@ import { ollama } from 'ollama-ai-provider';
 import { openrouter } from '@openrouter/ai-sdk-provider';
 import { openai } from '@ai-sdk/openai';
 import { anthropic } from '@ai-sdk/anthropic';
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import os from 'os';
 import z from 'zod';
 import type { Config, ProviderKey } from './config';
@@ -117,6 +118,14 @@ export function getModelFromConfig(config: Config): ModelConfig {
         model = ollama(modelId);
         break;
 
+      case 'lmstudio':
+        const lmstudio = createOpenAICompatible({
+          name: 'lmstudio',
+          baseURL: 'http://localhost:1234/v1',
+        });
+        model = lmstudio(modelId);
+        break;
+
       default:
         throw new Error(`Unsupported provider: ${provider}`);
     }
@@ -137,6 +146,7 @@ function getDefaultModelId(provider: ProviderKey): string {
     openai: 'gpt-4o-mini',
     ollama: 'llama3.2',
     mistral: 'devstral-small-2505',
+    lmstudio: 'llama-3.2-1b',
   };
 
   return defaultModels[provider];
@@ -177,7 +187,7 @@ export function getDefaultModel(): ModelConfig {
       model = ollama(modelId);
     } catch (error) {
       throw new Error(
-        'No API key found. Please set either GROQ_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY, OPENROUTER_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY. Or setup Ollama'
+        'No API key found. Please set either GROQ_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY, OPENROUTER_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY. Or setup Ollama/LM Studio'
       );
     }
   }
@@ -196,6 +206,13 @@ export function getBenchmarkModels(): Record<string, LanguageModel> {
     'ollama3.2': ollama('llama3.2'),
     'llama-3.3-70b-versatile': groq('llama-3.3-70b-versatile'),
     devstral: mistral('devstral-small-2505'),
+    'lmstudio-llama': (() => {
+      const lmstudio = createOpenAICompatible({
+        name: 'lmstudio',
+        baseURL: 'http://localhost:1234/v1',
+      });
+      return lmstudio('llama-3.2-1b');
+    })(),
   };
 }
 
@@ -344,4 +361,11 @@ export const models = {
   anthropic: (modelId: string = 'claude-3-5-haiku-latest') => anthropic(modelId),
   openai: (modelId: string = 'gpt-4o-mini') => openai(modelId),
   ollama: (modelId: string = 'llama3.2') => ollama(modelId),
+  lmstudio: (modelId: string = 'llama-3.2-1b') => {
+    const lmstudio = createOpenAICompatible({
+      name: 'lmstudio',
+      baseURL: 'http://localhost:1234/v1',
+    });
+    return lmstudio(modelId);
+  },
 };

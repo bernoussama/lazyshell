@@ -50,6 +50,12 @@ export const SUPPORTED_PROVIDERS = {
     envVar: null,
     defaultModel: 'devstral-small-2505',
   },
+  lmstudio: {
+    name: 'LM Studio (Local)',
+    description: 'Local LM Studio instance',
+    envVar: null,
+    defaultModel: 'llama-3.2-1b',
+  },
 } as const;
 
 export type ProviderKey = keyof typeof SUPPORTED_PROVIDERS;
@@ -139,8 +145,8 @@ export function validateConfig(config: Config): boolean {
     return false;
   }
 
-  // Ollama doesn't need an API key
-  if (config.provider === 'ollama') {
+  // Ollama and LM Studio don't need an API key
+  if (config.provider === 'ollama' || config.provider === 'lmstudio') {
     return true;
   }
 
@@ -179,9 +185,14 @@ export async function promptProvider(): Promise<ProviderKey> {
 export async function promptApiKey(provider: ProviderKey): Promise<string | undefined> {
   const providerInfo = SUPPORTED_PROVIDERS[provider];
 
-  // Ollama doesn't need an API key
+  // Ollama and LM Studio don't need an API key
   if (provider === 'ollama') {
     await print(chalk.green('Ollama selected - no API key required.'));
+    return undefined;
+  }
+
+  if (provider === 'lmstudio') {
+    await print(chalk.green('LM Studio selected - no API key required.'));
     return undefined;
   }
 
