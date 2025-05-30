@@ -1,6 +1,6 @@
 {
   "name": "lazyshell",
-  "version": "1.0.10",
+  "version": "1.0.11-0",
   "description": "AI CLI that generates shell commands",
   "type": "module",
   "bin": {
@@ -64,6 +64,7 @@
     "commander": "^14.0.0",
     "dedent": "^1.6.0",
     "ollama-ai-provider": "^1.2.0",
+    "systeminformation": "^5.27.1",
     "zod": "^3.25.39"
   }
 }

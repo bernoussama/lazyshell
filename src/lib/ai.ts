@@ -12,6 +12,7 @@ import type { Config, ProviderKey } from './config';
 import { mistral } from '@ai-sdk/mistral';
 import dedent from 'dedent';
 import { getDistroPackageManager } from '../helpers/package-manager';
+import { getHardwareInfo, type HardwareInfo } from '../helpers/hardware';
 
 // System information interface
 export interface SystemInfo {
@@ -21,6 +22,7 @@ export interface SystemInfo {
   packageManager?: string; // Only for Linux
   type: string;
   arch: string;
+  hardware?: HardwareInfo; // Hardware info for Linux systems
 }
 
 // Model configuration interface
@@ -51,7 +53,7 @@ function getLinuxDistro(): string | undefined {
 }
 
 // Get system information for context
-export function getSystemInfo(): SystemInfo {
+export async function getSystemInfo(): Promise<SystemInfo> {
   const sysinfo: SystemInfo = {
     platform: os.platform(),
     release: os.release(),
@@ -61,6 +63,7 @@ export function getSystemInfo(): SystemInfo {
   if (os.platform() === 'linux') {
     sysinfo.distro = getLinuxDistro(); // Get Linux distribution name simply
     sysinfo.packageManager = getDistroPackageManager();
+    sysinfo.hardware = await getHardwareInfo();
   }
   return sysinfo;
 }
@@ -131,6 +134,24 @@ export function getModelFromConfig(config: Config): ModelConfig {
         break;
       }
 
+      case 'openaiCompatible': {
+        const baseUrl = config.baseUrl || 'http://localhost:8000/v1';
+
+        // Set API key if provided
+        if (apiKey) {
+          process.env.OPENAI_COMPATIBLE_API_KEY = apiKey;
+        }
+
+        const openaiCompatible = createOpenAICompatible({
+          name: 'openaiCompatible',
+          baseURL: baseUrl,
+          apiKey: apiKey || process.env.OPENAI_COMPATIBLE_API_KEY,
+        });
+        model = openaiCompatible(modelId);
+        maxRetries = 1;
+        break;
+      }
+
       default:
         throw new Error(`Unsupported provider: ${provider}`);
     }
@@ -152,6 +173,7 @@ function getDefaultModelId(provider: ProviderKey): string {
     ollama: 'llama3.2',
     mistral: 'devstral-small-2505',
     lmstudio: 'deepseek/deepseek-r1-0528-qwen3-8b',
+    openaiCompatible: 'gpt-3.5-turbo',
   };
 
   return defaultModels[provider];
@@ -218,6 +240,13 @@ export function getBenchmarkModels(): Record<string, LanguageModel> {
       });
       return lmstudio('llama-3.2-1b');
     })(),
+    'openaiCompatible-gpt': (() => {
+      const openaiCompatible = createOpenAICompatible({
+        name: 'openaiCompatible',
+        baseURL: 'http://localhost:8000/v1',
+      });
+      return openaiCompatible('gpt-3.5-turbo');
+    })(),
   };
 }
 
@@ -242,7 +271,7 @@ export async function generateTextWithModel(model: LanguageModel, prompt: string
   return await generateText(generateOptions);
 }
 
-const osInfo = getSystemInfo();
+const osInfo = await getSystemInfo();
 const pwd = process.cwd();
 const currentShell = os.platform() == 'win32' ? 'powershell' : process.env.SHELL || os.userInfo().shell || 'unknown';
 const systemPrompt = dedent`You are an expert system administrator and command-line specialist.
@@ -250,8 +279,12 @@ const systemPrompt = dedent`You are an expert system administrator and command-l
 SYSTEM CONTEXT:
 - Platform: ${osInfo.platform}
 - Architecture: ${osInfo.arch}
-- Distribution: ${osInfo.distro || 'N/A'}
-- Package Manager: ${osInfo.packageManager || 'N/A'}
+- Hardware:
+  - CPU: ${osInfo.hardware?.cpu}
+  - Memory: ${osInfo.hardware?.memory}
+  - GPU: ${osInfo.hardware?.gpu}
+${osInfo.distro ? `- Distribution: ${osInfo.distro}` : ''}
+${osInfo.packageManager ? `- Package Manager: ${osInfo.packageManager}` : ''}
 - Shell: ${currentShell}
 - Working Directory: ${pwd}
 
@@ -379,5 +412,12 @@ export const models = {
       baseURL: baseUrl,
     });
     return lmstudio(modelId);
+  },
+  openaiCompatible: (modelId: string = 'gpt-3.5-turbo', baseUrl: string = 'http://localhost:8000/v1') => {
+    const openaiCompatible = createOpenAICompatible({
+      name: 'openaiCompatible',
+      baseURL: baseUrl,
+    });
+    return openaiCompatible(modelId);
   },
 };
