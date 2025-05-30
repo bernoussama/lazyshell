@@ -57,7 +57,7 @@
     "@ai-sdk/openai-compatible": "^0.2.14",
     "@clack/prompts": "^0.11.0",
     "@napi-rs/clipboard": "^1.1.2",
-    "@openrouter/ai-sdk-provider": "^0.4.6",
+    "@openrouter/ai-sdk-provider": "^0.7.0",
     "@types/json-schema": "^7.0.15",
     "ai": "^4.3.16",
     "chalk": "^5.4.1",
