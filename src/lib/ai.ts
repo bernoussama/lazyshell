@@ -134,6 +134,17 @@ export function getModelFromConfig(config: Config): ModelConfig {
         break;
       }
 
+      case 'openaiCompatible': {
+        const baseUrl = config.baseUrl || 'http://localhost:8000/v1';
+        const openaiCompatible = createOpenAICompatible({
+          name: 'openaiCompatible',
+          baseURL: baseUrl,
+        });
+        model = openaiCompatible(modelId);
+        maxRetries = 1;
+        break;
+      }
+
       default:
         throw new Error(`Unsupported provider: ${provider}`);
     }
@@ -155,6 +166,7 @@ function getDefaultModelId(provider: ProviderKey): string {
     ollama: 'llama3.2',
     mistral: 'devstral-small-2505',
     lmstudio: 'deepseek/deepseek-r1-0528-qwen3-8b',
+    openaiCompatible: 'gpt-3.5-turbo',
   };
 
   return defaultModels[provider];
@@ -220,6 +232,13 @@ export function getBenchmarkModels(): Record<string, LanguageModel> {
         baseURL: 'http://localhost:1234/v1',
       });
       return lmstudio('llama-3.2-1b');
+    })(),
+    'openaiCompatible-gpt': (() => {
+      const openaiCompatible = createOpenAICompatible({
+        name: 'openaiCompatible',
+        baseURL: 'http://localhost:8000/v1',
+      });
+      return openaiCompatible('gpt-3.5-turbo');
     })(),
   };
 }
@@ -386,5 +405,12 @@ export const models = {
       baseURL: baseUrl,
     });
     return lmstudio(modelId);
+  },
+  openaiCompatible: (modelId: string = 'gpt-3.5-turbo', baseUrl: string = 'http://localhost:8000/v1') => {
+    const openaiCompatible = createOpenAICompatible({
+      name: 'openaiCompatible',
+      baseURL: baseUrl,
+    });
+    return openaiCompatible(modelId);
   },
 };

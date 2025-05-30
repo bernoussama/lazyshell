@@ -59,6 +59,14 @@ export const SUPPORTED_PROVIDERS = {
     defaultBaseUrl: 'http://localhost:1234/v1',
     supportsCustomBaseUrl: true,
   },
+  openaiCompatible: {
+    name: 'OpenAI Compatible',
+    description: 'Any OpenAI-compatible API endpoint',
+    envVar: null,
+    defaultModel: 'gpt-3.5-turbo',
+    defaultBaseUrl: 'http://localhost:8000/v1',
+    supportsCustomBaseUrl: true,
+  },
 } as const;
 
 export type ProviderKey = keyof typeof SUPPORTED_PROVIDERS;
@@ -149,8 +157,8 @@ export function validateConfig(config: Config): boolean {
     return false;
   }
 
-  // Ollama and LM Studio don't need an API key
-  if (config.provider === 'ollama' || config.provider === 'lmstudio') {
+  // Ollama, LM Studio, and OpenAI Compatible don't need an API key
+  if (config.provider === 'ollama' || config.provider === 'lmstudio' || config.provider === 'openaiCompatible') {
     return true;
   }
 
@@ -189,7 +197,7 @@ export async function promptProvider(): Promise<ProviderKey> {
 export async function promptApiKey(provider: ProviderKey): Promise<string | undefined> {
   const providerInfo = SUPPORTED_PROVIDERS[provider];
 
-  // Ollama and LM Studio don't need an API key
+  // Ollama, LM Studio, and OpenAI Compatible don't need an API key
   if (provider === 'ollama') {
     await print(chalk.green('Ollama selected - no API key required.'));
     return undefined;
@@ -197,6 +205,11 @@ export async function promptApiKey(provider: ProviderKey): Promise<string | unde
 
   if (provider === 'lmstudio') {
     await print(chalk.green('LM Studio selected - no API key required.'));
+    return undefined;
+  }
+
+  if (provider === 'openaiCompatible') {
+    await print(chalk.green('OpenAI Compatible selected - no API key required.'));
     return undefined;
   }
 
