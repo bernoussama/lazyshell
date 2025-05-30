@@ -215,7 +215,6 @@ export function getBenchmarkModels(): Record<string, LanguageModel> {
       const lmstudio = createOpenAICompatible({
         name: 'lmstudio',
         baseURL: 'http://localhost:1234/v1',
-        
       });
       return lmstudio('llama-3.2-1b');
     })(),
