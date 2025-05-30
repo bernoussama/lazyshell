@@ -231,6 +231,7 @@ const systemPrompt = dedent`You are an expert system administrator and command-l
 SYSTEM CONTEXT:
 - Platform: ${osInfo.platform}
 - Architecture: ${osInfo.arch}
+- Hardware: ${osInfo.hardware}
 - Distribution: ${osInfo.distro || 'N/A'}
 - Package Manager: ${osInfo.packageManager || 'N/A'}
 - Shell: ${currentShell}
