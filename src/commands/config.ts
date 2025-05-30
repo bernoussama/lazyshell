@@ -6,6 +6,7 @@ import {
   saveConfig,
   promptProvider,
   promptApiKey,
+  promptBaseUrl,
   SUPPORTED_PROVIDERS,
   Config,
   configExists,
@@ -49,6 +50,7 @@ export async function showConfigUI() {
       { label: '📝 Edit Provider', value: 'edit-provider' },
       { label: '🔑 Edit API Key', value: 'edit-apikey' },
       { label: '🤖 Edit Model', value: 'edit-model' },
+      { label: '🌐 Edit Base URL', value: 'edit-baseurl' },
       { label: '🔄 Reset Configuration', value: 'reset' },
       { label: '❌ Exit', value: 'exit' },
     ],
@@ -69,6 +71,9 @@ export async function showConfigUI() {
     case 'edit-model':
       await editModel(config);
       break;
+    case 'edit-baseurl':
+      await editBaseUrl(config);
+      break;
     case 'reset':
       await resetConfiguration();
       break;
@@ -85,6 +90,14 @@ async function showCurrentConfig(config: Config) {
   await print(`${chalk.cyan('Description:')} ${provider.description}`);
   await print(`${chalk.cyan('Model:')} ${config.model || provider.defaultModel}`);
   await print(`${chalk.cyan('API Key:')} ${hasApiKey ? chalk.green(maskedApiKey) : chalk.yellow(maskedApiKey)}`);
+  
+  // Show base URL for providers that support it
+  if ('supportsCustomBaseUrl' in provider && provider.supportsCustomBaseUrl) {
+    const defaultBaseUrl = 'defaultBaseUrl' in provider ? provider.defaultBaseUrl : 'http://localhost:1234/v1';
+    const currentBaseUrl = config.baseUrl || defaultBaseUrl;
+    await print(`${chalk.cyan('Base URL:')} ${currentBaseUrl}`);
+  }
+  
   await print(`${chalk.cyan('Config File:')} ~/.lazyshell/config.json`);
 }
 
@@ -102,6 +115,10 @@ async function editProvider(config: Config) {
   } else {
     config.apiKey = undefined;
   }
+
+  // If the new provider supports custom base URL, prompt for it
+  const newBaseUrl = await promptBaseUrl(newProvider);
+  config.baseUrl = newBaseUrl;
 
   const saved = await saveConfig(config);
   if (saved) {
@@ -153,6 +170,41 @@ async function editModel(config: Config) {
   if (saved) {
     await showCurrentConfig(config);
     outro(chalk.green('✅ Model updated successfully!'));
+  } else {
+    outro(chalk.red('❌ Failed to save configuration.'));
+  }
+}
+
+async function editBaseUrl(config: Config) {
+  // console.log(chalk.blue('🌐 Change Base URL'));
+
+  const providerInfo = SUPPORTED_PROVIDERS[config.provider];
+  
+  // Check if the provider supports custom base URL
+  if (!('supportsCustomBaseUrl' in providerInfo) || !providerInfo.supportsCustomBaseUrl) {
+    await print(chalk.yellow(`${providerInfo.name} doesn't support custom base URL configuration.`));
+    return;
+  }
+
+  const defaultBaseUrl = 'defaultBaseUrl' in providerInfo ? providerInfo.defaultBaseUrl : 'http://localhost:1234/v1';
+  const currentBaseUrl = config.baseUrl || defaultBaseUrl;
+
+  const newBaseUrl = await input({
+    message: `Enter new base URL for ${providerInfo.name}:`,
+    placeholder: currentBaseUrl,
+    initialValue: currentBaseUrl,
+  });
+
+  if (isCancel(newBaseUrl)) {
+    return;
+  }
+
+  config.baseUrl = newBaseUrl;
+
+  const saved = await saveConfig(config);
+  if (saved) {
+    await showCurrentConfig(config);
+    outro(chalk.green('✅ Base URL updated successfully!'));
   } else {
     outro(chalk.red('❌ Failed to save configuration.'));
   }

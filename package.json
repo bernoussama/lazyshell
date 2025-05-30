@@ -18,7 +18,8 @@
     "build": "pkgroll --minify",
     "release:patch": "pnpm run build && npm version patch && npm run build && npm publish && git push --follow-tags",
     "prerelease": "pnpm run build && npm version prerelease && npm run build && npm publish && git push --follow-tags",
-    "eval:ci": "jiti src/lib/ci-eval.ts"
+    "eval:ci": "jiti src/lib/ci-eval.ts",
+    "prepare": "husky"
   },
   "keywords": [
     "ai",
@@ -40,6 +41,7 @@
     "@typescript-eslint/eslint-plugin": "^8.33.0",
     "@typescript-eslint/parser": "^8.33.0",
     "eslint": "^9.27.0",
+    "husky": "^9.1.7",
     "jiti": "^2.4.2",
     "pkgroll": "^2.12.2",
     "prettier": "^3.5.3",

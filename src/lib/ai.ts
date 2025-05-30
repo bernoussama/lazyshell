@@ -119,12 +119,15 @@ export function getModelFromConfig(config: Config): ModelConfig {
         break;
 
       case 'lmstudio':
-        const lmstudio = createOpenAICompatible({
-          name: 'lmstudio',
-          baseURL: 'http://localhost:1234/v1',
-        });
-        model = lmstudio(modelId);
-        break;
+        {
+          const baseUrl = config.baseUrl || 'http://localhost:1234/v1';
+          const lmstudio = createOpenAICompatible({
+            name: 'lmstudio',
+            baseURL: baseUrl,
+          });
+          model = lmstudio(modelId);
+          break;
+        }
 
       default:
         throw new Error(`Unsupported provider: ${provider}`);
@@ -141,7 +144,7 @@ function getDefaultModelId(provider: ProviderKey): string {
   const defaultModels: Record<ProviderKey, string> = {
     groq: 'llama-3.3-70b-versatile',
     google: 'gemini-2.0-flash-lite',
-    openrouter: 'deepseek/deepseek-r1-0528:free',
+    openrouter: 'google/gemini-2.0-flash-001',
     anthropic: 'claude-3-5-haiku-latest',
     openai: 'gpt-4o-mini',
     ollama: 'llama3.2',
@@ -170,7 +173,7 @@ export function getDefaultModel(): ModelConfig {
     model = google(modelId);
   } else if (process.env.OPENROUTER_API_KEY) {
     provider = 'openrouter';
-    modelId = 'deepseek/deepseek-r1-0528:free';
+    modelId = 'google/gemini-2.0-flash-001';
     model = openrouter(modelId);
   } else if (process.env.ANTHROPIC_API_KEY) {
     provider = 'anthropic';
@@ -323,21 +326,17 @@ export async function generateCommandStruct(
     zShema = zCmd;
   }
   try {
-  const result = await generateObject({
-    model: modelConf.model,
-    system: systemPrompt,
-    schema: zShema,
-    prompt,
-    temperature: modelConf.temperature || 0.1,
+    const result = await generateObject({
+      model: modelConf.model,
+      system: systemPrompt,
+      schema: zShema,
+      prompt,
+      temperature: modelConf.temperature || 0.1,
     });
     return result.object;
   } catch (error) {
-    try{
-      const result = await generateCommand(prompt, modelConf);
-      return { command: result, explanation: '' };
-    } catch (error) {
-      throw error;
-    }
+    const result = await generateCommand(prompt, modelConf);
+    return { command: result, explanation: '' };
   }
 }
 
@@ -367,14 +366,14 @@ export async function generateBenchmarkText(model: LanguageModel, prompt: string
 export const models = {
   groq: (modelId: string = 'llama-3.1-8b-instant') => groq(modelId),
   google: (modelId: string = 'gemini-2.0-flash-lite') => google(modelId),
-  openrouter: (modelId: string = 'deepseek/deepseek-r1-0528:free') => openrouter(modelId),
+  openrouter: (modelId: string = 'google/gemini-2.0-flash-001') => openrouter(modelId),
   anthropic: (modelId: string = 'claude-3-5-haiku-latest') => anthropic(modelId),
   openai: (modelId: string = 'gpt-4o-mini') => openai(modelId),
   ollama: (modelId: string = 'llama3.2') => ollama(modelId),
-  lmstudio: (modelId: string = 'deepseek/deepseek-r1-0528-qwen3-8b') => {
+  lmstudio: (modelId: string = 'deepseek/deepseek-r1-0528-qwen3-8b', baseUrl: string = 'http://localhost:1234/v1') => {
     const lmstudio = createOpenAICompatible({
       name: 'lmstudio',
-      baseURL: 'http://localhost:1234/v1',
+      baseURL: baseUrl,
     });
     return lmstudio(modelId);
   },
