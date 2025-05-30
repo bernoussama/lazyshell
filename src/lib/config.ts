@@ -62,7 +62,7 @@ export const SUPPORTED_PROVIDERS = {
   openaiCompatible: {
     name: 'OpenAI Compatible',
     description: 'Any OpenAI-compatible API endpoint',
-    envVar: null,
+    envVar: 'OPENAI_COMPATIBLE_API_KEY',
     defaultModel: 'gpt-3.5-turbo',
     defaultBaseUrl: 'http://localhost:8000/v1',
     supportsCustomBaseUrl: true,
@@ -157,7 +157,7 @@ export function validateConfig(config: Config): boolean {
     return false;
   }
 
-  // Ollama, LM Studio, and OpenAI Compatible don't need an API key
+  // Ollama, LM Studio, and OpenAI Compatible don't require an API key (can work locally)
   if (config.provider === 'ollama' || config.provider === 'lmstudio' || config.provider === 'openaiCompatible') {
     return true;
   }
@@ -197,7 +197,7 @@ export async function promptProvider(): Promise<ProviderKey> {
 export async function promptApiKey(provider: ProviderKey): Promise<string | undefined> {
   const providerInfo = SUPPORTED_PROVIDERS[provider];
 
-  // Ollama, LM Studio, and OpenAI Compatible don't need an API key
+  // Ollama and LM Studio don't need an API key
   if (provider === 'ollama') {
     await print(chalk.green('Ollama selected - no API key required.'));
     return undefined;
@@ -209,8 +209,43 @@ export async function promptApiKey(provider: ProviderKey): Promise<string | unde
   }
 
   if (provider === 'openaiCompatible') {
-    await print(chalk.green('OpenAI Compatible selected - no API key required.'));
-    return undefined;
+    await print(chalk.yellow('\nOpenAI Compatible provider selected.'));
+    await print(chalk.gray('API key is optional - only needed for hosted services that require authentication.'));
+    await print(chalk.gray('Leave empty if connecting to a local server without authentication.'));
+    
+    // Check environment variable first
+    const envApiKey = getApiKeyFromEnv(provider);
+    if (envApiKey) {
+      await print(chalk.green(`Using API key from environment variable: ${providerInfo.envVar}`));
+      return envApiKey;
+    }
+
+    const { confirm } = await import('@clack/prompts');
+    const needsApiKey = await confirm({
+      message: 'Does your OpenAI-compatible endpoint require an API key?',
+    });
+
+    if (isCancel(needsApiKey)) {
+      cancel('API key configuration cancelled');
+      process.exit(0);
+    }
+
+    if (!needsApiKey) {
+      await print(chalk.green('No API key will be used - connecting without authentication.'));
+      return undefined;
+    }
+
+    const apiKey = await password({
+      message: 'Enter your OpenAI-compatible API key:',
+      mask: '*',
+    });
+
+    if (isCancel(apiKey)) {
+      cancel('API key entry cancelled');
+      process.exit(0);
+    }
+
+    return apiKey;
   }
 
   await print(chalk.yellow(`\nYou'll need an API key for ${providerInfo.name}.`));

@@ -136,9 +136,16 @@ export function getModelFromConfig(config: Config): ModelConfig {
 
       case 'openaiCompatible': {
         const baseUrl = config.baseUrl || 'http://localhost:8000/v1';
+        
+        // Set API key if provided
+        if (apiKey) {
+          process.env.OPENAI_COMPATIBLE_API_KEY = apiKey;
+        }
+        
         const openaiCompatible = createOpenAICompatible({
           name: 'openaiCompatible',
           baseURL: baseUrl,
+          apiKey: apiKey || process.env.OPENAI_COMPATIBLE_API_KEY,
         });
         model = openaiCompatible(modelId);
         maxRetries = 1;

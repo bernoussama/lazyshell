@@ -132,9 +132,18 @@ async function editProvider(config: Config) {
 async function editApiKey(config: Config) {
   // console.log(chalk.blue('🔑 Update API Key'));
 
-  if (!SUPPORTED_PROVIDERS[config.provider].envVar) {
-    await print(chalk.yellow(`${SUPPORTED_PROVIDERS[config.provider].name} doesn't require an API key.`));
+  const providerInfo = SUPPORTED_PROVIDERS[config.provider];
+
+  // Handle providers that don't support API keys at all
+  if (!providerInfo.envVar && config.provider !== 'openaiCompatible') {
+    await print(chalk.yellow(`${providerInfo.name} doesn't require an API key.`));
     return;
+  }
+
+  // Special handling for openaiCompatible which has optional API key support
+  if (config.provider === 'openaiCompatible') {
+    await print(chalk.blue(`Configuring API key for ${providerInfo.name}:`));
+    await print(chalk.gray('API key is optional - only needed for hosted services that require authentication.'));
   }
 
   const newApiKey = await promptApiKey(config.provider);
