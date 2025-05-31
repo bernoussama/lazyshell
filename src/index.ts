@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { select, text as input, spinner, stream, outro, isCancel, cancel, intro } from '@clack/prompts';
 import chalk from 'chalk';
-import { info, print, runCommand } from './utils';
+import { info, print, runCommand, printWrapped } from './utils';
 import { generateCommand, generateCommandStruct, getDefaultModel, getModelFromConfig } from './lib/ai';
 import { Clipboard } from '@napi-rs/clipboard';
 import { getOrInitializeConfig } from './lib/config';
@@ -110,7 +110,8 @@ program
         await print(`${command}`);
         if ('explanation' in result && result.explanation) {
           await info('Explanation:');
-          await print(`${result.explanation.trim()}`);
+          const lineWidth = 80;
+          await printWrapped(`${result.explanation.trim()}`, lineWidth);
         }
 
         clipboard.setText(command);
