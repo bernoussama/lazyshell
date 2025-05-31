@@ -110,7 +110,7 @@ program
         await print(`${command}`);
         if ('explanation' in result && result.explanation) {
           await info('Explanation:');
-          const lineWidth =  80;
+          const lineWidth = 80;
           await printWrapped(`${result.explanation.trim()}`, lineWidth);
         }
 

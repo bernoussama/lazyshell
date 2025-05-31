@@ -57,4 +57,4 @@ export function wrapTextWithPrefix(text: string, maxWidth: number = 80, prefix: 
     .split('\n')
     .map(line => prefix + line)
     .join('\n');
-} 
+}
