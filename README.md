@@ -12,7 +12,7 @@
 > A smart CLI tool that generates and executes shell commands using AI
 
 <p align="center">
-   <img alt="Gif Demo" width="100%" src="https://github.com/user-attachments/assets/d9ee3561-0a59-4adb-99c2-3a0026d49f95" >
+   <img alt="Gif Demo" width="100%" src="https://github.com/user-attachments/assets/1699d100-d73a-43d9-8b69-5ba8e50fcdc7" >
 <p>
 
 
