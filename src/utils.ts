@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { exec } from 'child_process';
 import { stream } from '@clack/prompts';
+import { wrapText } from './helpers/text-wrapper';
 
 export function runCommand(command: string) {
   console.log('');
@@ -51,6 +52,20 @@ export async function print(msg: string) {
   await stream.message(
     (function* () {
       yield `${msg}`;
+    })()
+  );
+}
+
+/**
+ * Print text with line wrapping
+ * @param msg - The message to print
+ * @param lineWidth - Maximum characters per line (default: 80)
+ */
+export async function printWrapped(msg: string, lineWidth: number = 80) {
+  const wrappedMsg = wrapText(msg, lineWidth);
+  await stream.message(
+    (function* () {
+      yield `${wrappedMsg}`;
     })()
   );
 }
