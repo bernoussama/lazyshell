@@ -11,6 +11,11 @@
 
 > A smart CLI tool that generates and executes shell commands using AI
 
+<p align="center">
+   <img alt="Gif Demo" width="100%" src="https://github.com/user-attachments/assets/d9ee3561-0a59-4adb-99c2-3a0026d49f95" >
+<p>
+
+
 LazyShell is a command-line interface that helps you quickly generate and execute shell commands using AI. It supports multiple AI providers and provides an interactive configuration system for easy setup.
 
 ## Features ✨
