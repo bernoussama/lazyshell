@@ -7,6 +7,13 @@ import { Clipboard } from '@napi-rs/clipboard';
 import { getOrInitializeConfig } from './lib/config';
 import dedent from 'dedent';
 import { showConfigUI } from './commands/config';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJson = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'));
 
 async function genCommand(prompt: string) {
   // Get configuration first
@@ -67,8 +74,8 @@ async function refineCommand(currentPrompt: string, command: string): Promise<st
 
 const program = new Command();
 program
-  .version(require('../package.json').version)
-  .description(require('../package.json').description)
+  .version(packageJson.version)
+  .description(packageJson.description)
   .argument('<prompt_parts...>', 'prompt')
   .option('-s, --silent', 'run in silent mode (no explanation)')
   .action(async (prompt_parts: string[], options) => {
