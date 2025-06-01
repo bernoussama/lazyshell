@@ -1,5 +1,10 @@
-# LazyShell 🐚
+<h1 align="center">
+   
+LazyShell 🐚
 
+</h1>
+<div align="center">
+   
 [![npm version](https://badge.fury.io/js/lazyshell.svg)](https://badge.fury.io/js/lazyshell)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![CI](https://github.com/bernoussama/lazyshell/workflows/CI/badge.svg)](https://github.com/bernoussama/lazyshell/actions)
@@ -7,11 +12,17 @@
 [![AI Powered](https://img.shields.io/badge/AI-Powered-blue?logo=huggingface&logoColor=white)](https://github.com/bernoussama/lazyshell)
 ![NPM Downloads](https://img.shields.io/npm/d18m/lazyshell)
 
-> A smart CLI tool that generates and executes shell commands using AI
+</div>
+
+<h4 align="center">
+   
+A smart CLI tool that generates and executes shell commands using AI
+
+</h4>
 
 <p align="center">
    <img alt="Gif Demo" width="100%" src="https://github.com/user-attachments/assets/1699d100-d73a-43d9-8b69-5ba8e50fcdc7" >
-<p>
+</p>
 
 
 LazyShell is a command-line interface that helps you quickly generate and execute shell commands using AI. It supports multiple AI providers and provides an interactive configuration system for easy setup.
