@@ -79,7 +79,7 @@ const PROVIDER_CONFIG: Record<ProviderKey, BaseProviderConfig> = {
     benchmarkModel: 'llama-3.2-1b',
   },
   openaiCompatible: {
-    defaultModel: 'gpt-3.5-turbo',
+    defaultModel: 'gpt-4.1-mini',
     defaultBaseUrl: 'http://localhost:8000/v1',
     envKey: 'OPENAI_COMPATIBLE_API_KEY',
     createModel: (modelId: string, baseUrl?: string, apiKey?: string) => {
@@ -164,7 +164,7 @@ export function getModelFromConfig(config: Config): ModelConfig {
   }
 
   let model: LanguageModel;
-  let maxRetries: number | undefined = providerConfig.maxRetries;
+  const maxRetries: number | undefined = providerConfig.maxRetries;
 
   try {
     // Handle API key validation for providers that need it
@@ -211,7 +211,7 @@ export function getDefaultModel(): ModelConfig {
   // Try providers in priority order based on available API keys
   for (const provider of PROVIDER_PRIORITY) {
     const providerConfig = PROVIDER_CONFIG[provider];
-    
+
     // Skip providers that require API keys if none is available
     if (providerConfig.envKey && !process.env[providerConfig.envKey]) {
       continue;
@@ -220,11 +220,11 @@ export function getDefaultModel(): ModelConfig {
     try {
       const modelId = providerConfig.defaultModel;
       const model = providerConfig.createModel(modelId);
-      return { 
-        provider, 
-        modelId, 
+      return {
+        provider,
+        modelId,
         model,
-        maxRetries: providerConfig.maxRetries
+        maxRetries: providerConfig.maxRetries,
       };
     } catch (error) {
       continue; // Try next provider
@@ -237,11 +237,11 @@ export function getDefaultModel(): ModelConfig {
     const providerConfig = PROVIDER_CONFIG[provider];
     const modelId = providerConfig.defaultModel;
     const model = providerConfig.createModel(modelId);
-    return { 
-      provider, 
-      modelId, 
+    return {
+      provider,
+      modelId,
       model,
-      maxRetries: providerConfig.maxRetries
+      maxRetries: providerConfig.maxRetries,
     };
   } catch (error) {
     throw new Error(
@@ -257,11 +257,16 @@ export function getBenchmarkModels(): Record<string, LanguageModel> {
   // Add benchmark models from provider config
   Object.entries(PROVIDER_CONFIG).forEach(([provider, config]) => {
     if (config.benchmarkModel) {
-      const key = provider === 'openrouter' ? 'or-devstral' : 
-                  provider === 'ollama' ? 'ollama3.2' :
-                  provider === 'lmstudio' ? 'lmstudio-llama' :
-                  provider === 'openaiCompatible' ? 'openaiCompatible-gpt' :
-                  config.benchmarkModel;
+      const key =
+        provider === 'openrouter'
+          ? 'or-devstral'
+          : provider === 'ollama'
+            ? 'ollama3.2'
+            : provider === 'lmstudio'
+              ? 'lmstudio-llama'
+              : provider === 'openaiCompatible'
+                ? 'openaiCompatible-gpt'
+                : config.benchmarkModel;
 
       if (provider === 'lmstudio') {
         benchmarkModels[key] = config.createModel(config.benchmarkModel);
@@ -425,10 +430,13 @@ export async function generateBenchmarkText(model: LanguageModel, prompt: string
 }
 
 // Export model instances for direct use - using consolidated config
-export const models = Object.entries(PROVIDER_CONFIG).reduce((acc, [provider, config]) => {
-  acc[provider as ProviderKey] = (modelId?: string, ...args: any[]) => {
-    const finalModelId = modelId || config.defaultModel;
-    return config.createModel(finalModelId, ...args);
-  };
-  return acc;
-}, {} as Record<ProviderKey, (modelId?: string, ...args: any[]) => LanguageModel>);
+export const models = Object.entries(PROVIDER_CONFIG).reduce(
+  (acc, [provider, config]) => {
+    acc[provider as ProviderKey] = (modelId?: string, ...args: any[]) => {
+      const finalModelId = modelId || config.defaultModel;
+      return config.createModel(finalModelId, ...args);
+    };
+    return acc;
+  },
+  {} as Record<ProviderKey, (modelId?: string, ...args: any[]) => LanguageModel>
+);
