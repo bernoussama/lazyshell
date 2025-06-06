@@ -1,10 +1,10 @@
 import { Command } from 'commander';
-import { select, text as input, spinner, stream, outro, isCancel, cancel, intro } from '@clack/prompts';
+import { select, text as input, spinner, outro, isCancel, cancel, intro } from '@clack/prompts';
 import chalk from 'chalk';
 import { info, print, runCommand, printWrapped } from './utils';
 import { generateCommand, generateCommandStruct, getDefaultModel, getModelFromConfig } from './lib/ai';
 import { getOrInitializeConfig } from './lib/config';
-import dedent from 'dedent';
+
 import { showConfigUI } from './commands/config';
 
 // Conditional clipboard functionality
@@ -13,25 +13,22 @@ async function copyToClipboard(text: string): Promise<boolean> {
     // Only import and use clipboard on supported platforms
     const os = require('os');
     const platform = os.platform();
-    const arch = os.arch();
-    
+
     // Skip clipboard on Android (which shows up as linux) and potentially problematic ARM systems
     // Check for Android-specific indicators
-    const isAndroid = process.env.ANDROID_ROOT || 
-                     process.env.ANDROID_DATA || 
-                     platform === 'android';
-    
+    const isAndroid = process.env.ANDROID_ROOT || process.env.ANDROID_DATA || platform === 'android';
+
     // Skip if it's Android or if we're on ARM and the environment looks mobile
     if (isAndroid) {
       return false;
     }
-    
+
     // Try to import the clipboard module
     const { Clipboard } = await import('@napi-rs/clipboard');
     const clipboard = new Clipboard();
     clipboard.setText(text);
     return true;
-  } catch (error) {
+  } catch {
     // Silently fail if clipboard is not available
     return false;
   }
