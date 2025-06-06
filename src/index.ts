@@ -3,10 +3,39 @@ import { select, text as input, spinner, stream, outro, isCancel, cancel, intro 
 import chalk from 'chalk';
 import { info, print, runCommand, printWrapped } from './utils';
 import { generateCommand, generateCommandStruct, getDefaultModel, getModelFromConfig } from './lib/ai';
-import { Clipboard } from '@napi-rs/clipboard';
 import { getOrInitializeConfig } from './lib/config';
 import dedent from 'dedent';
 import { showConfigUI } from './commands/config';
+
+// Conditional clipboard functionality
+async function copyToClipboard(text: string): Promise<boolean> {
+  try {
+    // Only import and use clipboard on supported platforms
+    const os = require('os');
+    const platform = os.platform();
+    const arch = os.arch();
+    
+    // Skip clipboard on Android (which shows up as linux) and potentially problematic ARM systems
+    // Check for Android-specific indicators
+    const isAndroid = process.env.ANDROID_ROOT || 
+                     process.env.ANDROID_DATA || 
+                     platform === 'android';
+    
+    // Skip if it's Android or if we're on ARM and the environment looks mobile
+    if (isAndroid) {
+      return false;
+    }
+    
+    // Try to import the clipboard module
+    const { Clipboard } = await import('@napi-rs/clipboard');
+    const clipboard = new Clipboard();
+    clipboard.setText(text);
+    return true;
+  } catch (error) {
+    // Silently fail if clipboard is not available
+    return false;
+  }
+}
 
 async function genCommand(prompt: string) {
   // Get configuration first
@@ -77,7 +106,6 @@ program
     let shouldContinue = true;
     const silent = options.silent || false;
 
-    const clipboard = new Clipboard();
     while (shouldContinue) {
       try {
         // const result = await genCommand(currentPrompt);
@@ -114,7 +142,10 @@ program
           await printWrapped(`${result.explanation.trim()}`, lineWidth);
         }
 
-        clipboard.setText(command);
+        const clipboardSuccess = await copyToClipboard(command);
+        if (clipboardSuccess) {
+          await print(chalk.green('📋 Command copied to clipboard!'));
+        }
 
         const action = await select({
           message: 'Run command?',

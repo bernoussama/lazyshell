@@ -29,9 +29,6 @@ importers:
       '@clack/prompts':
         specifier: ^0.11.0
         version: 0.11.0
-      '@napi-rs/clipboard':
-        specifier: ^1.1.2
-        version: 1.1.2
       '@openrouter/ai-sdk-provider':
         specifier: ^0.4.6
         version: 0.4.6(zod@3.25.39)
@@ -96,6 +93,10 @@ importers:
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
+    optionalDependencies:
+      '@napi-rs/clipboard':
+        specifier: ^1.1.2
+        version: 1.1.2
 
 packages:
 
@@ -1650,6 +1651,7 @@ snapshots:
       '@napi-rs/clipboard-win32-arm64-msvc': 1.1.2
       '@napi-rs/clipboard-win32-ia32-msvc': 1.1.2
       '@napi-rs/clipboard-win32-x64-msvc': 1.1.2
+    optional: true
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
