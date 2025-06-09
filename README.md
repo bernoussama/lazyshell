@@ -56,9 +56,9 @@ npm install -g lazyshell
 yarn global add lazyshell
 ```
 
-### Using pnpm (recommended)
+### Using npm (recommended)
 ```bash
-pnpm add -g lazyshell
+npm add -g lazyshell
 ```
 
 ## Quick Start 🚀
@@ -236,7 +236,7 @@ LazyShell includes comprehensive benchmarking capabilities to compare AI model p
 ### Running Benchmarks
 ```bash
 # Build and run benchmarks
-pnpm build
+npm build
 node dist/bench_models.mjs
 ```
 
@@ -271,22 +271,22 @@ LazyShell includes automated quality assessments that run in CI to ensure consis
 ### Local Testing
 ```bash
 # Run CI evaluations locally
-pnpm eval:ci
+npm eval:ci
 ```
 
 ### Custom Evaluation Scripts
 ```bash
 # Run basic evaluations
-pnpm build && node dist/lib/basic.eval.mjs
+npm build && node dist/lib/basic.eval.mjs
 
 # Run LLM judge evaluation
-pnpm build && node dist/lib/llm-judge.eval.mjs
+npm build && node dist/lib/llm-judge.eval.mjs
 
 # Test AI library
-pnpm build && node dist/test-ai-lib.mjs
+npm build && node dist/test-ai-lib.mjs
 
 # Run example evaluations
-pnpm build && node dist/lib/example.eval.mjs
+npm build && node dist/lib/example.eval.mjs
 ```
 
 See [docs/CI_EVALUATIONS.md](docs/CI_EVALUATIONS.md) for complete setup and configuration guide.
@@ -306,17 +306,17 @@ See [docs/CI_EVALUATIONS.md](docs/CI_EVALUATIONS.md) for complete setup and conf
 
 2. Install dependencies:
    ```bash
-   pnpm install
+   npm install
    ```
 
 3. Build the project:
    ```bash
-   pnpm build
+   npm build
    ```
 
 4. Link the package for local development:
    ```bash
-   pnpm link --global
+   npm link --local
    ```
 
 ### Available Scripts
