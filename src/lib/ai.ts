@@ -1,15 +1,12 @@
 import { generateObject, generateText, type LanguageModel } from 'ai';
-import { groq } from '@ai-sdk/groq';
 import { google } from '@ai-sdk/google';
 import { ollama } from 'ollama-ai-provider';
-import { openrouter } from '@openrouter/ai-sdk-provider';
 import { openai } from '@ai-sdk/openai';
 import { anthropic } from '@ai-sdk/anthropic';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import os from 'os';
 import z from 'zod';
 import type { Config, ProviderKey } from './config';
-import { mistral } from '@ai-sdk/mistral';
 import dedent from 'dedent';
 import { getDistroPackageManager } from '../helpers/package-manager';
 import { getHardwareInfo, type HardwareInfo } from '../helpers/hardware';
@@ -78,13 +75,20 @@ export function getModelFromConfig(config: Config): ModelConfig {
   let maxRetries: number | undefined = undefined;
   try {
     switch (provider) {
-      case 'groq':
+      case 'groq': {
         if (!apiKey && !process.env.GROQ_API_KEY) {
           throw new Error('Groq API key is required');
         }
-        process.env.GROQ_API_KEY = apiKey || process.env.GROQ_API_KEY;
+
+        const baseUrl = config.baseUrl || 'https://api.groq.com/openai/v1';
+        const groq = createOpenAICompatible({
+          name: 'groq',
+          baseURL: baseUrl,
+          apiKey: apiKey || process.env.GROQ_API_KEY,
+        });
         model = groq(modelId);
         break;
+      }
 
       case 'google':
         if (!apiKey && !process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
@@ -94,13 +98,20 @@ export function getModelFromConfig(config: Config): ModelConfig {
         model = google(modelId);
         break;
 
-      case 'openrouter':
+      case 'openrouter': {
         if (!apiKey && !process.env.OPENROUTER_API_KEY) {
           throw new Error('OpenRouter API key is required');
         }
-        process.env.OPENROUTER_API_KEY = apiKey || process.env.OPENROUTER_API_KEY;
+
+        const baseUrl = 'https://openrouter.ai/api/v1';
+        const openrouter = createOpenAICompatible({
+          name: 'openrouter',
+          baseURL: baseUrl,
+          apiKey: apiKey || process.env.OPENROUTER_API_KEY,
+        });
         model = openrouter(modelId);
         break;
+      }
 
       case 'anthropic':
         if (!apiKey && !process.env.ANTHROPIC_API_KEY) {
@@ -122,6 +133,21 @@ export function getModelFromConfig(config: Config): ModelConfig {
         model = ollama(modelId);
         maxRetries = 1;
         break;
+
+      case 'mistral': {
+        if (!apiKey && !process.env.MISTRAL_API_KEY) {
+          throw new Error('Mistral API key is required');
+        }
+
+        const baseUrl = config.baseUrl || 'https://api.mistral.ai/v1';
+        const mistral = createOpenAICompatible({
+          name: 'mistral',
+          baseURL: baseUrl,
+          apiKey: apiKey || process.env.MISTRAL_API_KEY,
+        });
+        model = mistral(modelId);
+        break;
+      }
 
       case 'lmstudio': {
         const baseUrl = config.baseUrl || 'http://localhost:1234/v1';
@@ -190,6 +216,11 @@ export function getDefaultModel(): ModelConfig {
     // modelId = 'llama-3.1-8b-instant';
     modelId = 'llama-3.3-70b-versatile';
 
+    const groq = createOpenAICompatible({
+      name: 'groq',
+      baseURL: 'https://api.groq.com/openai/v1',
+      apiKey: process.env.GROQ_API_KEY,
+    });
     model = groq(modelId);
   } else if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
     provider = 'google';
@@ -198,6 +229,11 @@ export function getDefaultModel(): ModelConfig {
   } else if (process.env.OPENROUTER_API_KEY) {
     provider = 'openrouter';
     modelId = 'google/gemini-2.0-flash-001';
+    const openrouter = createOpenAICompatible({
+      name: 'openrouter',
+      baseURL: 'https://openrouter.ai/api/v1',
+      apiKey: process.env.OPENROUTER_API_KEY,
+    });
     model = openrouter(modelId);
   } else if (process.env.ANTHROPIC_API_KEY) {
     provider = 'anthropic';
@@ -224,6 +260,24 @@ export function getDefaultModel(): ModelConfig {
 
 // Get predefined models for benchmarking
 export function getBenchmarkModels(): Record<string, LanguageModel> {
+  const openrouter = createOpenAICompatible({
+    name: 'openrouter',
+    baseURL: 'https://openrouter.ai/api/v1',
+    apiKey: process.env.OPENROUTER_API_KEY,
+  });
+
+  const groq = createOpenAICompatible({
+    name: 'groq',
+    baseURL: 'https://api.groq.com/openai/v1',
+    apiKey: process.env.GROQ_API_KEY,
+  });
+
+  const mistral = createOpenAICompatible({
+    name: 'mistral',
+    baseURL: 'https://api.mistral.ai/v1',
+    apiKey: process.env.MISTRAL_API_KEY,
+  });
+
   return {
     'or-devstral': openrouter('mistralai/devstral-small:free'),
     // 'openrouter-mistral-7b': openrouter('mistralai/mistral-7b-instruct:free'),
@@ -400,12 +454,34 @@ export async function generateBenchmarkText(model: LanguageModel, prompt: string
 
 // Export model instances for direct use
 export const models = {
-  groq: (modelId: string = 'llama-3.1-8b-instant') => groq(modelId),
+  groq: (modelId: string = 'llama-3.1-8b-instant', baseUrl: string = 'https://api.groq.com/openai/v1') => {
+    const groq = createOpenAICompatible({
+      name: 'groq',
+      baseURL: baseUrl,
+      apiKey: process.env.GROQ_API_KEY,
+    });
+    return groq(modelId);
+  },
   google: (modelId: string = 'gemini-2.0-flash-lite') => google(modelId),
-  openrouter: (modelId: string = 'google/gemini-2.0-flash-001') => openrouter(modelId),
+  openrouter: (modelId: string = 'google/gemini-2.0-flash-001', baseUrl: string = 'https://openrouter.ai/api/v1') => {
+    const openrouter = createOpenAICompatible({
+      name: 'openrouter',
+      baseURL: baseUrl,
+      apiKey: process.env.OPENROUTER_API_KEY,
+    });
+    return openrouter(modelId);
+  },
   anthropic: (modelId: string = 'claude-3-5-haiku-latest') => anthropic(modelId),
   openai: (modelId: string = 'gpt-4o-mini') => openai(modelId),
   ollama: (modelId: string = 'llama3.2') => ollama(modelId),
+  mistral: (modelId: string = 'devstral-small-2505', baseUrl: string = 'https://api.mistral.ai/v1') => {
+    const mistral = createOpenAICompatible({
+      name: 'mistral',
+      baseURL: baseUrl,
+      apiKey: process.env.MISTRAL_API_KEY,
+    });
+    return mistral(modelId);
+  },
   lmstudio: (modelId: string = 'deepseek/deepseek-r1-0528-qwen3-8b', baseUrl: string = 'http://localhost:1234/v1') => {
     const lmstudio = createOpenAICompatible({
       name: 'lmstudio',
