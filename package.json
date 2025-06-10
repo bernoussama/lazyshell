@@ -19,7 +19,8 @@
     "release:patch": "pnpm run build && npm version patch && npm run build && npm publish && git push --follow-tags",
     "prerelease": "pnpm run build && npm version prerelease && npm run build && npm publish && git push --follow-tags",
     "eval:ci": "jiti src/lib/ci-eval.ts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "compile": "bun build src/index.ts --minify --compile --outfile bin/lsh"
   },
   "keywords": [
     "ai",
