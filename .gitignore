@@ -4,3 +4,5 @@ bin/*.map
 bin/**/*.js
 bin/lib
 dist
+lsh
+bin

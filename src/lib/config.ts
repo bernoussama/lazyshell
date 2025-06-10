@@ -25,6 +25,7 @@ export const SUPPORTED_PROVIDERS = {
     description: 'OpenRouter API (multiple models)',
     envVar: 'OPENROUTER_API_KEY',
     defaultModel: 'google/gemini-2.0-flash-001',
+    defaultBaseUrl: 'https://openrouter.ai/api/v1',
     // defaultModel: 'google/gemma-3-27b-it:free',
   },
   anthropic: {
@@ -48,8 +49,9 @@ export const SUPPORTED_PROVIDERS = {
   mistral: {
     name: 'Mistral',
     description: 'Mistral models',
-    envVar: null,
+    envVar: 'MISTRAL_API_KEY',
     defaultModel: 'devstral-small-2505',
+    defaultBaseUrl: 'https://api.mistral.ai/v1',
   },
   lmstudio: {
     name: 'LM Studio (Local)',
