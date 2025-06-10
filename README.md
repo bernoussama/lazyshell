@@ -1,8 +1,13 @@
-<h1 align="center">
-   
-LazyShell 🐚
 
-</h1>
+
+<div align="center">
+
+# LazyShell
+
+<img width="200" align="center" alt="lsh-logo" src="https://github.com/user-attachments/assets/f94fbe8d-0be9-474c-9321-4caa27091c0f" />
+</div>
+
+
 <div align="center">
    
 [![npm version](https://badge.fury.io/js/lazyshell.svg)](https://badge.fury.io/js/lazyshell)
