@@ -275,13 +275,22 @@ export async function generateBenchmarkText(model: LanguageModel, prompt: string
 
 // Export model instances for direct use
 export const models = {
-  groq: (modelId: string = 'llama-3.3-70b-versatile', baseUrl?: string, apiKey?: string) => getModelFromRegistry('groq', modelId, baseUrl, apiKey).model,
-  google: (modelId: string = 'gemini-2.0-flash-lite', baseUrl?: string, apiKey?: string) => getModelFromRegistry('google', modelId, baseUrl, apiKey).model,
-  openrouter: (modelId: string = 'google/gemini-2.0-flash-001', baseUrl?: string, apiKey?: string) => getModelFromRegistry('openrouter', modelId, baseUrl, apiKey).model,
-  anthropic: (modelId: string = 'claude-3-5-haiku-latest', baseUrl?: string, apiKey?: string) => getModelFromRegistry('anthropic', modelId, baseUrl, apiKey).model,
-  openai: (modelId: string = 'gpt-4o-mini', baseUrl?: string, apiKey?: string) => getModelFromRegistry('openai', modelId, baseUrl, apiKey).model,
-  ollama: (modelId: string = 'llama3.2', baseUrl?: string, apiKey?: string) => getModelFromRegistry('ollama', modelId, baseUrl, apiKey).model,
-  mistral: (modelId: string = 'devstral-small-2505', baseUrl?: string, apiKey?: string) => getModelFromRegistry('mistral', modelId, baseUrl, apiKey).model,
-  lmstudio: (modelId: string = 'deepseek/deepseek-r1-0528-qwen3-8b', baseUrl?: string, apiKey?: string) => getModelFromRegistry('lmstudio', modelId, baseUrl, apiKey).model,
-  openaiCompatible: (modelId: string = 'gpt-3.5-turbo', baseUrl?: string, apiKey?: string) => getModelFromRegistry('openaiCompatible', modelId, baseUrl, apiKey).model,
+  groq: (modelId: string = 'llama-3.3-70b-versatile', baseUrl?: string, apiKey?: string) =>
+    getModelFromRegistry('groq', modelId, baseUrl, apiKey).model,
+  google: (modelId: string = 'gemini-2.0-flash-lite', baseUrl?: string, apiKey?: string) =>
+    getModelFromRegistry('google', modelId, baseUrl, apiKey).model,
+  openrouter: (modelId: string = 'google/gemini-2.0-flash-001', baseUrl?: string, apiKey?: string) =>
+    getModelFromRegistry('openrouter', modelId, baseUrl, apiKey).model,
+  anthropic: (modelId: string = 'claude-3-5-haiku-latest', baseUrl?: string, apiKey?: string) =>
+    getModelFromRegistry('anthropic', modelId, baseUrl, apiKey).model,
+  openai: (modelId: string = 'gpt-4o-mini', baseUrl?: string, apiKey?: string) =>
+    getModelFromRegistry('openai', modelId, baseUrl, apiKey).model,
+  ollama: (modelId: string = 'llama3.2', baseUrl?: string, apiKey?: string) =>
+    getModelFromRegistry('ollama', modelId, baseUrl, apiKey).model,
+  mistral: (modelId: string = 'devstral-small-2505', baseUrl?: string, apiKey?: string) =>
+    getModelFromRegistry('mistral', modelId, baseUrl, apiKey).model,
+  lmstudio: (modelId: string = 'deepseek/deepseek-r1-0528-qwen3-8b', baseUrl?: string, apiKey?: string) =>
+    getModelFromRegistry('lmstudio', modelId, baseUrl, apiKey).model,
+  openaiCompatible: (modelId: string = 'gpt-3.5-turbo', baseUrl?: string, apiKey?: string) =>
+    getModelFromRegistry('openaiCompatible', modelId, baseUrl, apiKey).model,
 };

@@ -33,7 +33,7 @@ export const ProviderRegistry: Record<ProviderKey, ProviderConfig> = {
     name: 'google',
     apiKeyEnvVar: 'GOOGLE_GENERATIVE_AI_API_KEY',
     defaultModelId: 'gemini-2.0-flash-lite',
-    createModel: (modelId) => google(modelId),
+    createModel: modelId => google(modelId),
   },
   openrouter: {
     name: 'openrouter',
@@ -49,19 +49,19 @@ export const ProviderRegistry: Record<ProviderKey, ProviderConfig> = {
     name: 'anthropic',
     apiKeyEnvVar: 'ANTHROPIC_API_KEY',
     defaultModelId: 'claude-3-5-haiku-latest',
-    createModel: (modelId) => anthropic(modelId),
+    createModel: modelId => anthropic(modelId),
   },
   openai: {
     name: 'openai',
     apiKeyEnvVar: 'OPENAI_API_KEY',
     defaultModelId: 'gpt-4o-mini',
-    createModel: (modelId) => openai(modelId),
+    createModel: modelId => openai(modelId),
   },
   ollama: {
     name: 'ollama',
     defaultModelId: 'llama3.2',
     maxRetries: 1,
-    createModel: (modelId) => ollama(modelId),
+    createModel: modelId => ollama(modelId),
   },
   mistral: {
     name: 'mistral',
@@ -97,18 +97,23 @@ export const ProviderRegistry: Record<ProviderKey, ProviderConfig> = {
 };
 
 // Utility to get model from registry
-export function getModelFromRegistry(providerKey: ProviderKey, modelId?: string, baseUrl?: string, apiKey?: string): ModelConfig {
+export function getModelFromRegistry(
+  providerKey: ProviderKey,
+  modelId?: string,
+  baseUrl?: string,
+  apiKey?: string
+): ModelConfig {
   const config = ProviderRegistry[providerKey];
   if (!config) throw new Error(`Unsupported provider: ${providerKey}`);
-  
+
   const finalModelId = modelId || config.defaultModelId;
   const finalBaseUrl = baseUrl || config.baseUrl;
   const finalApiKey = apiKey || (config.apiKeyEnvVar ? process.env[config.apiKeyEnvVar] : undefined);
-  
+
   if (config.apiKeyEnvVar && !finalApiKey) {
     throw new Error(`${config.name} API key is required`);
   }
-  
+
   const model = config.createModel(finalModelId, finalBaseUrl, finalApiKey);
   return { provider: providerKey, modelId: finalModelId, model, maxRetries: config.maxRetries };
 }
