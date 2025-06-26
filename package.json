@@ -12,7 +12,7 @@
   ],
   "scripts": {
     "x": "jiti src/index.ts",
-    "typecheck": "tsc",
+    "typecheck": "tsc --noEmit",
     "lint": "prettier --check . && eslint",
     "lint:fix": "prettier --write . && eslint --fix",
     "build": "pkgroll --minify",
@@ -20,7 +20,7 @@
     "prerelease": "pnpm run build && npm version prerelease && npm run build && npm publish && git push --follow-tags",
     "eval:ci": "jiti src/lib/ci-eval.ts",
     "prepare": "husky",
-    "compile": "bun build src/index.ts --minify --compile --outfile bin/lsh"
+    "compile": "bun build --compile --minify --sourcemap src/index.ts  --outfile bin/lsh"
   },
   "keywords": [
     "ai",
@@ -34,8 +34,13 @@
   ],
   "author": "bernoussama",
   "license": "GPL-3.0",
-  "packageManager": "pnpm@10.12.1",
+  "packageManager": "bun@1.2.17",
   "devDependencies": {
+    "ollama-ai-provider": "^1.2.0",
+    "@ai-sdk/anthropic": "^1.2.12",
+    "@ai-sdk/google": "^1.2.18",
+    "@ai-sdk/openai": "^1.3.22",
+    "@ai-sdk/openai-compatible": "^0.2.14",
     "@eslint/js": "^9.27.0",
     "@jest/types": "^29.6.3",
     "@types/node": "^22.15.25",
@@ -50,17 +55,12 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^1.2.12",
-    "@ai-sdk/google": "^1.2.18",
-    "@ai-sdk/openai": "^1.3.22",
-    "@ai-sdk/openai-compatible": "^0.2.14",
     "@clack/prompts": "^0.11.0",
     "@types/json-schema": "^7.0.15",
     "ai": "^4.3.16",
     "chalk": "^5.4.1",
     "commander": "^14.0.0",
     "dedent": "^1.6.0",
-    "ollama-ai-provider": "^1.2.0",
     "systeminformation": "^5.27.1",
     "zod": "^3.25.39"
   },
