@@ -16,8 +16,8 @@
     "lint": "prettier --check . && eslint",
     "lint:fix": "prettier --write . && eslint --fix",
     "build": "pkgroll --minify",
-    "release:patch": "pnpm run build && npm version patch && npm run build && npm publish && git push --follow-tags",
-    "prerelease": "pnpm run build && npm version prerelease && npm run build && npm publish && git push --follow-tags",
+    "release:patch": "bun run build && npm version patch && npm run build && npm publish && git push --follow-tags",
+    "prerelease": "bun run build && npm version prerelease && npm run build && npm publish && git push --follow-tags",
     "eval:ci": "jiti src/lib/ci-eval.ts",
     "prepare": "husky",
     "compile": "bun build --compile --minify --sourcemap src/index.ts  --outfile bin/lsh"
