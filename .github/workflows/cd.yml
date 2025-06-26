@@ -1,0 +1,123 @@
+name: CD - Build and Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    name: Build binaries
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            arch: x64
+            extension: ''
+          - os: macos-latest
+            platform: darwin
+            arch: x64
+            extension: ''
+          - os: macos-latest
+            platform: darwin
+            arch: arm64
+            extension: ''
+          - os: windows-latest
+            platform: win32
+            arch: x64
+            extension: '.exe'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.2.17'
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Create bin directory
+        run: mkdir -p bin
+
+      - name: Build binary
+        run: bun build --compile --minify --sourcemap src/index.ts --outfile bin/lsh${{ matrix.extension }}
+
+      - name: Make binary executable (Unix)
+        if: matrix.os != 'windows-latest'
+        run: chmod +x bin/lsh
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: lsh-${{ matrix.platform }}-${{ matrix.arch }}
+          path: bin/lsh${{ matrix.extension }}
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Prepare release assets
+        run: |
+          mkdir -p release
+          # Rename and move binaries with proper names
+          mv artifacts/lsh-linux-x64/lsh release/lsh-linux-x64
+          mv artifacts/lsh-darwin-x64/lsh release/lsh-darwin-x64
+          mv artifacts/lsh-win32-x64/lsh.exe release/lsh-win32-x64.exe
+          
+          # Create checksums
+          cd release
+          sha256sum lsh-* > checksums.txt
+          ls -la
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: Release ${{ steps.version.outputs.version }}
+          body: |
+            ## LazyShell ${{ steps.version.outputs.version }}
+            
+            ### Downloads
+            - **Linux (x64)**: `lsh-linux-x64`
+            - **macOS (x64)**: `lsh-darwin-x64`  
+            - **Windows (x64)**: `lsh-win32-x64.exe`
+            
+            ### Installation
+            1. Download the appropriate binary for your platform
+            2. Make it executable: `chmod +x lsh-*` (Unix systems)
+            3. Move to a directory in your PATH: `mv lsh-* /usr/local/bin/lsh`
+            4. Run: `lsh --help`
+            
+            ### Checksums
+            SHA256 checksums are included in `checksums.txt` for verification.
+          files: |
+            release/lsh-linux-x64
+            release/lsh-darwin-x64
+            release/lsh-win32-x64.exe
+            release/checksums.txt
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.version, '-') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

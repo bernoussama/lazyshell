@@ -1,15 +1,12 @@
 import { generateObject, generateText, type LanguageModel } from 'ai';
-import { groq } from '@ai-sdk/groq';
 import { google } from '@ai-sdk/google';
 import { ollama } from 'ollama-ai-provider';
-import { openrouter } from '@openrouter/ai-sdk-provider';
 import { openai } from '@ai-sdk/openai';
 import { anthropic } from '@ai-sdk/anthropic';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import os from 'os';
 import z from 'zod';
 import type { Config, ProviderKey } from './config';
-import { mistral } from '@ai-sdk/mistral';
 import dedent from 'dedent';
 import { getDistroPackageManager } from '../helpers/package-manager';
 import { getHardwareInfo, type HardwareInfo } from '../helpers/hardware';
@@ -68,98 +65,11 @@ export async function getSystemInfo(): Promise<SystemInfo> {
   return sysinfo;
 }
 
+import { ProviderRegistry, getModelFromRegistry } from './provider-registry';
+
 // Get model based on configuration
 export function getModelFromConfig(config: Config): ModelConfig {
-  const provider = config.provider;
-  const modelId = config.model || getDefaultModelId(provider);
-  const apiKey = config.apiKey;
-
-  let model: LanguageModel;
-  let maxRetries: number | undefined = undefined;
-  try {
-    switch (provider) {
-      case 'groq':
-        if (!apiKey && !process.env.GROQ_API_KEY) {
-          throw new Error('Groq API key is required');
-        }
-        process.env.GROQ_API_KEY = apiKey || process.env.GROQ_API_KEY;
-        model = groq(modelId);
-        break;
-
-      case 'google':
-        if (!apiKey && !process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-          throw new Error('Google AI API key is required');
-        }
-        process.env.GOOGLE_GENERATIVE_AI_API_KEY = apiKey || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
-        model = google(modelId);
-        break;
-
-      case 'openrouter':
-        if (!apiKey && !process.env.OPENROUTER_API_KEY) {
-          throw new Error('OpenRouter API key is required');
-        }
-        process.env.OPENROUTER_API_KEY = apiKey || process.env.OPENROUTER_API_KEY;
-        model = openrouter(modelId);
-        break;
-
-      case 'anthropic':
-        if (!apiKey && !process.env.ANTHROPIC_API_KEY) {
-          throw new Error('Anthropic API key is required');
-        }
-        process.env.ANTHROPIC_API_KEY = apiKey || process.env.ANTHROPIC_API_KEY;
-        model = anthropic(modelId);
-        break;
-
-      case 'openai':
-        if (!apiKey && !process.env.OPENAI_API_KEY) {
-          throw new Error('OpenAI API key is required');
-        }
-        process.env.OPENAI_API_KEY = apiKey || process.env.OPENAI_API_KEY;
-        model = openai(modelId);
-        break;
-
-      case 'ollama':
-        model = ollama(modelId);
-        maxRetries = 1;
-        break;
-
-      case 'lmstudio': {
-        const baseUrl = config.baseUrl || 'http://localhost:1234/v1';
-        const lmstudio = createOpenAICompatible({
-          name: 'lmstudio',
-          baseURL: baseUrl,
-        });
-        model = lmstudio(modelId);
-        maxRetries = 1;
-        break;
-      }
-
-      case 'openaiCompatible': {
-        const baseUrl = config.baseUrl || 'http://localhost:8000/v1';
-
-        // Set API key if provided
-        if (apiKey) {
-          process.env.OPENAI_COMPATIBLE_API_KEY = apiKey;
-        }
-
-        const openaiCompatible = createOpenAICompatible({
-          name: 'openaiCompatible',
-          baseURL: baseUrl,
-          apiKey: apiKey || process.env.OPENAI_COMPATIBLE_API_KEY,
-        });
-        model = openaiCompatible(modelId);
-        maxRetries = 1;
-        break;
-      }
-
-      default:
-        throw new Error(`Unsupported provider: ${provider}`);
-    }
-
-    return { provider, modelId, model };
-  } catch (error) {
-    throw new Error(`Failed to initialize ${provider} model: ${error}`);
-  }
+  return getModelFromRegistry(config.provider, config.model, config.baseUrl, config.apiKey);
 }
 
 // Get default model ID for a provider
@@ -181,72 +91,37 @@ function getDefaultModelId(provider: ProviderKey): string {
 
 // Get available model based on environment variables (legacy function)
 export function getDefaultModel(): ModelConfig {
-  let model: LanguageModel;
-  let provider: string;
-  let modelId: string;
-
   if (process.env.GROQ_API_KEY) {
-    provider = 'groq';
-    // modelId = 'llama-3.1-8b-instant';
-    modelId = 'llama-3.3-70b-versatile';
-
-    model = groq(modelId);
+    return getModelFromRegistry('groq');
   } else if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-    provider = 'google';
-    modelId = 'gemini-2.0-flash-lite';
-    model = google(modelId);
+    return getModelFromRegistry('google');
   } else if (process.env.OPENROUTER_API_KEY) {
-    provider = 'openrouter';
-    modelId = 'google/gemini-2.0-flash-001';
-    model = openrouter(modelId);
+    return getModelFromRegistry('openrouter');
   } else if (process.env.ANTHROPIC_API_KEY) {
-    provider = 'anthropic';
-    modelId = 'claude-3-5-haiku-latest';
-    model = anthropic(modelId);
+    return getModelFromRegistry('anthropic');
   } else if (process.env.OPENAI_API_KEY) {
-    provider = 'openai';
-    modelId = 'gpt-4o-mini';
-    model = openai(modelId);
+    return getModelFromRegistry('openai');
   } else {
     try {
-      provider = 'ollama';
-      modelId = 'llama3.2';
-      model = ollama(modelId);
+      return getModelFromRegistry('ollama');
     } catch (error) {
       throw new Error(
         'No API key found. Please set either GROQ_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY, OPENROUTER_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY. Or setup Ollama/LM Studio'
       );
     }
   }
-
-  return { provider, modelId, model };
 }
 
 // Get predefined models for benchmarking
 export function getBenchmarkModels(): Record<string, LanguageModel> {
   return {
-    'or-devstral': openrouter('mistralai/devstral-small:free'),
-    // 'openrouter-mistral-7b': openrouter('mistralai/mistral-7b-instruct:free'),
-    // 'openrouter-llama3.3': openrouter('meta-llama/llama-3.3-8b-instruct:free'),// doesnt support tool calling or json
-    // 'groq-llama3-8b': groq('llama3-8b-8192'), // slower than llama-3.3-70b
-    'gemini-2.0-flash-lite': google('gemini-2.0-flash-lite'),
-    'ollama3.2': ollama('llama3.2'),
-    'llama-3.3-70b-versatile': groq('llama-3.3-70b-versatile'),
-    devstral: mistral('devstral-small-2505'),
-    'lmstudio-llama': (() => {
-      const lmstudio = createOpenAICompatible({
-        name: 'lmstudio',
-        baseURL: 'http://localhost:1234/v1',
-      });
-      return lmstudio('llama-3.2-1b');
-    })(),
-    'openaiCompatible-gpt': (() => {
-      const openaiCompatible = createOpenAICompatible({
-        name: 'openaiCompatible',
-        baseURL: 'http://localhost:8000/v1',
-      });
-      return openaiCompatible('gpt-3.5-turbo');
-    })(),
+    'or-devstral': getModelFromRegistry('openrouter', 'mistralai/devstral-small:free').model,
+    'gemini-2.0-flash-lite': getModelFromRegistry('google', 'gemini-2.0-flash-lite').model,
+    'ollama3.2': getModelFromRegistry('ollama', 'llama3.2').model,
+    'llama-3.3-70b-versatile': getModelFromRegistry('groq', 'llama-3.3-70b-versatile').model,
+    devstral: getModelFromRegistry('mistral', 'devstral-small-2505').model,
+    'lmstudio-llama': getModelFromRegistry('lmstudio', 'llama-3.2-1b').model,
+    'openaiCompatible-gpt': getModelFromRegistry('openaiCompatible', 'gpt-3.5-turbo').model,
   };
 }
 
@@ -400,24 +275,22 @@ export async function generateBenchmarkText(model: LanguageModel, prompt: string
 
 // Export model instances for direct use
 export const models = {
-  groq: (modelId: string = 'llama-3.1-8b-instant') => groq(modelId),
-  google: (modelId: string = 'gemini-2.0-flash-lite') => google(modelId),
-  openrouter: (modelId: string = 'google/gemini-2.0-flash-001') => openrouter(modelId),
-  anthropic: (modelId: string = 'claude-3-5-haiku-latest') => anthropic(modelId),
-  openai: (modelId: string = 'gpt-4o-mini') => openai(modelId),
-  ollama: (modelId: string = 'llama3.2') => ollama(modelId),
-  lmstudio: (modelId: string = 'deepseek/deepseek-r1-0528-qwen3-8b', baseUrl: string = 'http://localhost:1234/v1') => {
-    const lmstudio = createOpenAICompatible({
-      name: 'lmstudio',
-      baseURL: baseUrl,
-    });
-    return lmstudio(modelId);
-  },
-  openaiCompatible: (modelId: string = 'gpt-3.5-turbo', baseUrl: string = 'http://localhost:8000/v1') => {
-    const openaiCompatible = createOpenAICompatible({
-      name: 'openaiCompatible',
-      baseURL: baseUrl,
-    });
-    return openaiCompatible(modelId);
-  },
+  groq: (modelId: string = 'llama-3.3-70b-versatile', baseUrl?: string, apiKey?: string) =>
+    getModelFromRegistry('groq', modelId, baseUrl, apiKey).model,
+  google: (modelId: string = 'gemini-2.0-flash-lite', baseUrl?: string, apiKey?: string) =>
+    getModelFromRegistry('google', modelId, baseUrl, apiKey).model,
+  openrouter: (modelId: string = 'google/gemini-2.0-flash-001', baseUrl?: string, apiKey?: string) =>
+    getModelFromRegistry('openrouter', modelId, baseUrl, apiKey).model,
+  anthropic: (modelId: string = 'claude-3-5-haiku-latest', baseUrl?: string, apiKey?: string) =>
+    getModelFromRegistry('anthropic', modelId, baseUrl, apiKey).model,
+  openai: (modelId: string = 'gpt-4o-mini', baseUrl?: string, apiKey?: string) =>
+    getModelFromRegistry('openai', modelId, baseUrl, apiKey).model,
+  ollama: (modelId: string = 'llama3.2', baseUrl?: string, apiKey?: string) =>
+    getModelFromRegistry('ollama', modelId, baseUrl, apiKey).model,
+  mistral: (modelId: string = 'devstral-small-2505', baseUrl?: string, apiKey?: string) =>
+    getModelFromRegistry('mistral', modelId, baseUrl, apiKey).model,
+  lmstudio: (modelId: string = 'deepseek/deepseek-r1-0528-qwen3-8b', baseUrl?: string, apiKey?: string) =>
+    getModelFromRegistry('lmstudio', modelId, baseUrl, apiKey).model,
+  openaiCompatible: (modelId: string = 'gpt-3.5-turbo', baseUrl?: string, apiKey?: string) =>
+    getModelFromRegistry('openaiCompatible', modelId, baseUrl, apiKey).model,
 };
