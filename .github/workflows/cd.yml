@@ -3,7 +3,7 @@ name: CD - Build and Release
 on:
   push:
     tags:
-      - 'v*'
+      - '*'
   workflow_dispatch:
 
 
