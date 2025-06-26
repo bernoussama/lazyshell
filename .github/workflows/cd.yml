@@ -65,13 +65,12 @@ jobs:
           path: bin/lsh${{ matrix.extension }}
 
   release:
-    if: github.event.pull_request.merged == true
+    if: startsWith(github.ref, 'refs/tags/')
     name: Create GitHub Release
     needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    if: startsWith(github.ref, 'refs/tags/')
 
     steps:
       - name: Checkout code
