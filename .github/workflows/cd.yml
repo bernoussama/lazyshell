@@ -2,7 +2,6 @@ name: CD - Build and Release
 
 on:
   push:
-    branches: [ main ]
     tags:
       - '*'
   workflow_dispatch:
@@ -62,48 +61,29 @@ jobs:
           name: lsh-${{ matrix.platform }}-${{ matrix.arch }}
           path: bin/lsh${{ matrix.extension }}
 
+  # release
   release:
     name: Create GitHub Release
     needs: build
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
     permissions:
       contents: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Check for tags on current commit
-        id: check_tag
-        run: |
-          # Get all tags pointing to the current commit
-          TAGS=$(git tag --points-at HEAD)
-          if [ -n "$TAGS" ]; then
-            # Get the first tag (in case there are multiple)
-            TAG=$(echo "$TAGS" | head -n1)
-            echo "has_tag=true" >> $GITHUB_OUTPUT
-            echo "tag_name=$TAG" >> $GITHUB_OUTPUT
-            echo "Found tag: $TAG"
-          else
-            echo "has_tag=false" >> $GITHUB_OUTPUT
-            echo "No tags found on current commit"
-          fi
 
       - name: Download all artifacts
-        if: steps.check_tag.outputs.has_tag == 'true'
         uses: actions/download-artifact@v4
         with:
           path: artifacts
 
       - name: Extract version from tag
-        if: steps.check_tag.outputs.has_tag == 'true'
         id: version
-        run: echo "version=${{ steps.check_tag.outputs.tag_name }}" >> $GITHUB_OUTPUT
+        run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
       - name: Prepare release assets
-        if: steps.check_tag.outputs.has_tag == 'true'
         run: |
           mkdir -p release
           # Rename and move binaries with proper names
@@ -118,7 +98,6 @@ jobs:
           ls -la
 
       - name: Create Release
-        if: steps.check_tag.outputs.has_tag == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.version }}
