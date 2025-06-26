@@ -5,10 +5,13 @@ on:
     tags:
       - '*'
 
+
 jobs:
   build:
     name: Build binaries
     runs-on: ${{ matrix.os }}
+    permissions:
+          contents: read
     strategy:
       matrix:
         include:
