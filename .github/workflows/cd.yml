@@ -1,13 +1,17 @@
 name: CD - Build and Release
 
 on:
-  push:
+  pull_request_target:
+    types:
+      - closed
     tags:
-      - 'v*'
+      - '*'
   workflow_dispatch:
 
 
 jobs:
+  if_merged:
+      if: github.event.pull_request.merged == true
   build:
     name: Build binaries
     runs-on: ${{ matrix.os }}
