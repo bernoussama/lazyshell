@@ -3,6 +3,7 @@
 # LazyShell Install Script
 # Usage: curl -fsSL https://raw.githubusercontent.com/bernoussama/lazyshell/main/install.sh | bash
 
+# this line is used to ensure the script exits on any error
 set -e
 
 # Colors for output
