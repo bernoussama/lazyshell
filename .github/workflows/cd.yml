@@ -61,6 +61,7 @@ jobs:
           name: lsh-${{ matrix.platform }}-${{ matrix.arch }}
           path: bin/lsh${{ matrix.extension }}
 
+  # release
   release:
     name: Create GitHub Release
     needs: build
