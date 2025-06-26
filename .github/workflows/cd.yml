@@ -1,9 +1,12 @@
 name: CD - Build and Release
 
 on:
-  push:
-    tags:
-      - '*'
+  workflow_dispatch:
+    push:
+      branches:
+        - dev
+      tags:
+        - "*"
 
 
 jobs:
