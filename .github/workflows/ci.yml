@@ -5,6 +5,7 @@ on:
     branches: [ main, dev ]
     paths:
       - 'src/**'
+      - '**.ts'
       - 'package.json'
       - 'pnpm-lock.yaml'
       - '.github/workflows/ci.yml'
