@@ -57,12 +57,7 @@ jobs:
         run: mkdir -p bin
 
       - name: Build binary
-        if: matrix.platform != 'win32'
-        run: bun build --compile --minify --sourcemap src/index.ts --outfile bin/lsh${{ matrix.extension }} --target bun-${{ matrix.platform }}-${{ matrix.arch }}
-
-      - name: Build binary (Windows)
-        if: matrix.platform == 'win32'
-        run: bun build --compile --minify --sourcemap src/index.ts --outfile bin/lsh${{ matrix.extension }} --target bun-windows-${{ matrix.arch }}
+        run: bun build --compile --minify --sourcemap src/index.ts --outfile bin/lsh${{ matrix.extension }}
 
       - name: Make binary executable (Unix)
         if: matrix.os != 'windows-latest'
