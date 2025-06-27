@@ -20,6 +20,10 @@ jobs:
             platform: linux
             arch: x64
             extension: ''
+          - os: ubuntu-latest
+            platform: linux
+            arch: arm64
+            extension: ''
           - os: macos-latest
             platform: darwin
             arch: x64
@@ -31,6 +35,10 @@ jobs:
           - os: windows-latest
             platform: win32
             arch: x64
+            extension: '.exe'
+          - os: windows-latest
+            platform: win32
+            arch: arm64
             extension: '.exe'
 
     steps:
@@ -49,7 +57,12 @@ jobs:
         run: mkdir -p bin
 
       - name: Build binary
-        run: bun build --compile --minify --sourcemap src/index.ts --outfile bin/lsh${{ matrix.extension }}
+        if: matrix.platform != 'win32'
+        run: bun build --compile --minify --sourcemap src/index.ts --outfile bin/lsh${{ matrix.extension }} --target bun-${{ matrix.platform }}-${{ matrix.arch }}
+
+      - name: Build binary (Windows)
+        if: matrix.platform == 'win32'
+        run: bun build --compile --minify --sourcemap src/index.ts --outfile bin/lsh${{ matrix.extension }} --target bun-windows-${{ matrix.arch }}
 
       - name: Make binary executable (Unix)
         if: matrix.os != 'windows-latest'
@@ -88,9 +101,11 @@ jobs:
           mkdir -p release
           # Rename and move binaries with proper names
           mv artifacts/lsh-linux-x64/lsh release/lsh-linux-x64
+          mv artifacts/lsh-linux-arm64/lsh release/lsh-linux-arm64
           mv artifacts/lsh-darwin-x64/lsh release/lsh-darwin-x64
           mv artifacts/lsh-darwin-arm64/lsh release/lsh-darwin-arm64
           mv artifacts/lsh-win32-x64/lsh.exe release/lsh-win32-x64.exe
+          mv artifacts/lsh-win32-arm64/lsh.exe release/lsh-win32-arm64.exe
           
           # Create checksums
           cd release
@@ -107,9 +122,11 @@ jobs:
             
             ### Downloads
             - **Linux (x64)**: `lsh-linux-x64`
+            - **Linux (ARM64)**: `lsh-linux-arm64`
             - **macOS (x64)**: `lsh-darwin-x64`
             - **macOS (ARM64)**: `lsh-darwin-arm64`
             - **Windows (x64)**: `lsh-win32-x64.exe`
+            - **Windows (ARM64, experimental)**: `lsh-win32-arm64.exe`
             
             ### Installation
             1. Download the appropriate binary for your platform
@@ -121,9 +138,11 @@ jobs:
             SHA256 checksums are included in `checksums.txt` for verification.
           files: |
             release/lsh-linux-x64
+            release/lsh-linux-arm64
             release/lsh-darwin-x64
             release/lsh-darwin-arm64
             release/lsh-win32-x64.exe
+            release/lsh-win32-arm64.exe
             release/checksums.txt
           draft: false
           prerelease: ${{ contains(steps.version.outputs.version, '-') }}
