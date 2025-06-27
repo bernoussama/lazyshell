@@ -198,7 +198,7 @@ install_binary() {
   local temp_file="$TEMP_DIR/$binary_name"
 
   log_info "Downloading $binary_name..."
-  if ! curl -fsSL -o "$temp_file" "$download_url"; then
+  if ! curl -# -L -o "$temp_file" "$download_url"; then
     log_error "Failed to download binary"
     exit 1
   fi
