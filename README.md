@@ -66,6 +66,11 @@ yarn global add lazyshell
 pnpm add -g lazyshell
 ```
 
+### Using Install Script (experimental)
+```bash
+curl -fsSL https://raw.githubusercontent.com/bernoussama/lazyshell/main/install | bash
+```
+
 ## Quick Start 🚀
 
 1. **First Run**: LazyShell will automatically prompt you to select an AI provider and enter your API key:
