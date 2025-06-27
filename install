@@ -159,15 +159,12 @@ parse_json() {
 
 # Get latest release info from GitHub API
 get_latest_release() {
-  local api_url="https://api.github.com/repos/${REPO}/releases/latest"
+  local api_url="https://api.github.com/repos/${REPO}/releases"
   local release_data
 
-  log_info "Fetching latest release information..."
+  log_info "Fetching latest release information..." >&2
 
-  if ! release_data=$(curl -fsSL "$api_url"); then
-    log_error "Failed to fetch release information from GitHub API"
-    exit 1
-  fi
+  release_data=$(curl -fsSL "$api_url")
 
   echo "$release_data"
 }
@@ -284,20 +281,15 @@ main() {
   local release_data
   release_data=$(get_latest_release)
 
-  # Extract version and download URL
+  # Extract version and download URL from the first release in the array
   local version download_url
   if command_exists jq; then
-    version=$(echo "$release_data" | jq -r '.tag_name')
-    download_url=$(echo "$release_data" | jq -r ".assets[] | select(.name == \"$binary_name\") | .browser_download_url")
+    version=$(echo "$release_data" | jq -r '.[0].tag_name')
+    download_url=$(echo "$release_data" | jq -r ".[0].assets[] | select(.name == \"$binary_name\") | .browser_download_url")
   else
-    # Fallback JSON parsing
-    version=$(echo "$release_data" | grep -o '"tag_name":"[^"]*' | cut -d'"' -f4)
-    download_url=$(echo "$release_data" | grep -o "\"browser_download_url\":\"[^\"]*$binary_name\"" | cut -d'"' -f4)
-  fi
-
-  if [ -z "$version" ]; then
-    log_error "Failed to extract version from release data"
-    exit 1
+    # Fallback JSON parsing for array format
+    version=$(echo "$release_data" | grep '"tag_name"' | head -1 | cut -d'"' -f4)
+    download_url=$(echo "$release_data" | grep "browser_download_url.*$binary_name" | head -1 | cut -d'"' -f4)
   fi
 
   if [ -z "$download_url" ]; then
