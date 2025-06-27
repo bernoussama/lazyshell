@@ -142,9 +142,9 @@ check_requirements() {
 
   if ! command_exists jq; then
     if command_exists python3; then
-      log_info "jq not found, will use python3 for JSON parsing"
+      log_warning "jq not found, using python3 for JSON parsing"
     elif command_exists python; then
-      log_info "jq not found, will use python for JSON parsing"
+      log_warning "jq not found, using python for JSON parsing"
     else
       missing_commands+=("jq or python")
     fi
@@ -179,8 +179,6 @@ get_latest_release() {
   local api_url="https://api.github.com/repos/${REPO}/releases"
   local release_data
 
-  log_info "Fetching latest release information..." >&2
-
   release_data=$(curl -fsSL "$api_url")
 
   echo "$release_data"
@@ -197,7 +195,7 @@ install_binary() {
 
   local temp_file="$TEMP_DIR/$binary_name"
 
-  log_info "Downloading $binary_name..."
+  print_message info "Downloading ${GREEN}lazyshell ..."
   if ! curl -# -L -o "$temp_file" "$download_url"; then
     log_error "Failed to download binary"
     exit 1
@@ -259,13 +257,12 @@ verify_installation() {
     log_warning "Add it to your PATH or use the full path: $install_path"
   else
     log_success "Installation verified successfully"
-    log_info "You can now run: $BINARY_NAME --help"
+
   fi
 }
 
 # Main installation function
 main() {
-  log_info "Starting LazyShell installation..."
 
   # Check requirements
   check_requirements
@@ -276,16 +273,15 @@ main() {
   arch=$(detect_arch)
   binary_name=$(get_binary_name "$os" "$arch")
 
-  log_info "Detected system: $os $arch"
-  log_info "Target binary: $binary_name"
-
   # Check for unsupported combinations
   if [ "$os" = "darwin" ] && [ "$arch" = "arm64" ]; then
-    log_info "Detected Apple Silicon Mac"
+    echo
   elif [ "$os" = "darwin" ] && [ "$arch" = "x64" ]; then
-    log_info "Detected Intel Mac"
+    echo
   elif [ "$os" = "linux" ] && [ "$arch" = "x64" ]; then
-    log_info "Detected Linux x64"
+    echo
+  elif [ "$os" = "linux" ] && [ "$arch" = "arm64" ]; then
+    echo
   elif [ "$os" = "win32" ]; then
     log_warning "Windows detected - this script may not work properly"
     log_warning "Consider downloading the binary manually"
@@ -315,21 +311,16 @@ main() {
     exit 1
   fi
 
-  log_info "Latest version: $version"
-  log_info "Download URL: $download_url"
-
   # Check if already installed
   if command_exists "$BINARY_NAME"; then
     local current_version
     current_version=$($BINARY_NAME --version 2>/dev/null || echo "unknown")
-    log_info "Current version: $current_version"
 
     if [ "$current_version" = "$version" ]; then
       log_success "Latest version is already installed"
       exit 0
     fi
 
-    log_info "Updating from $current_version to $version"
   fi
 
   # Download and install
@@ -422,11 +413,11 @@ main() {
   verify_installation
 
   # alias lazyshell to lsh
-  log_info "Creating alias for $BINARY_NAME as $ALIAS_NAME"
+
   ln -sf "$INSTALL_DIR/$BINARY_NAME" "$INSTALL_DIR/$ALIAS_NAME"
 
   log_success "LazyShell $version has been successfully installed!"
-  log_info "Run '$BINARY_NAME --help' to get started"
+
 }
 
 # Run main function
