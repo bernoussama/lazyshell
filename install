@@ -16,7 +16,10 @@ NC='\033[0m' # No Color
 # Script configuration
 REPO="bernoussama/lazyshell"
 BINARY_NAME="lsh"
-INSTALL_DIR="/usr/local/bin"
+ALIAS_NAME="lazyshell"
+
+INSTALL_DIR=$HOME/.lazyshell/bin
+mkdir -p "$INSTALL_DIR"
 TEMP_DIR="/tmp/lazyshell-install"
 
 # Logging functions
@@ -34,6 +37,20 @@ log_warning() {
 
 log_error() {
   echo -e "${RED}[ERROR]${NC} $1"
+}
+
+print_message() {
+  local level=$1
+  local message=$2
+  local color=""
+
+  case $level in
+  info) color="${GREEN}" ;;
+  warning) color="${YELLOW}" ;;
+  error) color="${RED}" ;;
+  esac
+
+  echo -e "${color}${message}${NC}"
 }
 
 # Cleanup function
@@ -318,8 +335,95 @@ main() {
   # Download and install
   install_binary "$binary_name" "$download_url"
 
+  add_to_path() {
+    local config_file=$1
+    local command=$2
+    echo "Adding $command to $config_file"
+
+    if grep -Fxq "$command" "$config_file"; then
+      print_message info "Command already exists in $config_file, skipping write."
+    elif [[ -w $config_file ]]; then
+      echo -e "\n# lazyshell" >>"$config_file"
+      echo "$command" >>"$config_file"
+      print_message info "Successfully added ${RED}lazyshell ${GREEN}to \$PATH in $config_file"
+    else
+      print_message warning "Manually add the directory to $config_file (or similar):"
+      print_message info "  $command"
+    fi
+  }
+
+  XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
+
+  current_shell=$(basename "$SHELL")
+  case $current_shell in
+  fish)
+    config_files="$HOME/.config/fish/config.fish"
+    ;;
+  zsh)
+    config_files="$HOME/.zshrc $HOME/.zshenv $XDG_CONFIG_HOME/zsh/.zshrc $XDG_CONFIG_HOME/zsh/.zshenv"
+    ;;
+  bash)
+    config_files="$HOME/.bashrc $HOME/.bash_profile $HOME/.profile $XDG_CONFIG_HOME/bash/.bashrc $XDG_CONFIG_HOME/bash/.bash_profile"
+    ;;
+  ash)
+    config_files="$HOME/.ashrc $HOME/.profile /etc/profile"
+    ;;
+  sh)
+    config_files="$HOME/.ashrc $HOME/.profile /etc/profile"
+    ;;
+  *)
+    # Default case if none of the above matches
+    config_files="$HOME/.bashrc $HOME/.bash_profile $XDG_CONFIG_HOME/bash/.bashrc $XDG_CONFIG_HOME/bash/.bash_profile"
+    ;;
+  esac
+
+  config_file=""
+  for file in $config_files; do
+    if [[ -f $file ]]; then
+      config_file=$file
+      break
+    fi
+  done
+
+  if [[ -z $config_file ]]; then
+    print_message error "No config file found for $current_shell. Checked files: ${config_files[@]}"
+    exit 1
+  fi
+
+  if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
+    case $current_shell in
+    fish)
+      add_to_path "$config_file" "fish_add_path $INSTALL_DIR"
+      ;;
+    zsh)
+      add_to_path "$config_file" "export PATH=$INSTALL_DIR:\$PATH"
+      ;;
+    bash)
+      add_to_path "$config_file" "export PATH=$INSTALL_DIR:\$PATH"
+      ;;
+    ash)
+      add_to_path "$config_file" "export PATH=$INSTALL_DIR:\$PATH"
+      ;;
+    sh)
+      add_to_path "$config_file" "export PATH=$INSTALL_DIR:\$PATH"
+      ;;
+    *)
+      export PATH=$INSTALL_DIR:$PATH
+      print_message warning "Manually add the directory to $config_file (or similar):"
+      print_message info "  export PATH=$INSTALL_DIR:\$PATH"
+      ;;
+    esac
+    source "$config_file" || {
+      print_message warning "Failed to source $config_file. Please run 'source $config_file' manually."
+    }
+  fi
+
   # Verify installation
   verify_installation
+
+  # alias lazyshell to lsh
+  log_info "Creating alias for $BINARY_NAME as $ALIAS_NAME"
+  ln -sf "$INSTALL_DIR/$BINARY_NAME" "$INSTALL_DIR/$ALIAS_NAME"
 
   log_success "LazyShell $version has been successfully installed!"
   log_info "Run '$BINARY_NAME --help' to get started"
