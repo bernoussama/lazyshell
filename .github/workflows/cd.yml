@@ -20,11 +20,11 @@ jobs:
             platform: linux
             arch: x64
             extension: ''
-          - os: ubuntu-latest
+          - os: ubuntu-22.04-arm
             platform: linux
             arch: arm64
             extension: ''
-          - os: macos-latest
+          - os: macos-13
             platform: darwin
             arch: x64
             extension: ''
@@ -36,7 +36,7 @@ jobs:
             platform: win32
             arch: x64
             extension: '.exe'
-          - os: windows-latest
+          - os: windows-11-arm
             platform: win32
             arch: arm64
             extension: '.exe'
