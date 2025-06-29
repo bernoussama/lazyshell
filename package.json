@@ -33,7 +33,7 @@
     "lazyshell"
   ],
   "author": "bernoussama",
-  "license": "GPL-3.0",
+  "license": "MIT",
   "packageManager": "bun@1.2.17",
   "devDependencies": {
     "@ai-sdk/anthropic": "^1.2.12",
