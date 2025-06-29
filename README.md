@@ -9,7 +9,7 @@
 <div align="center">
 
 [![npm version](https://badge.fury.io/js/lazyshell.svg)](https://badge.fury.io/js/lazyshell)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/bernoussama/lazyshell/workflows/CI/badge.svg)](https://github.com/bernoussama/lazyshell/actions)
 [![Evals](https://github.com/bernoussama/lazyshell/workflows/Evals/badge.svg)](https://github.com/bernoussama/lazyshell/actions)
 [![AI Powered](https://img.shields.io/badge/AI-Powered-blue?logo=huggingface&logoColor=white)](https://github.com/bernoussama/lazyshell)
