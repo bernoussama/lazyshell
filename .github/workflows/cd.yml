@@ -101,7 +101,6 @@ jobs:
           mv artifacts/lsh-darwin-x64/lsh release/lsh-darwin-x64
           mv artifacts/lsh-darwin-arm64/lsh release/lsh-darwin-arm64
           mv artifacts/lsh-win32-x64/lsh.exe release/lsh-win32-x64.exe
-          mv artifacts/lsh-win32-arm64/lsh.exe release/lsh-win32-arm64.exe
           
           # Create checksums
           cd release
@@ -122,7 +121,6 @@ jobs:
             - **macOS (x64)**: `lsh-darwin-x64`
             - **macOS (ARM64)**: `lsh-darwin-arm64`
             - **Windows (x64)**: `lsh-win32-x64.exe`
-            - **Windows (ARM64, experimental)**: `lsh-win32-arm64.exe`
             
             ### Installation
             1. Download the appropriate binary for your platform
@@ -138,7 +136,6 @@ jobs:
             release/lsh-darwin-x64
             release/lsh-darwin-arm64
             release/lsh-win32-x64.exe
-            release/lsh-win32-arm64.exe
             release/checksums.txt
           draft: false
           prerelease: ${{ contains(steps.version.outputs.version, '-') }}
