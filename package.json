@@ -1,6 +1,6 @@
 {
   "name": "lazyshell",
-  "version": "1.0.12-12",
+  "version": "1.0.12-14",
   "description": "AI CLI that generates shell commands",
   "type": "module",
   "bin": {
@@ -33,7 +33,7 @@
     "lazyshell"
   ],
   "author": "bernoussama",
-  "license": "GPL-3.0",
+  "license": "MIT",
   "packageManager": "bun@1.2.17",
   "devDependencies": {
     "@ai-sdk/anthropic": "^1.2.12",
