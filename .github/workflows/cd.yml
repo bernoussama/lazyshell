@@ -36,10 +36,11 @@ jobs:
             platform: win32
             arch: x64
             extension: '.exe'
-          - os: windows-11-arm
-            platform: win32
-            arch: arm64
-            extension: '.exe'
+          # not yet supported by bun
+          # - os: windows-11-arm
+          #   platform: win32
+          #   arch: arm64
+          #   extension: '.exe'
 
     steps:
       - name: Checkout code
