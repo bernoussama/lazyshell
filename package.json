@@ -11,14 +11,14 @@
     "dist"
   ],
   "scripts": {
-    "x": "jiti src/index.ts",
+    "x": "bun src/index.ts",
     "typecheck": "tsc --noEmit",
     "lint": "prettier --check . && eslint",
     "lint:fix": "prettier --write . && eslint --fix",
-    "build": "pkgroll --minify",
+    "build": "bun build --minify --target 'node' --format 'esm'  src/index.ts --outdir dist",
     "release:patch": "bun run build && npm version patch && npm run build && npm publish && git push --follow-tags",
     "prerelease": "bun run build && npm version prerelease && npm run build && npm publish && git push --follow-tags",
-    "eval:ci": "jiti src/lib/ci-eval.ts",
+    "eval:ci": "bun src/lib/ci-eval.ts",
     "prepare": "husky",
     "compile": "bun build --compile --minify --sourcemap src/index.ts  --outfile bin/lsh"
   },
@@ -43,13 +43,11 @@
     "@eslint/js": "^9.30.0",
     "@jest/types": "^29.6.3",
     "@types/node": "^22.15.34",
-    "@typescript-eslint/eslint-plugin": "^8.35.0",
-    "@typescript-eslint/parser": "^8.35.0",
+    "@typescript-eslint/eslint-plugin": "^8.35.1",
+    "@typescript-eslint/parser": "^8.35.1",
     "eslint": "^9.30.0",
     "husky": "^9.1.7",
-    "jiti": "^2.4.2",
     "ollama-ai-provider": "^1.2.0",
-    "pkgroll": "^2.13.1",
     "prettier": "^3.6.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
