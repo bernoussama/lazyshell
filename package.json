@@ -42,7 +42,7 @@
     "@ai-sdk/openai-compatible": "^0.2.14",
     "@eslint/js": "^9.27.0",
     "@jest/types": "^29.6.3",
-    "@types/node": "^22.15.25",
+    "@types/node": "^24.0.8",
     "@typescript-eslint/eslint-plugin": "^8.33.0",
     "@typescript-eslint/parser": "^8.33.0",
     "eslint": "^9.27.0",
