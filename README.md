@@ -267,8 +267,8 @@ LazyShell includes comprehensive benchmarking capabilities to compare AI model p
 
 ```bash
 # Build and run benchmarks
-pnpm build
-node dist/bench_models.mjs
+bun run build
+bun dist/bench_models.mjs
 ```
 
 ### Benchmark Features
@@ -307,23 +307,23 @@ LazyShell includes automated quality assessments that run in CI to ensure consis
 
 ```bash
 # Run CI evaluations locally
-pnpm eval:ci
+bun run eval:ci
 ```
 
 ### Custom Evaluation Scripts
 
 ```bash
 # Run basic evaluations
-pnpm build && node dist/lib/basic.eval.mjs
+bun run build && bun dist/lib/basic.eval.mjs
 
 # Run LLM judge evaluation
-pnpm build && node dist/lib/llm-judge.eval.mjs
+bun run build && bun dist/lib/llm-judge.eval.mjs
 
 # Test AI library
-pnpm build && node dist/test-ai-lib.mjs
+bun run build && bun dist/test-ai-lib.mjs
 
 # Run example evaluations
-pnpm build && node dist/lib/example.eval.mjs
+bun run build && bun dist/lib/example.eval.mjs
 ```
 
 See [docs/CI_EVALUATIONS.md](docs/CI_EVALUATIONS.md) for complete setup and configuration guide.
@@ -332,8 +332,7 @@ See [docs/CI_EVALUATIONS.md](docs/CI_EVALUATIONS.md) for complete setup and conf
 
 ### Prerequisites
 
-- Node.js 18+
-- pnpm (recommended)
+- Bun (recommended)
 
 ### Setup
 
@@ -347,32 +346,32 @@ See [docs/CI_EVALUATIONS.md](docs/CI_EVALUATIONS.md) for complete setup and conf
 2. Install dependencies:
 
    ```bash
-   pnpm install
+   bun install
    ```
 
 3. Build the project:
 
    ```bash
-   pnpm build
+   bun run build
    ```
 
 4. Link the package for local development:
 
    ```bash
-   pnpm link --global
+   bun link --global
    ```
 
 ### Available Scripts
 
 ```bash
-pnpm x                    # Quick run with jiti (development)
-pnpm build               # Compile TypeScript with pkgroll
-pnpm typecheck           # Type checking only
-pnpm lint                # Check code formatting and linting
-pnpm lint:fix            # Fix formatting and linting issues
-pnpm eval:ci             # Run CI evaluations locally
-pnpm release:patch       # Build, version bump, publish, and push
-pnpm prerelease          # Build, prerelease version, publish, and push
+bun x                    # Quick run with jiti (development)
+bun run build           # Compile TypeScript with pkgroll
+bun run typecheck       # Type checking only
+bun run lint            # Check code formatting and linting
+bun run lint:fix        # Fix formatting and linting issues
+bun run eval:ci         # Run CI evaluations locally
+bun run release:patch   # Build, version bump, publish, and push
+bun run prerelease      # Build, prerelease version, publish, and push
 ```
 
 ### Project Structure
