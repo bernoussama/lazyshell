@@ -60,7 +60,7 @@
     "commander": "^14.0.0",
     "dedent": "^1.6.0",
     "systeminformation": "^5.27.7",
-    "zod": "^3.25.67"
+    "zod": "^4.1.5"
   },
   "optionalDependencies": {
     "@napi-rs/clipboard": "^1.1.2"
