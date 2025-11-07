@@ -55,7 +55,7 @@
   "dependencies": {
     "@clack/prompts": "^0.11.0",
     "@types/json-schema": "^7.0.15",
-    "ai": "^4.3.16",
+    "ai": "^5.0.89",
     "chalk": "^5.4.1",
     "commander": "^14.0.0",
     "dedent": "^1.6.0",
