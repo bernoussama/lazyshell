@@ -1,4 +1,4 @@
-import { generateCommand, generateBenchmarkText, getDefaultModel, models } from './ai';
+import { generateCommand } from './ai';
 import { eval, ExactMatch, Contains, Levenshtein, LLMJudge, createLLMJudge } from './eval';
 
 async function main() {

@@ -26,7 +26,6 @@ export const SUPPORTED_PROVIDERS = {
     envVar: 'OPENROUTER_API_KEY',
     defaultModel: 'google/gemini-2.0-flash-001',
     defaultBaseUrl: 'https://openrouter.ai/api/v1',
-    // defaultModel: 'google/gemma-3-27b-it:free',
   },
   anthropic: {
     name: 'Anthropic Claude',
@@ -186,10 +185,6 @@ export async function promptProvider(): Promise<ProviderKey> {
     process.exit(0);
   }
 
-  if (typeof provider === 'symbol') {
-    throw new Error('Provider selection cancelled');
-  }
-
   return provider;
 }
 
@@ -265,8 +260,9 @@ export async function promptApiKey(provider: ProviderKey): Promise<string | unde
     mask: '*',
   });
 
-  if (typeof apiKey === 'symbol') {
-    throw new Error('apiKey entry cancelled');
+  if (isCancel(apiKey)) {
+    cancel('API key entry cancelled');
+    process.exit(0);
   }
 
   return apiKey;
@@ -353,14 +349,13 @@ export async function getOrInitializeConfig(): Promise<Config | null> {
 
     if (config && validateConfig(config)) {
       return config;
-    } else {
-      console.log(chalk.yellow('Configuration exists but is incomplete or invalid.'));
-      return await initializeConfig();
     }
-  } else {
-    console.log(chalk.yellow('No configuration found.'));
-    return await initializeConfig();
+    console.log(chalk.yellow('Configuration exists but is incomplete or invalid.'));
+    return initializeConfig();
   }
+
+  console.log(chalk.yellow('No configuration found.'));
+  return initializeConfig();
 }
 
 /**
@@ -378,15 +373,8 @@ export function getApiKeyFromEnv(provider: ProviderKey): string | undefined {
  * Get the effective API key (config first, then environment)
  */
 export function getEffectiveApiKey(config: Config): string | undefined {
-  // Use config API key if available
   if (config.apiKey) {
     return config.apiKey;
   }
-
-  // Fall back to environment variable
   return getApiKeyFromEnv(config.provider);
-}
-
-function iscancelled(provider: string | symbol) {
-  throw new Error('Function not implemented.');
 }

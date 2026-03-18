@@ -9,7 +9,6 @@ export interface HardwareInfo {
 
 async function getGpuInfo(): Promise<string> {
   try {
-    // Try to dynamically import systeminformation
     const si = await import('systeminformation').catch(() => null);
 
     if (si) {
@@ -18,12 +17,10 @@ async function getGpuInfo(): Promise<string> {
         const gpu = graphics.controllers[0];
         let gpuInfo = gpu.model || gpu.name || 'Unknown GPU';
 
-        // Add vendor if available and not already included
         if (gpu.vendor && !gpuInfo.toLowerCase().includes(gpu.vendor.toLowerCase())) {
           gpuInfo = `${gpu.vendor} ${gpuInfo}`;
         }
 
-        // Add VRAM info if available
         if (gpu.vram && gpu.vram > 0) {
           gpuInfo += ` (${gpu.vram}MB VRAM)`;
         }
@@ -36,19 +33,7 @@ async function getGpuInfo(): Promise<string> {
     // Fall through to basic detection
   }
 
-  // Fallback: Basic GPU detection based on platform
-  const platform = os.platform();
-
-  switch (platform) {
-    case 'linux':
-      return 'GPU info unavailable (install systeminformation for detailed info)';
-    case 'darwin':
-      return 'GPU info unavailable (install systeminformation for detailed info)';
-    case 'win32':
-      return 'GPU info unavailable (install systeminformation for detailed info)';
-    default:
-      return 'Unknown GPU';
-  }
+  return 'GPU info unavailable (install systeminformation for detailed info)';
 }
 
 export async function getHardwareInfo(): Promise<HardwareInfo> {
@@ -59,28 +44,7 @@ export async function getHardwareInfo(): Promise<HardwareInfo> {
     const gpu = await getGpuInfo();
 
     return { cpu, memory, arch, gpu };
-  } catch (error) {
-    console.error('Error getting hardware info:', error);
-    return {
-      cpu: 'Unknown CPU',
-      memory: 'Unknown Memory',
-      arch: 'Unknown Architecture',
-      gpu: 'Unknown GPU',
-    };
-  }
-}
-
-// Async version for detailed hardware info including GPU
-export async function getDetailedHardwareInfo(): Promise<HardwareInfo> {
-  try {
-    const cpu = os.cpus()[0]?.model || 'Unknown CPU';
-    const memory = `${Math.round(os.totalmem() / 1024 / 1024 / 1024)} GB`;
-    const arch = os.arch();
-    const gpu = await getGpuInfo();
-
-    return { cpu, memory, arch, gpu };
-  } catch (error) {
-    console.error('Error getting detailed hardware info:', error);
+  } catch {
     return {
       cpu: 'Unknown CPU',
       memory: 'Unknown Memory',

@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import chalk from 'chalk';
 import { performance } from 'perf_hooks';
-import { getBenchmarkModels, generateBenchmarkText, Command, generateCommandStruct, ModelConfig } from './lib/ai';
+import { getBenchmarkModels, Command, generateCommandStruct, ModelConfig } from './lib/ai';
 import { spinner } from '@clack/prompts';
 
 // Get the models to benchmark from our AI library

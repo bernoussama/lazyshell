@@ -91,15 +91,10 @@ export function createLLMJudge(
   return {
     name,
     description: `AI-powered evaluation based on ${criteria}`,
-    score: async (input: any, output: any, expected?: any): Promise<number> => {
+    score: async (input: any, output: any, _expected?: any): Promise<number> => {
       try {
         return await withRetry(
           async () => {
-            // Optional delay for conservative rate limiting
-            // if (delayMs > 0) {
-            //   await createDelay(delayMs);
-            // }
-
             const model = modelConfig || judgeModelConf;
 
             const prompt = `You are an expert evaluator. Please rate the following output based on ${criteria}.
@@ -146,8 +141,7 @@ export const LLMJudge = createLLMJudge('LLMJudge');
 export const LLMJudgeNoDelay = createLLMJudge('LLMJudgeNoDelay', undefined, undefined, 0);
 export const LLMJudgeFast = createLLMJudge('LLMJudgeFast', undefined, undefined, 500);
 
-// Helper function for Levenshtein distance
-function levenshteinDistance(str1: string, str2: string): number {
+export function levenshteinDistance(str1: string, str2: string): number {
   const matrix = Array(str2.length + 1)
     .fill(null)
     .map(() => Array(str1.length + 1).fill(null));
@@ -179,7 +173,6 @@ export function createDelay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Rate limiting with exponential backoff
 export async function withRetry<T>(
   fn: () => Promise<T>,
   maxRetries: number = 3,
@@ -311,61 +304,4 @@ export async function runEval<TInput = any, TOutput = any, TExpected = any>(
   };
 }
 
-// Export with the desired interface name
 export { runEval as eval };
-
-// 4. Legacy compatibility (for existing code)
-
-export const zEvaluationInput = z.object({
-  originalPrompt: z.string(),
-  generatedOutput: z.string(),
-  referenceOutput: z.string().optional(),
-});
-export type EvaluationInput = z.infer<typeof zEvaluationInput>;
-
-export const zEvaluationResult = z.object({
-  score: z.number().min(1).max(5),
-  explanation: z.string(),
-});
-export type EvaluationResult = z.infer<typeof zEvaluationResult>;
-
-// Legacy evaluation function (kept for backward compatibility)
-export async function evaluateGeneration(
-  input: EvaluationInput,
-  evaluatorModelConfig?: any
-): Promise<EvaluationResult> {
-  // This is a simplified version for backward compatibility
-  // In a real implementation, you might want to use the new eval system
-  throw new Error('Legacy evaluateGeneration is deprecated. Use the new eval() function instead.');
-}
-
-// Example of how you might batch evaluate (optional for now)
-/*
-export async function batchEvaluateGenerations(
-  inputs: EvaluationInput[],
-  evaluatorModelConfig?: ModelConfig
-): Promise<EvaluationResult[]> {
-  const results: EvaluationResult[] = [];
-  for (const input of inputs) {
-    try {
-      const result = await evaluateGeneration(input, evaluatorModelConfig);
-      results.push(result);
-    } catch (error) {
-      console.error(`Failed to evaluate input: ${JSON.stringify(input)}`, error);
-      // Decide how to handle errors, e.g., push a specific error result or skip
-      results.push({
-        score: 0, // Indicate error
-        explanation: `Evaluation failed: ${error instanceof Error ? error.message : String(error)}`,
-      });
-    }
-  }
-  return results;
-}
-*/
-
-// Utility to get a specific evaluator model (if needed, or rely on ai.ts)
-// export function getEvaluatorModel(config?: Config): ModelConfig {
-//   // Potentially use a specific model known for good evaluation, or a cost-effective one
-//   // For now, reuses the logic from ai.ts
-//   return getDefaultModel(); // Or a more specific configuration
-// }

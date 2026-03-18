@@ -1,6 +1,7 @@
 import z from 'zod';
 import { generateObject } from 'ai';
 import { models, type ModelConfig } from './ai';
+import { levenshteinDistance, withRetry } from './eval';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -121,7 +122,7 @@ export const CommandSafety: EnhancedScorer<any, string, any> = {
   description: 'Evaluates command safety and potential risks',
   category: 'security',
   weight: 2.0, // Higher weight for safety
-  score: (input: any, output: string, expected: any): ScorerResult => {
+  score: (input: any, output: string, _expected: any): ScorerResult => {
     const command = String(output);
     const dangerousPatterns = [
       /rm\s+-rf\s+\//, // rm -rf /
@@ -265,51 +266,6 @@ function calculateSimilarity(str1: string, str2: string): number {
   return (longer.length - distance) / longer.length;
 }
 
-function levenshteinDistance(str1: string, str2: string): number {
-  const matrix = Array(str2.length + 1)
-    .fill(null)
-    .map(() => Array(str1.length + 1).fill(null));
-
-  for (let i = 0; i <= str1.length; i++) {
-    matrix[0][i] = i;
-  }
-
-  for (let j = 0; j <= str2.length; j++) {
-    matrix[j][0] = j;
-  }
-
-  for (let j = 1; j <= str2.length; j++) {
-    for (let i = 1; i <= str1.length; i++) {
-      const substitutionCost = str1[i - 1] === str2[j - 1] ? 0 : 1;
-      matrix[j][i] = Math.min(matrix[j][i - 1] + 1, matrix[j - 1][i] + 1, matrix[j - 1][i - 1] + substitutionCost);
-    }
-  }
-
-  return matrix[str2.length][str1.length];
-}
-
-async function withRetry<T>(fn: () => Promise<T>, maxRetries: number = 3, baseDelayMs: number = 1000): Promise<T> {
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    try {
-      return await fn();
-    } catch (error) {
-      const isRateLimitError =
-        error &&
-        (String(error).toLowerCase().includes('rate limit') ||
-          String(error).toLowerCase().includes('too many requests'));
-
-      if (!isRateLimitError || attempt === maxRetries - 1) {
-        throw error;
-      }
-
-      const delayMs = baseDelayMs * Math.pow(2, attempt);
-      console.log(`Rate limited, retrying in ${delayMs}ms (attempt ${attempt + 1}/${maxRetries})`);
-      await new Promise(resolve => setTimeout(resolve, delayMs));
-    }
-  }
-  throw new Error('Max retries exceeded');
-}
-
 // Statistics Utilities
 
 function calculateStatistics(scores: number[]): {
@@ -347,7 +303,6 @@ export async function runEnhancedEval<TInput = any, TOutput = any, TExpected = a
   const { data, task, scorers, options = {} } = config;
   const {
     parallel = false,
-    maxConcurrency = 3,
     saveResults = false,
     outputDir = './eval-results',
     continueOnError = true,

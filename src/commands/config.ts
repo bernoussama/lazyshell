@@ -102,8 +102,6 @@ async function showCurrentConfig(config: Config) {
 }
 
 async function editProvider(config: Config) {
-  // console.log(chalk.blue('🔄 Change Provider'));
-
   const newProvider = await promptProvider();
   config.provider = newProvider;
   config.model = SUPPORTED_PROVIDERS[newProvider].defaultModel;
@@ -130,8 +128,6 @@ async function editProvider(config: Config) {
 }
 
 async function editApiKey(config: Config) {
-  // console.log(chalk.blue('🔑 Update API Key'));
-
   const providerInfo = SUPPORTED_PROVIDERS[config.provider];
 
   // Handle providers that don't support API keys at all
@@ -159,8 +155,6 @@ async function editApiKey(config: Config) {
 }
 
 async function editModel(config: Config) {
-  // console.log(chalk.blue('🤖 Change Model'));
-
   const currentModel = config.model || SUPPORTED_PROVIDERS[config.provider].defaultModel;
 
   const newModel = await input({
@@ -185,8 +179,6 @@ async function editModel(config: Config) {
 }
 
 async function editBaseUrl(config: Config) {
-  // console.log(chalk.blue('🌐 Change Base URL'));
-
   const providerInfo = SUPPORTED_PROVIDERS[config.provider];
 
   // Check if the provider supports custom base URL
@@ -220,8 +212,6 @@ async function editBaseUrl(config: Config) {
 }
 
 async function resetConfiguration() {
-  // console.log(chalk.blue('🔄 Reset Configuration'));
-
   const confirmed = await confirm({
     message: chalk.yellow('Are you sure you want to reset your configuration? This will delete your current settings.'),
   });

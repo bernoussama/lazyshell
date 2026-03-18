@@ -2,7 +2,7 @@ import { eval, Levenshtein, ExactMatch, Contains } from './eval';
 
 // Example 1: Simple string concatenation task
 async function basicStringExample() {
-  return await eval('Basic String Concatenation', {
+  return eval('Basic String Concatenation', {
     // Test data function
     data: async () => {
       return [
@@ -22,7 +22,7 @@ async function basicStringExample() {
 
 // Example 2: Command generation evaluation
 async function commandGenerationExample() {
-  return await eval('Command Generation', {
+  return eval('Command Generation', {
     data: () => [
       {
         input: 'list all files in current directory',
@@ -56,7 +56,7 @@ async function commandGenerationExample() {
 
 // Example 3: LLM-based evaluation (you would replace this with actual LLM calls)
 async function llmExample() {
-  return await eval('LLM Generation', {
+  return eval('LLM Generation', {
     data: async () => [
       {
         input: 'Explain recursion',
