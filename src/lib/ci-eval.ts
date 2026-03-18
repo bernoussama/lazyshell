@@ -1,5 +1,5 @@
 import { generateCommand, getDefaultModel, models, ModelConfig } from './ai';
-import { eval as runEval, LLMJudge, createLLMJudge, EvalSummary } from './eval';
+import { eval as runEval, createLLMJudge, EvalSummary } from './eval';
 
 const judgeModelConf: ModelConfig = {
   model: models.groq('qwen-qwq-32b'),

@@ -17,28 +17,10 @@ export function runCommand(command: string) {
     if (stderr) {
       console.error(`stderr: ${stderr}`);
     }
-
-    // console.log(`stdout: ${stdout}`);
   });
 
-  // Determine user shell and add command to appropriate history file
-  const shell = process.env.SHELL?.split('/').pop() || '';
-  let historyFilePath = '';
+  appendToShellHistory(command);
 
-  if (shell === 'zsh') {
-    historyFilePath = path.join(os.homedir(), '.zsh_history');
-    // ZSH history format includes timestamps
-    fs.appendFileSync(historyFilePath, `: ${Math.floor(Date.now() / 1000)}:0;${command}\n`);
-  } else if (shell === 'bash') {
-    historyFilePath = path.join(os.homedir(), '.bash_history');
-    fs.appendFileSync(historyFilePath, `${command}\n`);
-  } else {
-    // Default to sh history format
-    historyFilePath = path.join(os.homedir(), '.sh_history');
-    fs.appendFileSync(historyFilePath, `${command}\n`);
-  }
-
-  // Handle process output in real-time
   childProcess.stdout?.on('data', data => {
     process.stdout.write(data);
   });
@@ -48,24 +30,38 @@ export function runCommand(command: string) {
   });
 }
 
+function appendToShellHistory(command: string) {
+  const shell = process.env.SHELL?.split('/').pop() || '';
+  let historyFilePath: string;
+  let entry: string;
+
+  if (shell === 'zsh') {
+    historyFilePath = path.join(os.homedir(), '.zsh_history');
+    entry = `: ${Math.floor(Date.now() / 1000)}:0;${command}\n`;
+  } else if (shell === 'bash') {
+    historyFilePath = path.join(os.homedir(), '.bash_history');
+    entry = `${command}\n`;
+  } else {
+    historyFilePath = path.join(os.homedir(), '.sh_history');
+    entry = `${command}\n`;
+  }
+
+  fs.appendFileSync(historyFilePath, entry);
+}
+
 export async function print(msg: string) {
   await stream.message(
     (function* () {
-      yield `${msg}`;
+      yield msg;
     })()
   );
 }
 
-/**
- * Print text with line wrapping
- * @param msg - The message to print
- * @param lineWidth - Maximum characters per line (default: 80)
- */
 export async function printWrapped(msg: string, lineWidth: number = 80) {
   const wrappedMsg = wrapText(msg, lineWidth);
   await stream.message(
     (function* () {
-      yield `${wrappedMsg}`;
+      yield wrappedMsg;
     })()
   );
 }
@@ -73,7 +69,7 @@ export async function printWrapped(msg: string, lineWidth: number = 80) {
 export async function info(msg: string) {
   await stream.info(
     (function* () {
-      yield `${msg}`;
+      yield msg;
     })()
   );
 }

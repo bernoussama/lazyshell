@@ -1,4 +1,4 @@
-import { generateCommand, generateCommandStruct, getDefaultModel, models, ModelConfig } from './ai';
+import { generateCommandStruct, getDefaultModel, models, ModelConfig } from './ai';
 import {
   eval as runEnhancedEval,
   EnhancedExactMatch,

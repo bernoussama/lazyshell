@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { generateCommand, generateCommandStruct, getDefaultModel } from './lib/ai';
+import { generateCommandStruct } from './lib/ai';
 import chalk from 'chalk';
 
 async function testImprovedPrompt() {

@@ -1,28 +1,22 @@
 import { generateObject, generateText, type LanguageModel } from 'ai';
-import { google } from '@ai-sdk/google';
-import { ollama } from 'ollama-ai-provider';
-import { openai } from '@ai-sdk/openai';
-import { anthropic } from '@ai-sdk/anthropic';
-import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import os from 'os';
 import z from 'zod';
 import type { Config, ProviderKey } from './config';
 import dedent from 'dedent';
 import { getDistroPackageManager } from '../helpers/package-manager';
 import { getHardwareInfo, type HardwareInfo } from '../helpers/hardware';
+import { getModelFromRegistry } from './provider-registry';
 
-// System information interface
 export interface SystemInfo {
   platform: string;
   release: string;
-  distro?: string; // Only for Linux
-  packageManager?: string; // Only for Linux
+  distro?: string;
+  packageManager?: string;
   type: string;
   arch: string;
-  hardware?: HardwareInfo; // Hardware info for Linux systems
+  hardware?: HardwareInfo;
 }
 
-// Model configuration interface
 export interface ModelConfig {
   provider: string;
   modelId: string;
@@ -31,14 +25,12 @@ export interface ModelConfig {
   maxRetries?: number | undefined;
 }
 
-// Text generation options
-export interface GenerationOptions {
+interface GenerationOptions {
   temperature?: number;
   systemPrompt?: string;
   maxTokens?: number;
 }
 
-// Simple function to get Linux distro name from /etc/os-release
 function getLinuxDistro(): string | undefined {
   try {
     const osRelease = require('fs').readFileSync('/etc/os-release', 'utf8');
@@ -49,7 +41,6 @@ function getLinuxDistro(): string | undefined {
   }
 }
 
-// Get system information for context
 export async function getSystemInfo(): Promise<SystemInfo> {
   const sysinfo: SystemInfo = {
     platform: os.platform(),
@@ -58,61 +49,41 @@ export async function getSystemInfo(): Promise<SystemInfo> {
     arch: os.arch(),
   };
   if (os.platform() === 'linux') {
-    sysinfo.distro = getLinuxDistro(); // Get Linux distribution name simply
+    sysinfo.distro = getLinuxDistro();
     sysinfo.packageManager = getDistroPackageManager();
     sysinfo.hardware = await getHardwareInfo();
   }
   return sysinfo;
 }
 
-import { ProviderRegistry, getModelFromRegistry } from './provider-registry';
-
-// Get model based on configuration
 export function getModelFromConfig(config: Config): ModelConfig {
   return getModelFromRegistry(config.provider, config.model, config.baseUrl, config.apiKey);
 }
 
-// Get default model ID for a provider
-function getDefaultModelId(provider: ProviderKey): string {
-  const defaultModels: Record<ProviderKey, string> = {
-    groq: 'llama-3.3-70b-versatile',
-    google: 'gemini-2.0-flash-lite',
-    openrouter: 'google/gemini-2.0-flash-001',
-    anthropic: 'claude-3-5-haiku-latest',
-    openai: 'gpt-4o-mini',
-    ollama: 'llama3.2',
-    mistral: 'devstral-small-2505',
-    lmstudio: 'deepseek/deepseek-r1-0528-qwen3-8b',
-    openaiCompatible: 'gpt-3.5-turbo',
-  };
-
-  return defaultModels[provider];
-}
-
-// Get available model based on environment variables (legacy function)
 export function getDefaultModel(): ModelConfig {
-  if (process.env.GROQ_API_KEY) {
-    return getModelFromRegistry('groq');
-  } else if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-    return getModelFromRegistry('google');
-  } else if (process.env.OPENROUTER_API_KEY) {
-    return getModelFromRegistry('openrouter');
-  } else if (process.env.ANTHROPIC_API_KEY) {
-    return getModelFromRegistry('anthropic');
-  } else if (process.env.OPENAI_API_KEY) {
-    return getModelFromRegistry('openai');
-  } else {
-    try {
-      return getModelFromRegistry('ollama');
-    } catch (error) {
-      throw new Error(
-        'No API key found. Please set either GROQ_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY, OPENROUTER_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY. Or setup Ollama/LM Studio'
-      );
+  const envProviderMap: [string, ProviderKey][] = [
+    ['GROQ_API_KEY', 'groq'],
+    ['GOOGLE_GENERATIVE_AI_API_KEY', 'google'],
+    ['OPENROUTER_API_KEY', 'openrouter'],
+    ['ANTHROPIC_API_KEY', 'anthropic'],
+    ['OPENAI_API_KEY', 'openai'],
+  ];
+
+  for (const [envVar, provider] of envProviderMap) {
+    if (process.env[envVar]) {
+      return getModelFromRegistry(provider);
     }
+  }
+
+  try {
+    return getModelFromRegistry('ollama');
+  } catch {
+    throw new Error(
+      'No API key found. Please set either GROQ_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY, OPENROUTER_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY. Or setup Ollama/LM Studio'
+    );
   }
 }
 
-// Get predefined models for benchmarking
 export function getBenchmarkModels(): Record<string, LanguageModel> {
   return {
     'or-devstral': getModelFromRegistry('openrouter', 'mistralai/devstral-small:free').model,
@@ -125,30 +96,22 @@ export function getBenchmarkModels(): Record<string, LanguageModel> {
   };
 }
 
-// Generate text with a model
-export async function generateTextWithModel(model: LanguageModel, prompt: string, options: GenerationOptions = {}) {
+async function generateTextWithModel(model: LanguageModel, prompt: string, options: GenerationOptions = {}) {
   const { temperature = 0, systemPrompt, maxTokens } = options;
 
-  const generateOptions: any = {
+  return generateText({
     model,
     temperature,
     prompt,
-  };
-
-  if (systemPrompt) {
-    generateOptions.system = systemPrompt;
-  }
-
-  if (maxTokens) {
-    generateOptions.maxTokens = maxTokens;
-  }
-
-  return await generateText(generateOptions);
+    ...(systemPrompt && { system: systemPrompt }),
+    ...(maxTokens && { maxTokens }),
+  });
 }
 
 const osInfo = await getSystemInfo();
 const pwd = process.cwd();
 const currentShell = os.platform() == 'win32' ? 'powershell' : process.env.SHELL || os.userInfo().shell || 'unknown';
+
 const systemPrompt = dedent`You are an expert system administrator and command-line specialist.
 
 SYSTEM CONTEXT:
@@ -229,29 +192,24 @@ export async function generateCommandStruct(
   explanation: boolean = true
 ): Promise<Command | CommandWithExplanation> {
   const modelConf = modelConfig || getDefaultModel();
-  let zShema;
-  if (explanation) {
-    zShema = zCmdExp;
-  } else {
-    zShema = zCmd;
-  }
+  const schema = explanation ? zCmdExp : zCmd;
+
   try {
     const result = await generateObject({
       model: modelConf.model,
       system: systemPrompt,
-      schema: zShema,
+      schema,
       prompt,
       temperature: modelConf.temperature || 0.1,
       maxRetries: modelConf.maxRetries || undefined,
     });
     return result.object;
-  } catch (error) {
+  } catch {
     const result = await generateCommand(prompt, modelConf);
     return { command: result, explanation: '' };
   }
 }
 
-// Generate command using the default model with system admin context
 export async function generateCommand(prompt: string, modelConfig?: ModelConfig): Promise<string> {
   const finalModelConfig = modelConfig || getDefaultModel();
 
@@ -263,7 +221,6 @@ export async function generateCommand(prompt: string, modelConfig?: ModelConfig)
   return result.text.trim();
 }
 
-// Generate text for benchmarking with simple system prompt
 export async function generateBenchmarkText(model: LanguageModel, prompt: string): Promise<string> {
   const result = await generateTextWithModel(model, prompt, {
     temperature: 0,
@@ -273,24 +230,23 @@ export async function generateBenchmarkText(model: LanguageModel, prompt: string
   return result.text.trim();
 }
 
-// Export model instances for direct use
 export const models = {
-  groq: (modelId: string = 'llama-3.3-70b-versatile', baseUrl?: string, apiKey?: string) =>
+  groq: (modelId?: string, baseUrl?: string, apiKey?: string) =>
     getModelFromRegistry('groq', modelId, baseUrl, apiKey).model,
-  google: (modelId: string = 'gemini-2.0-flash-lite', baseUrl?: string, apiKey?: string) =>
+  google: (modelId?: string, baseUrl?: string, apiKey?: string) =>
     getModelFromRegistry('google', modelId, baseUrl, apiKey).model,
-  openrouter: (modelId: string = 'google/gemini-2.0-flash-001', baseUrl?: string, apiKey?: string) =>
+  openrouter: (modelId?: string, baseUrl?: string, apiKey?: string) =>
     getModelFromRegistry('openrouter', modelId, baseUrl, apiKey).model,
-  anthropic: (modelId: string = 'claude-3-5-haiku-latest', baseUrl?: string, apiKey?: string) =>
+  anthropic: (modelId?: string, baseUrl?: string, apiKey?: string) =>
     getModelFromRegistry('anthropic', modelId, baseUrl, apiKey).model,
-  openai: (modelId: string = 'gpt-4o-mini', baseUrl?: string, apiKey?: string) =>
+  openai: (modelId?: string, baseUrl?: string, apiKey?: string) =>
     getModelFromRegistry('openai', modelId, baseUrl, apiKey).model,
-  ollama: (modelId: string = 'llama3.2', baseUrl?: string, apiKey?: string) =>
+  ollama: (modelId?: string, baseUrl?: string, apiKey?: string) =>
     getModelFromRegistry('ollama', modelId, baseUrl, apiKey).model,
-  mistral: (modelId: string = 'devstral-small-2505', baseUrl?: string, apiKey?: string) =>
+  mistral: (modelId?: string, baseUrl?: string, apiKey?: string) =>
     getModelFromRegistry('mistral', modelId, baseUrl, apiKey).model,
-  lmstudio: (modelId: string = 'deepseek/deepseek-r1-0528-qwen3-8b', baseUrl?: string, apiKey?: string) =>
+  lmstudio: (modelId?: string, baseUrl?: string, apiKey?: string) =>
     getModelFromRegistry('lmstudio', modelId, baseUrl, apiKey).model,
-  openaiCompatible: (modelId: string = 'gpt-3.5-turbo', baseUrl?: string, apiKey?: string) =>
+  openaiCompatible: (modelId?: string, baseUrl?: string, apiKey?: string) =>
     getModelFromRegistry('openaiCompatible', modelId, baseUrl, apiKey).model,
 };
