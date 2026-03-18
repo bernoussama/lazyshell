@@ -165,11 +165,13 @@ lazyshell "your natural language command description"
 lsh "your natural language command description"
 ```
 
-### Silent Mode
+### Explain Mode
+
+By default, LazyShell generates and runs the command immediately. Use `--explain` to see an explanation and confirm before running:
 
 ```bash
-lazyshell -s "find all JavaScript files"  # No explanation, just the command
-lsh --silent "show disk usage"            # Same with long flag
+lazyshell -e "find all JavaScript files"  # Show explanation and confirm before running
+lsh --explain "show disk usage"           # Same with long flag
 ```
 
 ### Examples

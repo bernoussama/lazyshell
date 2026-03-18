@@ -189,7 +189,7 @@ export type CommandWithExplanation = z.infer<typeof zCmdExp>;
 export async function generateCommandStruct(
   prompt: string,
   modelConfig?: ModelConfig,
-  explanation: boolean = true
+  explanation: boolean = false
 ): Promise<Command | CommandWithExplanation> {
   const modelConf = modelConfig || getDefaultModel();
   const schema = explanation ? zCmdExp : zCmd;

@@ -57,12 +57,12 @@ program
   .version(require('../package.json').version)
   .description(require('../package.json').description)
   .argument('<prompt_parts...>', 'prompt')
-  .option('-s, --silent', 'run in silent mode (no explanation)')
+  .option('-e, --explain', 'show explanation and confirm before running')
   .action(async (prompt_parts: string[], options) => {
     intro(chalk.bgBlue(chalk.black('LazyShell')));
     let currentPrompt = prompt_parts.join(' ');
     let shouldContinue = true;
-    const silent = options.silent || false;
+    const explain = options.explain || false;
 
     while (shouldContinue) {
       try {
@@ -70,7 +70,7 @@ program
 
         const spin = spinner();
         spin.start('Loading...');
-        const result = await generateCommandStruct(currentPrompt, modelConfig, !silent);
+        const result = await generateCommandStruct(currentPrompt, modelConfig, explain);
 
         spin.stop('Your command: ');
         const command = result.command.trim();
@@ -85,31 +85,37 @@ program
           await print(chalk.green('📋 Command copied to clipboard!'));
         }
 
-        const action = await select({
-          message: 'Run command?',
-          options: [
-            { label: '✅ Yes', value: 'execute' },
-            { label: '🔧 Refine', value: 'refine' },
-            { label: '❌ Cancel', value: 'cancel' },
-          ],
-        });
-        if (isCancel(action)) {
-          cancel('Operation cancelled.');
-          process.exit(0);
-        }
+        if (explain) {
+          const action = await select({
+            message: 'Run command?',
+            options: [
+              { label: '✅ Yes', value: 'execute' },
+              { label: '🔧 Refine', value: 'refine' },
+              { label: '❌ Cancel', value: 'cancel' },
+            ],
+          });
+          if (isCancel(action)) {
+            cancel('Operation cancelled.');
+            process.exit(0);
+          }
 
-        switch (action) {
-          case 'execute':
-            outro(`running command: ${chalk.green(command)}`);
-            runCommand(command);
-            shouldContinue = false;
-            break;
-          case 'refine':
-            currentPrompt = await refineCommand(currentPrompt, command);
-            break;
-          case 'cancel':
-            outro(chalk.yellow('Command cancelled.'));
-            return;
+          switch (action) {
+            case 'execute':
+              outro(`running command: ${chalk.green(command)}`);
+              runCommand(command);
+              shouldContinue = false;
+              break;
+            case 'refine':
+              currentPrompt = await refineCommand(currentPrompt, command);
+              break;
+            case 'cancel':
+              outro(chalk.yellow('Command cancelled.'));
+              return;
+          }
+        } else {
+          outro(`running command: ${chalk.green(command)}`);
+          runCommand(command);
+          shouldContinue = false;
         }
       } catch (error) {
         console.error(chalk.red(error));
