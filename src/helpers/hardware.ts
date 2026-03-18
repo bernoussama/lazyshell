@@ -28,7 +28,8 @@ async function getGpuInfo(): Promise<string> {
         return gpuInfo.trim();
       }
     }
-  } catch {
+  } catch (error) {
+    console.warn('Failed to get GPU info from systeminformation:', error);
     // Fall through to basic detection
   }
 
