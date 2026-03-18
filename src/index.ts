@@ -57,12 +57,14 @@ program
   .version(require('../package.json').version)
   .description(require('../package.json').description)
   .argument('<prompt_parts...>', 'prompt')
-  .option('-e, --explain', 'show explanation and confirm before running')
+  .option('-e, --explain', 'show explanation of the generated command')
+  .option('-c, --confirm', 'ask for confirmation before running the command')
   .action(async (prompt_parts: string[], options) => {
     intro(chalk.bgBlue(chalk.black('LazyShell')));
     let currentPrompt = prompt_parts.join(' ');
     let shouldContinue = true;
     const explain = options.explain || false;
+    const confirm = options.confirm || false;
 
     while (shouldContinue) {
       try {
@@ -85,7 +87,7 @@ program
           await print(chalk.green('📋 Command copied to clipboard!'));
         }
 
-        if (explain) {
+        if (confirm) {
           const action = await select({
             message: 'Run command?',
             options: [
