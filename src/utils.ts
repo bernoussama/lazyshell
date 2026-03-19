@@ -1,32 +1,27 @@
 import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
-import { exec } from 'child_process';
+import { spawn } from 'child_process';
 import { stream } from '@clack/prompts';
 import { wrapText } from './helpers/text-wrapper';
 
-export function runCommand(command: string) {
+export function runCommand(command: string): Promise<number> {
   console.log('');
-
-  const childProcess = exec(command, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Error: ${error.message}`);
-      return;
-    }
-
-    if (stderr) {
-      console.error(`stderr: ${stderr}`);
-    }
-  });
 
   appendToShellHistory(command);
 
-  childProcess.stdout?.on('data', data => {
-    process.stdout.write(data);
+  const shell = process.env.SHELL || (os.platform() === 'win32' ? 'powershell' : '/bin/sh');
+  const childProcess = spawn(shell, ['-c', command], {
+    stdio: 'inherit',
   });
 
-  childProcess.stderr?.on('data', data => {
-    process.stderr.write(data);
+  return new Promise((resolve, reject) => {
+    childProcess.on('close', code => {
+      resolve(code ?? 0);
+    });
+    childProcess.on('error', err => {
+      reject(err);
+    });
   });
 }
 

@@ -104,7 +104,7 @@ program
           switch (action) {
             case 'execute':
               outro(`running command: ${chalk.green(command)}`);
-              runCommand(command);
+              await runCommand(command);
               shouldContinue = false;
               break;
             case 'refine':
@@ -116,7 +116,7 @@ program
           }
         } else {
           outro(`running command: ${chalk.green(command)}`);
-          runCommand(command);
+          await runCommand(command);
           shouldContinue = false;
         }
       } catch (error) {
