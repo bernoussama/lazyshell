@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { select, text as input, spinner, outro, isCancel, cancel, intro } from '@clack/prompts';
 import chalk from 'chalk';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { info, print, runCommand, printWrapped } from './utils';
 import { generateCommandStruct, getDefaultModel, getModelFromConfig, type ModelConfig } from './lib/ai';
 import { getOrInitializeConfig } from './lib/config';
@@ -55,15 +55,15 @@ async function refineCommand(currentPrompt: string, command: string): Promise<st
 
 async function openIssuePage(): Promise<void> {
   const issueUrl = 'https://github.com/bernoussama/lazyshell/issues/new';
-  const openCommand =
+  const [command, args] =
     process.platform === 'darwin'
-      ? `open "${issueUrl}"`
+      ? ['open', [issueUrl]]
       : process.platform === 'win32'
-        ? `start "" "${issueUrl}"`
-        : `xdg-open "${issueUrl}"`;
+        ? ['cmd', ['/c', 'start', '', issueUrl]]
+        : ['xdg-open', [issueUrl]];
 
   await new Promise<void>((resolve, reject) => {
-    exec(openCommand, (error, _stdout, stderr) => {
+    execFile(command, args, (error, _stdout, stderr) => {
       if (error) {
         const details = stderr?.trim() || error.message;
         reject(new Error(details));
@@ -153,7 +153,7 @@ program
   .action(async () => {
     try {
       await openIssuePage();
-      await print(chalk.green('Opened browser to create a new issue.'));
+      await print(chalk.green('Attempted to open browser to create a new issue.'));
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.error(chalk.red(`Failed to open issue page: ${message}`));
