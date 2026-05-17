@@ -63,9 +63,8 @@ async function openIssuePage(): Promise<void> {
         : `xdg-open "${issueUrl}"`;
 
   await new Promise<void>((resolve, reject) => {
-    exec(openCommand, (error, ...output) => {
+    exec(openCommand, (error, _stdout, stderr) => {
       if (error) {
-        const stderr = typeof output[1] === 'string' ? output[1] : '';
         const details = stderr?.trim() || error.message;
         reject(new Error(details));
         return;
@@ -154,7 +153,7 @@ program
   .action(async () => {
     try {
       await openIssuePage();
-      await print(chalk.green('Attempted to open browser to create a new issue.'));
+      await print(chalk.green('Opened browser to create a new issue.'));
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.error(chalk.red(`Failed to open issue page: ${message}`));
