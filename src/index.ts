@@ -66,7 +66,7 @@ async function openIssuePage(): Promise<void> {
     execFile(command, args, (error, _stdout, stderr) => {
       if (error) {
         const details = stderr?.trim() || error.message;
-        reject(new Error(details));
+        reject(new Error(`Failed to execute browser command: ${details}`));
         return;
       }
       resolve();
@@ -153,7 +153,7 @@ program
   .action(async () => {
     try {
       await openIssuePage();
-      await print(chalk.green('Attempted to open browser to create a new issue.'));
+      await print(chalk.green('Opened issue page in browser.'));
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.error(chalk.red(`Failed to open issue page: ${message}`));
