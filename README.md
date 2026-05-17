@@ -117,6 +117,9 @@ On first run, LazyShell will guide you through:
 ```bash
 # Open configuration UI
 lazyshell config
+
+# Open GitHub page to create a new issue
+lazyshell issue
 ```
 
 ### Manual Environment Variables (Optional)
