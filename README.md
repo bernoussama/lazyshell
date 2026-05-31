@@ -31,20 +31,20 @@ LazyShell is a command-line interface that helps you quickly generate and execut
 
 ## Features ✨
 
-- 🔍 Generates shell commands from natural language descriptions
-- ⚡ Supports multiple AI providers (Groq, Google Gemini, OpenRouter, Anthropic, OpenAI, Ollama, Mistral)
-- 🔧 Interactive configuration system - no manual environment setup needed
-- 🔒 Safe execution with confirmation prompt
-- 🚀 Fast and lightweight
-- 🔄 Automatic fallback to environment variables
-- 💾 Persistent configuration storage
-- 📋 **Automatic clipboard integration** - generated commands are copied to clipboard
-- 🧪 **Built-in evaluation system for testing AI performance**
-- 🏆 **Model benchmarking capabilities**
-- 🤖 **LLM Judge evaluation system**
-- ⚙️ **CI/CD integration with automated quality checks**
-- 🖥️ **System-aware command generation** - detects OS, distro, and package manager
-- 🔄 **Command refinement** - iteratively improve commands with AI feedback
+-  Generates shell commands from natural language descriptions
+-  Supports multiple AI providers (Groq, Google Gemini, OpenRouter, Anthropic, OpenAI, Ollama, Mistral)
+-  Interactive configuration system - no manual environment setup needed
+-  Safe execution with confirmation prompt
+-  Fast and lightweight
+-  Automatic fallback to environment variables
+-  Persistent configuration storage
+-  **Automatic clipboard integration** - generated commands are copied to clipboard
+-  **Built-in evaluation system for testing AI performance**
+-  **Model benchmarking capabilities**
+-  **LLM Judge evaluation system**
+-  **CI/CD integration with automated quality checks**
+-  **System-aware command generation** - detects OS, distro, and package manager
+-  **Command refinement** - iteratively improve commands with AI feedback
 
 ## Installation 📦
 
@@ -78,7 +78,7 @@ bun add -g lazyshell
 curl -fsSL https://raw.githubusercontent.com/bernoussama/lazyshell/main/install | bash
 ```
 
-## Quick Start 🚀
+## Quick Start
 
 1. **First Run**: LazyShell will automatically prompt you to select an AI provider and enter your API key:
 
@@ -102,7 +102,7 @@ curl -fsSL https://raw.githubusercontent.com/bernoussama/lazyshell/main/install 
 
 4. **Clipboard Integration**: Generated commands are automatically copied to your clipboard for easy pasting.
 
-## Configuration 🔧
+## Configuration
 
 ### Interactive Setup (Recommended)
 
@@ -142,7 +142,7 @@ export OPENAI_API_KEY='your-api-key-here'
 - **Linux/macOS**: `~/.lazyshell/config.json`
 - **Windows**: `%USERPROFILE%\.lazyshell\config.json`
 
-## Supported AI Providers 🤖
+## Supported AI Providers
 
 | Provider | Models | API Key Required | Notes |
 |----------|--------|------------------|-------|
@@ -155,7 +155,7 @@ export OPENAI_API_KEY='your-api-key-here'
 | **Mistral** | Devstral Small | No | Code-optimized models |
 | **LMStudio** | Local models | No | **Experimental** - Local models via LMStudio |
 
-## Usage Examples 🚀
+## Usage Examples
 
 ### Basic Usage
 
@@ -201,7 +201,7 @@ lazyshell "install docker"  # Uses apt/yum/pacman/etc based on your distro
 - **Cancel**: Exit without running anything
 - **Clipboard**: Commands are automatically copied for manual execution
 
-## System Intelligence 🧠
+## System Intelligence
 
 LazyShell automatically detects your system environment:
 
@@ -213,7 +213,7 @@ LazyShell automatically detects your system environment:
 
 This enables LazyShell to generate system-appropriate commands and suggest the right package manager for installations.
 
-## Evaluation System 🧪
+## Evaluation System
 
 LazyShell includes a flexible evaluation system for testing and benchmarking AI performance:
 
@@ -259,7 +259,7 @@ await runEval("My Eval", {
 
 See [docs/EVALUATION.md](docs/EVALUATION.md) for complete documentation.
 
-## Model Benchmarking 🏆
+## Model Benchmarking
 
 LazyShell includes comprehensive benchmarking capabilities to compare AI model performance:
 
@@ -286,7 +286,7 @@ bun dist/bench_models.mjs
 - `ollama3.2` (Ollama)
 - `or-devstral` (OpenRouter)
 
-## CI Evaluations 🚦
+## CI Evaluations
 
 LazyShell includes automated quality assessments that run in CI to ensure consistent performance:
 
@@ -328,7 +328,7 @@ bun run build && bun dist/lib/example.eval.mjs
 
 See [docs/CI_EVALUATIONS.md](docs/CI_EVALUATIONS.md) for complete setup and configuration guide.
 
-## Development 🛠️
+## Development
 
 ### Prerequisites
 
@@ -406,7 +406,7 @@ src/
 - **Modular Architecture**: Clean separation of concerns
 - **ESM**: Modern ES modules throughout
 
-## Troubleshooting 🔧
+## Troubleshooting
 
 ### Configuration Issues
 
@@ -433,7 +433,7 @@ For troubleshooting, you can check:
 - System detection: The AI considers your OS, distro, and package manager
 - Command history: Generated commands are added to your shell history
 
-## Contributing 🤝
+## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
