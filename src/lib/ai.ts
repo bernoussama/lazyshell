@@ -6,6 +6,8 @@ import dedent from 'dedent';
 import { getDistroPackageManager } from '../helpers/package-manager';
 import { getHardwareInfo, type HardwareInfo } from '../helpers/hardware';
 import { getModelFromRegistry } from './provider-registry';
+import { ensureBundledServer, isBundledModelInstalled, isOllamaReachable } from './bundled-model';
+import { BUNDLED_MODEL, OLLAMA_DEFAULT_MODEL } from './local-models';
 
 export interface SystemInfo {
   platform: string;
@@ -60,7 +62,29 @@ export function getModelFromConfig(config: Config): ModelConfig {
   return getModelFromRegistry(config.provider, config.model, config.baseUrl, config.apiKey);
 }
 
-export function getDefaultModel(): ModelConfig {
+export async function prepareLocalRuntime(config: Config): Promise<Config> {
+  if (config.provider === 'ollama') {
+    if (await isOllamaReachable()) {
+      return config;
+    }
+    if (config.bundledModel?.status === 'installed' && (await isBundledModelInstalled())) {
+      const baseUrl = await ensureBundledServer();
+      return { ...config, provider: 'bundled', model: BUNDLED_MODEL.id, baseUrl };
+    }
+    throw new Error(
+      'Ollama is not running. Start Ollama, or run `lazyshell model install` to use the bundled local model.'
+    );
+  }
+
+  if (config.provider === 'bundled') {
+    const baseUrl = await ensureBundledServer();
+    return { ...config, model: BUNDLED_MODEL.id, baseUrl };
+  }
+
+  return config;
+}
+
+function envProvider(): ProviderKey | undefined {
   const envProviderMap: [string, ProviderKey][] = [
     ['GROQ_API_KEY', 'groq'],
     ['GOOGLE_GENERATIVE_AI_API_KEY', 'google'],
@@ -71,24 +95,52 @@ export function getDefaultModel(): ModelConfig {
 
   for (const [envVar, provider] of envProviderMap) {
     if (process.env[envVar]) {
-      return getModelFromRegistry(provider);
+      return provider;
     }
+  }
+  return undefined;
+}
+
+export function getDefaultModel(): ModelConfig {
+  const provider = envProvider();
+  if (provider) {
+    return getModelFromRegistry(provider);
   }
 
   try {
     return getModelFromRegistry('ollama');
   } catch {
     throw new Error(
-      'No API key found. Please set either GROQ_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY, OPENROUTER_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY. Or setup Ollama/LM Studio'
+      'No API key found. Please set either GROQ_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY, OPENROUTER_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY. Or setup Ollama/LM Studio/the bundled model'
     );
   }
+}
+
+export async function getDefaultModelAsync(): Promise<ModelConfig> {
+  const provider = envProvider();
+  if (provider) {
+    return getModelFromRegistry(provider);
+  }
+
+  if (await isOllamaReachable()) {
+    return getModelFromRegistry('ollama');
+  }
+
+  if (await isBundledModelInstalled()) {
+    const baseUrl = await ensureBundledServer();
+    return getModelFromRegistry('bundled', BUNDLED_MODEL.id, baseUrl);
+  }
+
+  throw new Error(
+    'No API key found and no local runtime is available. Set an API key, start Ollama, or run `lazyshell model install`.'
+  );
 }
 
 export function getBenchmarkModels(): Record<string, LanguageModel> {
   return {
     'or-devstral': getModelFromRegistry('openrouter', 'mistralai/devstral-small:free').model,
     'gemini-2.0-flash-lite': getModelFromRegistry('google', 'gemini-2.0-flash-lite').model,
-    'ollama3.2': getModelFromRegistry('ollama', 'llama3.2').model,
+    'ollama3.2': getModelFromRegistry('ollama', OLLAMA_DEFAULT_MODEL).model,
     'llama-3.3-70b-versatile': getModelFromRegistry('groq', 'llama-3.3-70b-versatile').model,
     devstral: getModelFromRegistry('mistral', 'devstral-small-2505').model,
     'lmstudio-llama': getModelFromRegistry('lmstudio', 'llama-3.2-1b').model,
@@ -241,6 +293,8 @@ export const models = {
     getModelFromRegistry('anthropic', modelId, baseUrl, apiKey).model,
   openai: (modelId?: string, baseUrl?: string, apiKey?: string) =>
     getModelFromRegistry('openai', modelId, baseUrl, apiKey).model,
+  bundled: (modelId?: string, baseUrl?: string, apiKey?: string) =>
+    getModelFromRegistry('bundled', modelId, baseUrl, apiKey).model,
   ollama: (modelId?: string, baseUrl?: string, apiKey?: string) =>
     getModelFromRegistry('ollama', modelId, baseUrl, apiKey).model,
   mistral: (modelId?: string, baseUrl?: string, apiKey?: string) =>

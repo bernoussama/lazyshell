@@ -97,6 +97,7 @@ curl -fsSL https://raw.githubusercontent.com/bernoussama/lazyshell/main/install 
    - **Ollama** - Local models (no API key required)
    - **Mistral** - Mistral AI models for code generation
    - **LMStudio** - Local models via LMStudio (experimental, no API key required)
+   - **Bundled** - Optional ~469 MB Qwen2.5-Coder 0.5B GGUF (downloaded on Yes, no Ollama required)
 
 3. **Automatic Configuration**: Your preferences are saved to `~/.lazyshell/config.json` and used for future runs.
 
@@ -108,15 +109,22 @@ curl -fsSL https://raw.githubusercontent.com/bernoussama/lazyshell/main/install 
 
 On first run, LazyShell will guide you through:
 
-1. Selecting your preferred AI provider
-2. Entering your API key (if required)
-3. Automatically saving the configuration
+1. Optionally downloading the bundled local model (~469 MB)
+2. Selecting your preferred AI provider
+3. Entering your API key (if required)
+4. Automatically saving the configuration
+
+Skip the download prompt with `--skip-bundled-model` or `LSH_SKIP_BUNDLED_MODEL=1`. The choice is saved; use `lazyshell model install` or `lazyshell model remove` later.
 
 ### Configuration Management
 
 ```bash
 # Open configuration UI
 lazyshell config
+
+# Bundled local model
+lazyshell model install
+lazyshell model remove
 ```
 
 ### Manual Environment Variables (Optional)
@@ -135,7 +143,7 @@ export ANTHROPIC_API_KEY='your-api-key-here'
 export OPENAI_API_KEY='your-api-key-here'
 ```
 
-> **Note**: Ollama and LMStudio don't require API keys as they run models locally.
+> **Note**: Ollama, LM Studio, and the bundled local model don't require API keys.
 
 ### Configuration File Location
 
@@ -151,9 +159,29 @@ export OPENAI_API_KEY='your-api-key-here'
 | **OpenRouter** | Multiple models | Yes | Includes free tier options |
 | **Anthropic** | Claude 3.5 Haiku | Yes | Advanced reasoning capabilities |
 | **OpenAI** | GPT-4o Mini | Yes | Industry standard models |
-| **Ollama** | Local models | No | Run models locally |
+| **Ollama** | Curated local catalog (see below) | No | Run models locally |
 | **Mistral** | Devstral Small | No | Code-optimized models |
-| **LMStudio** | Local models | No | **Experimental** - Local models via LMStudio |
+| **LMStudio** | Curated local catalog | No | **Experimental** - Local models via LMStudio |
+| **Bundled** | Qwen2.5-Coder 0.5B Instruct Q4_K_M | No | Optional ~469 MB GGUF, Apache-2.0 |
+
+## Local models
+
+Ollama and LM Studio stay first-class. When you pick either provider, LazyShell offers a catalog plus Custom…:
+
+- CPU / small: `qwen2.5-coder:0.5b`, `qwen2.5-coder:1.5b` (default), `hf.co/AryaYT/nl2shell-0.8b`
+- GPU: `qwen2.5-coder:3b`, `qwen2.5-coder:7b`, `westenfelder/NL2SH`
+
+Command-only NL2SH fine-tunes may skip explanations and ignore OS/package-manager context. Prefer Qwen2.5-Coder instruct models when you want LazyShell’s full system prompt.
+
+### Bundled model (opt-in / opt-out)
+
+The npm package does **not** contain weights. On first setup you can download [Qwen2.5-Coder-0.5B-Instruct Q4_K_M](https://huggingface.co/Qwen/Qwen2.5-Coder-0.5B-Instruct-GGUF) (~469 MB, Apache-2.0) to `~/.lazyshell/models/`. The file is checksum-verified.
+
+- **Yes** on first run: download, then use the bundled provider if Ollama is not running and no cloud API key is set.
+- **No**: remembered as declined; you will not be asked again until `lazyshell config` or `lazyshell model install`.
+- **Skip**: `lazyshell --skip-bundled-model "..."` or `LSH_SKIP_BUNDLED_MODEL=1`.
+
+If the configured provider is Ollama but Ollama is down and the bundled model is installed, LazyShell starts a local `llama-server` (downloaded once for your OS) and uses that instead.
 
 ## Usage Examples
 
@@ -283,7 +311,7 @@ bun dist/bench_models.mjs
 - `llama-3.3-70b-versatile` (Groq)
 - `gemini-2.0-flash-lite` (Google)
 - `devstral-small-2505` (Mistral)
-- `ollama3.2` (Ollama)
+- `qwen2.5-coder:1.5b` (Ollama)
 - `or-devstral` (OpenRouter)
 
 ## CI Evaluations
@@ -383,12 +411,15 @@ src/
 ├── bench_models.ts       # Model benchmarking script
 ├── test-ai-lib.ts        # AI library testing script
 ├── commands/
-│   └── config.ts         # Configuration UI command
+│   ├── config.ts         # Configuration UI command
+│   └── model.ts          # Bundled model install/remove
 ├── helpers/
 │   ├── index.ts          # Helper exports
 │   └── package-manager.ts # System package manager detection
 └── lib/
     ├── ai.ts             # AI provider integrations and command generation
+    ├── local-models.ts   # Ollama/LM Studio catalog and bundled GGUF pin
+    ├── bundled-model.ts  # Bundled download, checksum, llama-server
     ├── config.ts         # Configuration management
     ├── eval.ts           # Evaluation framework
     ├── basic.eval.ts     # Basic evaluation examples
@@ -421,7 +452,8 @@ LazyShell will automatically fall back to environment variables if the config fi
 ### Common Issues
 
 - **Clipboard not working**: Ensure your system supports clipboard operations
-- **Model timeout**: Some models (especially Ollama) may take longer to respond
+- **Model timeout**: Some models (especially Ollama or the first bundled-model start) may take longer to respond
+- **Bundled model missing**: Run `lazyshell model install` or pick Ollama/LM Studio/cloud in `lazyshell config`
 - **Rate limiting**: Built-in retry logic handles temporary rate limits
 - **Command not found**: Make sure the package is properly installed globally
 
