@@ -2,9 +2,9 @@ import { generateCommand, getDefaultModel, models, ModelConfig } from './ai';
 import { eval as runEval, createLLMJudge, EvalSummary } from './eval';
 
 const judgeModelConf: ModelConfig = {
-  model: models.groq('qwen-qwq-32b'),
+  model: models.groq('openai/gpt-oss-20b'),
   provider: 'groq',
-  modelId: 'qwen-qwq-32b',
+  modelId: 'openai/gpt-oss-20b',
 };
 
 // Configuration for CI thresholds

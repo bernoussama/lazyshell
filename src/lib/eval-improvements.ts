@@ -182,9 +182,9 @@ export function createEnhancedLLMJudge(
     async: true,
     score: async (input: any, output: any, expected?: any): Promise<ScorerResult> => {
       const model = modelConfig || {
-        model: models.groq('qwen-qwq-32b'),
+        model: models.groq('openai/gpt-oss-20b'),
         provider: 'groq',
-        modelId: 'qwen-qwq-32b',
+        modelId: 'openai/gpt-oss-20b',
       };
 
       const exampleText = includeExamples

@@ -3,9 +3,9 @@ import { generateObject } from 'ai';
 import { models, type ModelConfig } from './ai';
 
 const judgeModelConf: ModelConfig = {
-  model: models.groq('qwen-qwq-32b'),
+  model: models.groq('openai/gpt-oss-20b'),
   provider: 'groq',
-  modelId: 'qwen-qwq-32b',
+  modelId: 'openai/gpt-oss-20b',
 };
 
 // 1. Core Types and Interfaces

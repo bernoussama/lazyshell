@@ -141,7 +141,7 @@ export function getBenchmarkModels(): Record<string, LanguageModel> {
     'or-devstral': getModelFromRegistry('openrouter', 'mistralai/devstral-small:free').model,
     'gemini-2.0-flash-lite': getModelFromRegistry('google', 'gemini-2.0-flash-lite').model,
     'ollama3.2': getModelFromRegistry('ollama', OLLAMA_DEFAULT_MODEL).model,
-    'llama-3.3-70b-versatile': getModelFromRegistry('groq', 'llama-3.3-70b-versatile').model,
+    'gpt-oss-120b': getModelFromRegistry('groq', 'openai/gpt-oss-120b').model,
     devstral: getModelFromRegistry('mistral', 'devstral-small-2505').model,
     'lmstudio-llama': getModelFromRegistry('lmstudio', 'llama-3.2-1b').model,
     'openaiCompatible-gpt': getModelFromRegistry('openaiCompatible', 'gpt-3.5-turbo').model,

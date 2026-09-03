@@ -25,7 +25,7 @@ export const ProviderRegistry: Record<ProviderKey, ProviderConfig> = {
     name: 'groq',
     baseUrl: 'https://api.groq.com/openai/v1',
     apiKeyEnvVar: 'GROQ_API_KEY',
-    defaultModelId: 'llama-3.3-70b-versatile',
+    defaultModelId: 'openai/gpt-oss-120b',
     createModel: (modelId, baseUrl = 'https://api.groq.com/openai/v1', apiKey) => {
       const groq = createOpenAICompatible({ name: 'groq', baseURL: baseUrl, apiKey });
       return groq(modelId);

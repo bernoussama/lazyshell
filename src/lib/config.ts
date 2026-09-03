@@ -17,9 +17,9 @@ import { CONFIG_DIR, CONFIG_FILE, shouldSkipBundledModelPrompt } from './paths';
 export const SUPPORTED_PROVIDERS = {
   groq: {
     name: 'Groq',
-    description: 'Groq LLaMA models (fast inference)',
+    description: 'Groq GPT-OSS models (fast inference)',
     envVar: 'GROQ_API_KEY',
-    defaultModel: 'llama-3.3-70b-versatile',
+    defaultModel: 'openai/gpt-oss-120b',
   },
   google: {
     name: 'Google Gemini',

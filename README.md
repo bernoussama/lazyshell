@@ -89,7 +89,7 @@ curl -fsSL https://raw.githubusercontent.com/bernoussama/lazyshell/main/install 
    ```
 
 2. **Interactive Setup**: Choose from supported providers:
-   - **Groq** - Fast LLaMA models with great performance
+   - **Groq** - Fast GPT-OSS models with great performance
    - **Google Gemini** - Google's latest AI models  
    - **OpenRouter** - Access to multiple models including free options
    - **Anthropic Claude** - Powerful reasoning capabilities
@@ -154,7 +154,7 @@ export OPENAI_API_KEY='your-api-key-here'
 
 | Provider | Models | API Key Required | Notes |
 |----------|--------|------------------|-------|
-| **Groq** | LLaMA 3.3 70B | Yes | Fast inference, excellent performance |
+| **Groq** | GPT-OSS 120B | Yes | Fast inference, excellent performance |
 | **Google Gemini** | Gemini 2.0 Flash Lite | Yes | Latest Google AI models |
 | **OpenRouter** | Multiple models | Yes | Includes free tier options |
 | **Anthropic** | Claude 3.5 Haiku | Yes | Advanced reasoning capabilities |
@@ -308,7 +308,7 @@ bun dist/bench_models.mjs
 
 ### Available Models
 
-- `llama-3.3-70b-versatile` (Groq)
+- `openai/gpt-oss-120b` (Groq)
 - `gemini-2.0-flash-lite` (Google)
 - `devstral-small-2505` (Mistral)
 - `qwen2.5-coder:1.5b` (Ollama)
