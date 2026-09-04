@@ -8,6 +8,7 @@ import { getHardwareInfo, type HardwareInfo } from '../helpers/hardware';
 import { getModelFromRegistry } from './provider-registry';
 import { ensureBundledServer, isBundledModelInstalled, isOllamaReachable } from './bundled-model';
 import { BUNDLED_MODEL, OLLAMA_DEFAULT_MODEL } from './local-models';
+import { extractCommand, usesCompactPrompt } from './command-output';
 
 export interface SystemInfo {
   platform: string;
@@ -227,6 +228,47 @@ ${
 
 Remember: Your primary goal is to be helpful while maintaining system safety and security.`;
 
+const compactSystemPrompt = dedent`You convert a natural-language request into one shell command.
+
+Rules:
+- Output only the command. No markdown, no quotes, no explanation.
+- Do not use sudo unless the user asked for a privileged operation.
+- Prefer POSIX tools. Print the working directory with pwd, not cd.
+- Show OS/kernel info with uname -a, not package-manager show commands.
+- List files with ls. Create directories with mkdir. Search files with find. Disk usage with df.
+
+Examples:
+User: print the working directory
+pwd
+User: show OS and kernel information
+uname -a
+User: list all files including hidden ones in long format
+ls -la
+User: create a folder named demo
+mkdir demo
+User: find javascript files recursively
+find . -type f -name '*.js'
+User: check disk usage
+df -h
+
+Platform: ${osInfo.platform}${osInfo.distro ? ` (${osInfo.distro})` : ''}
+Shell: ${currentShell}
+Package manager: ${osInfo.packageManager || 'none'}`;
+
+function promptForModel(modelConfig?: ModelConfig): string {
+  if (usesCompactPrompt(modelConfig?.provider, modelConfig?.modelId)) {
+    return compactSystemPrompt;
+  }
+  return systemPrompt;
+}
+
+function generationLimits(modelConfig?: ModelConfig): { temperature: number; maxTokens?: number } {
+  if (usesCompactPrompt(modelConfig?.provider, modelConfig?.modelId)) {
+    return { temperature: 0, maxTokens: 64 };
+  }
+  return { temperature: modelConfig?.temperature || 0.1 };
+}
+
 const zCmd = z.object({
   command: z.string().describe('The command to execute, without any formatting or markdown'),
 });
@@ -249,13 +291,13 @@ export async function generateCommandStruct(
   try {
     const result = await generateObject({
       model: modelConf.model,
-      system: systemPrompt,
+      system: promptForModel(modelConf),
       schema,
       prompt,
-      temperature: modelConf.temperature || 0.1,
+      temperature: generationLimits(modelConf).temperature,
       maxRetries: modelConf.maxRetries || undefined,
     });
-    return result.object;
+    return { ...result.object, command: extractCommand(result.object.command) };
   } catch {
     const result = await generateCommand(prompt, modelConf);
     return { command: result, explanation: '' };
@@ -265,21 +307,23 @@ export async function generateCommandStruct(
 export async function generateCommand(prompt: string, modelConfig?: ModelConfig): Promise<string> {
   const finalModelConfig = modelConfig || getDefaultModel();
 
+  const limits = generationLimits(finalModelConfig);
   const result = await generateTextWithModel(finalModelConfig.model, prompt, {
-    temperature: finalModelConfig.temperature || 0.1,
-    systemPrompt,
+    temperature: limits.temperature,
+    maxTokens: limits.maxTokens,
+    systemPrompt: promptForModel(finalModelConfig),
   });
 
-  return result.text.trim();
+  return extractCommand(result.text);
 }
 
 export async function generateBenchmarkText(model: LanguageModel, prompt: string): Promise<string> {
   const result = await generateTextWithModel(model, prompt, {
     temperature: 0,
-    systemPrompt,
+    systemPrompt: promptForModel(),
   });
 
-  return result.text.trim();
+  return extractCommand(result.text);
 }
 
 export const models = {

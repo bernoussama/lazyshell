@@ -136,8 +136,9 @@ async function main(): Promise<void> {
   console.log(`Results: ${outPath}`);
 
   const generationFailed = evalResult.results.some(result => result.error || result.output === 'ERROR');
+  const tokenScore = evalResult.averageScores.ExpectedToken ?? 0;
   await stopBundledServer();
-  if (generationFailed) {
+  if (generationFailed || tokenScore < 1) {
     process.exit(1);
   }
 }
