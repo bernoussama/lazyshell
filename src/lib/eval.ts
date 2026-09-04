@@ -334,7 +334,11 @@ export async function withRetry<T>(
   throw new Error('Max retries exceeded');
 }
 
+export const DEFAULT_JUDGE_PROVIDER: ProviderKey = 'openrouter';
+export const DEFAULT_JUDGE_MODEL = 'google/gemini-3.8-flash';
+
 const JUDGE_PREFERENCE: Array<{ provider: ProviderKey; modelId: string; envVar: string }> = [
+  { provider: 'openrouter', modelId: DEFAULT_JUDGE_MODEL, envVar: 'OPENROUTER_API_KEY' },
   { provider: 'google', modelId: 'gemini-2.0-flash-lite', envVar: 'GOOGLE_GENERATIVE_AI_API_KEY' },
   { provider: 'openai', modelId: 'gpt-4o-mini', envVar: 'OPENAI_API_KEY' },
   { provider: 'anthropic', modelId: 'claude-3-5-haiku-latest', envVar: 'ANTHROPIC_API_KEY' },
@@ -350,31 +354,33 @@ function availableJudgeProviders(): Array<{ provider: ProviderKey; modelId: stri
 }
 
 export function pickJudgeModel(generatorProvider?: string): ModelConfig {
-  const override = process.env.EVAL_JUDGE_PROVIDER as ProviderKey | undefined;
+  const overrideProvider = process.env.EVAL_JUDGE_PROVIDER as ProviderKey | undefined;
+  const overrideModel = process.env.EVAL_JUDGE_MODEL;
   const available = availableJudgeProviders();
 
-  if (override) {
+  if (overrideProvider) {
     if (
       generatorProvider &&
-      override === generatorProvider &&
+      overrideProvider === generatorProvider &&
       available.some(entry => entry.provider !== generatorProvider)
     ) {
       throw new Error(
         `Judge and generator both resolve to ${generatorProvider}; set EVAL_JUDGE_PROVIDER to a different provider.`
       );
     }
-    const preferred = JUDGE_PREFERENCE.find(entry => entry.provider === override);
-    return getModelFromRegistry(override, preferred?.modelId);
+    const preferred = JUDGE_PREFERENCE.find(entry => entry.provider === overrideProvider);
+    return getModelFromRegistry(overrideProvider, overrideModel ?? preferred?.modelId);
   }
 
   if (available.length === 0) {
     throw new Error(
-      'No judge API key found. Set GOOGLE_GENERATIVE_AI_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY, or GROQ_API_KEY.'
+      'No judge API key found. Set OPENROUTER_API_KEY (preferred, google/gemini-3.8-flash), GOOGLE_GENERATIVE_AI_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY, or GROQ_API_KEY.'
     );
   }
 
   const chosen = available.find(entry => entry.provider !== generatorProvider) ?? available[0];
-  return getModelFromRegistry(chosen.provider, chosen.modelId);
+  const modelId = chosen.provider === DEFAULT_JUDGE_PROVIDER ? (overrideModel ?? chosen.modelId) : chosen.modelId;
+  return getModelFromRegistry(chosen.provider, modelId);
 }
 
 export function hasAnyJudgeKey(): boolean {

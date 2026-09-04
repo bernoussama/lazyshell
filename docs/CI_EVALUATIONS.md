@@ -15,7 +15,7 @@ Fork pull requests do not receive repository secrets. If `GROQ_API_KEY` is empty
 ## Models
 
 - **Generator** is pinned to Groq `openai/gpt-oss-120b`. Override with `EVAL_GENERATOR_PROVIDER` and `EVAL_GENERATOR_MODEL`.
-- **Judge** is chosen by `pickJudgeModel()`: `EVAL_JUDGE_PROVIDER` if set, otherwise the first available key among Google (`gemini-2.0-flash-lite`), OpenAI (`gpt-4o-mini`), Anthropic (`claude-3-5-haiku-latest`), then Groq (`openai/gpt-oss-20b`). When another provider is available, the judge must not match the generator provider.
+- **Judge** defaults to OpenRouter `google/gemini-3.8-flash` when `OPENROUTER_API_KEY` is set. Override with `EVAL_JUDGE_PROVIDER` / `EVAL_JUDGE_MODEL`. Fallbacks: Google, OpenAI, Anthropic, Groq. When another provider is available, the judge must not match the generator provider.
 
 ## Dataset
 
@@ -48,7 +48,8 @@ bun run eval:ci:baseline
 Add these repository secrets as needed:
 
 - `GROQ_API_KEY` — required to run the workflow (generator)
-- `GOOGLE_GENERATIVE_AI_API_KEY` — preferred judge
+- `OPENROUTER_API_KEY` — preferred judge (Gemini 3.8 Flash)
+- `GOOGLE_GENERATIVE_AI_API_KEY` — judge fallback
 - `OPENAI_API_KEY` — judge fallback
 - `ANTHROPIC_API_KEY` — judge fallback
 
@@ -56,8 +57,7 @@ Add these repository secrets as needed:
 
 ```bash
 export GROQ_API_KEY="..."
-# optional judge keys
-export GOOGLE_GENERATIVE_AI_API_KEY="..."
+export OPENROUTER_API_KEY="..."
 
 bun install
 bun run eval:ci

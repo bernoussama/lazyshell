@@ -48,9 +48,10 @@ Command-generation suites use `EvalCase` from `src/lib/eval-cases.ts` as `expect
 
 `pickJudgeModel(generatorProvider?)` picks a judge:
 
-1. `EVAL_JUDGE_PROVIDER` if set
-2. Otherwise the first available key: Google, OpenAI, Anthropic, Groq
-3. Prefer a provider other than `generatorProvider` when another key exists
+1. `EVAL_JUDGE_PROVIDER` / `EVAL_JUDGE_MODEL` if set
+2. Otherwise OpenRouter `google/gemini-3.8-flash` when `OPENROUTER_API_KEY` is set
+3. Then Google, OpenAI, Anthropic, Groq
+4. Prefer a provider other than `generatorProvider` when another key exists
 
 `hasAnyJudgeKey()` reports whether any of those keys is set.
 

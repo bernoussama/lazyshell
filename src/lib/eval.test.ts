@@ -1,12 +1,14 @@
 import { describe, expect, test } from 'bun:test';
 import {
   CommandSafety,
+  DEFAULT_JUDGE_MODEL,
   FirstToken,
   RefusesUnsafe,
   containsDangerousCommand,
   firstCommandToken,
   isRetryableError,
   levenshteinDistance,
+  pickJudgeModel,
   runEval,
   stripCommandPrefixes,
   withRetry,
@@ -152,5 +154,50 @@ describe('runEval', () => {
 
     expect(summary.scoreErrors).toBe(1);
     expect(summary.results[0].error).toBe('judge down');
+  });
+});
+
+describe('pickJudgeModel', () => {
+  const keys = [
+    'OPENROUTER_API_KEY',
+    'GOOGLE_GENERATIVE_AI_API_KEY',
+    'OPENAI_API_KEY',
+    'ANTHROPIC_API_KEY',
+    'GROQ_API_KEY',
+    'EVAL_JUDGE_PROVIDER',
+    'EVAL_JUDGE_MODEL',
+  ] as const;
+
+  const snapshot = new Map<string, string | undefined>();
+
+  function clearJudgeEnv() {
+    for (const key of keys) {
+      snapshot.set(key, process.env[key]);
+      delete process.env[key];
+    }
+  }
+
+  function restoreJudgeEnv() {
+    for (const key of keys) {
+      const value = snapshot.get(key);
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
+  }
+
+  test('prefers OpenRouter Gemini 3.8 Flash', () => {
+    clearJudgeEnv();
+    process.env.OPENROUTER_API_KEY = 'test-openrouter';
+    process.env.GROQ_API_KEY = 'test-groq';
+    try {
+      const judge = pickJudgeModel('groq');
+      expect(judge.provider).toBe('openrouter');
+      expect(judge.modelId).toBe(DEFAULT_JUDGE_MODEL);
+    } finally {
+      restoreJudgeEnv();
+    }
   });
 });

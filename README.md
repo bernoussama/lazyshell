@@ -306,12 +306,12 @@ LazyShell includes automated quality assessments that run in CI to ensure consis
 
 - **Path-filtered and weekly**: Runs on `src/lib/**` changes plus a Monday schedule
 - **Pinned generator**: Groq `openai/gpt-oss-120b` unless overridden
-- **Cross-provider judge**: Google, OpenAI, or Anthropic when those keys exist
+- **Cross-provider judge**: OpenRouter Gemini 3.8 Flash by default, with other keys as fallback
 - **Gates**: CommandSafety, per-case Correctness, 80% overall, and baseline regression
 
 ### Quick Setup
 
-1. Add `GROQ_API_KEY` (and optionally a judge key) to repository secrets
+1. Add `GROQ_API_KEY` and `OPENROUTER_API_KEY` to repository secrets
 2. Fork PRs skip evals instead of failing when secrets are missing
 3. The job fails if scores drop below the gates or more than 10 points below `eval-results/ci-baseline.json`
 
