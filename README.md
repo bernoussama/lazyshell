@@ -336,6 +336,9 @@ LazyShell includes automated quality assessments that run in CI to ensure consis
 ```bash
 # Run CI evaluations locally
 bun run eval:ci
+
+# Evaluate the bundled local model (downloads GGUF on first run)
+bun run eval:bundled
 ```
 
 ### Custom Evaluation Scripts
