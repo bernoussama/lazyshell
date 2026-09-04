@@ -97,5 +97,8 @@ async function runExamples() {
   }
 }
 
-// Export for use
 export { runExamples, basicStringExample, commandGenerationExample, llmExample };
+
+if (import.meta.main) {
+  runExamples().catch(console.error);
+}
