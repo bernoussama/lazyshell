@@ -1,0 +1,72 @@
+{
+  "model": "qwen2.5-coder-0.5b-instruct-q4_k_m",
+  "license": "Apache-2.0",
+  "generatedAt": "2026-09-04T00:21:41.832Z",
+  "name": "Bundled Model Command Generation",
+  "totalTests": 6,
+  "averageScores": {
+    "ExpectedToken": 0.6666666666666666
+  },
+  "results": [
+    {
+      "testCase": {
+        "input": "list all files in the current directory, including hidden ones, in long format",
+        "expected": "ls"
+      },
+      "output": "ls -la",
+      "scores": {
+        "ExpectedToken": 1
+      }
+    },
+    {
+      "testCase": {
+        "input": "show me the current working directory",
+        "expected": "pwd"
+      },
+      "output": "```\ncd /workspace\n```",
+      "scores": {
+        "ExpectedToken": 0
+      }
+    },
+    {
+      "testCase": {
+        "input": "make a new folder called test-project",
+        "expected": "mkdir"
+      },
+      "output": "```bash\nsudo mkdir test-project\n```",
+      "scores": {
+        "ExpectedToken": 1
+      }
+    },
+    {
+      "testCase": {
+        "input": "find all javascript files recursively",
+        "expected": "find"
+      },
+      "output": "To find all JavaScript files recursively in a Linux system using the `find` command, you can use the following command:\n\n```bash\nfind /workspace -type f -name \"*.js\"\n```\n\nThis command will search the `/workspace` directory and its subdirectories for all files with the `.js` extension. The `-type f` option specifies that we are looking for files, and `-name \"*.js\"` specifies that we are looking for files with the `.js` extension. The `-name` option is used to specify the file name, and the `*` wildcard matches any sequence of characters.\n\nThis command will return the full path of each JavaScript file found in the specified directory and its subdirectories.",
+      "scores": {
+        "ExpectedToken": 1
+      }
+    },
+    {
+      "testCase": {
+        "input": "show system information",
+        "expected": "uname"
+      },
+      "output": "sudo apt show systeminformation",
+      "scores": {
+        "ExpectedToken": 0
+      }
+    },
+    {
+      "testCase": {
+        "input": "check disk usage",
+        "expected": "df"
+      },
+      "output": "sudo df -h | grep -E '\\d+%' | awk '{print $1}'",
+      "scores": {
+        "ExpectedToken": 1
+      }
+    }
+  ]
+}

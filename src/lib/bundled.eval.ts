@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { generateCommand, getModelFromConfig, models, type ModelConfig } from './ai';
-import { ensureBundledServer, installBundledModel, isBundledModelInstalled } from './bundled-model';
+import { ensureBundledServer, installBundledModel, isBundledModelInstalled, stopBundledServer } from './bundled-model';
 import { Contains, createLLMJudge, eval as runEval, type EvalSummary, type Scorer } from './eval';
 import { BUNDLED_MODEL } from './local-models';
 
@@ -136,6 +136,7 @@ async function main(): Promise<void> {
   console.log(`Results: ${outPath}`);
 
   const generationFailed = evalResult.results.some(result => result.error || result.output === 'ERROR');
+  await stopBundledServer();
   if (generationFailed) {
     process.exit(1);
   }
