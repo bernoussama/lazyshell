@@ -1,194 +1,74 @@
 # CI Evaluations
 
-This document explains how the CI evaluation system works and how to configure it.
+The CI evaluation suite (`bun run eval:ci`) generates commands for a shared case set and scores them with deterministic gates plus LLM judges. It is the quality check used by the `Evals` GitHub Actions workflow.
 
-## Overview
+## When it runs
 
-The CI evaluation system automatically runs quality assessments on every pull request and push to main/develop branches. It uses LLM judges to evaluate the quality of generated commands against various criteria.
+The workflow (`.github/workflows/evals.yml`) runs on:
 
-## How It Works
+- Pull requests and pushes to `main` when `src/lib/**`, `package.json`, `bun.lock`, or the workflow file change
+- A weekly schedule (`0 6 * * 1`) so provider deprecations are caught even when no code changes
+- Manual `workflow_dispatch`
 
-1. **Threshold-Based Pass/Fail**: The system uses configurable thresholds to determine if the codebase meets quality standards
-2. **Multiple Criteria**: Evaluations check for command quality, Unix/Linux correctness, security best practices, and efficiency
-3. **CI Integration**: Runs automatically in GitHub Actions and fails the CI if scores are below thresholds
+Fork pull requests do not receive repository secrets. If `GROQ_API_KEY` is empty, the eval step is skipped and the job prints `skipped: no secrets (fork PR)` instead of failing.
 
-## Configuration
+## Models
 
-### Threshold Settings
+- **Generator** is pinned to Groq `openai/gpt-oss-120b`. Override with `EVAL_GENERATOR_PROVIDER` and `EVAL_GENERATOR_MODEL`.
+- **Judge** is chosen by `pickJudgeModel()`: `EVAL_JUDGE_PROVIDER` if set, otherwise the first available key among Google (`gemini-2.0-flash-lite`), OpenAI (`gpt-4o-mini`), Anthropic (`claude-3-5-haiku-latest`), then Groq (`openai/gpt-oss-20b`). When another provider is available, the judge must not match the generator provider.
 
-Edit `src/lib/ci-eval.ts` to adjust the thresholds:
+## Dataset
 
-```typescript
-const CI_CONFIG: CIEvalConfig = {
-  minThreshold: 0.7, // 70% score required to pass (both overall and individual)
-  criticalScorers: ['Quality', 'Correctness', 'Security'] // These scorers must individually meet the threshold
-};
-```
+Cases live in `src/lib/eval-cases.ts`:
 
-### Parameters
+- `PROMPT_SANITY_CASES` — six prompts that mirror the compact-prompt few-shots
+- `HELD_OUT_CASES` — tasks that are not copied into any system prompt
+- `SAFETY_CASES` — requests that must be refused (`error:` / `warning:`)
 
-- `minThreshold`: Overall average score required to pass (0-1 scale)
-- `criticalScorers`: Array of scorer names that must individually pass the threshold
+## Pass criteria
 
-## Test Cases
+All of the following must hold:
 
-The CI evaluations run against these command generation scenarios:
+- Zero task or scorer errors (failed API calls fail the job; they are not scored as zero)
+- `CommandSafety` is `1` on every case
+- `Correctness` is at least `0.5` (raw judge score 3/5) on every case
+- Overall average of scorer averages is at least `0.8`
+- If `eval-results/ci-baseline.json` exists, the overall score is not more than `0.10` below that baseline
 
-- List files with hidden ones in long format
-- Show current working directory  
-- Create a new folder
-- Find JavaScript files recursively
-- Show system information
-- Check disk usage
+Timestamped run output is written to `eval-results/ci-latest.json` (gitignored). When `GITHUB_STEP_SUMMARY` is set, a per-case table is appended.
 
-## Scoring Criteria
-
-Each test case is evaluated by 3 LLM judges:
-
-1. **Quality**: General command quality and appropriateness
-2. **Correctness**: Unix/Linux command syntax and platform compatibility
-3. **Security**: Security considerations and best practices
-
-## GitHub Actions Setup
-
-### Required Secrets
-
-Add these API keys to your GitHub repository secrets:
-
-- `GROQ_API_KEY`: Required for LLM judge evaluations
-- `ANTHROPIC_API_KEY`: Optional, fallback model
-- `OPENAI_API_KEY`: Optional, fallback model
-
-### Setting Up Secrets
-
-1. Go to your repository on GitHub
-2. Navigate to Settings → Secrets and variables → Actions
-3. Click "New repository secret"
-4. Add the required API keys
-
-### Workflow
-
-The CI workflow (`.github/workflows/ci.yml`) includes:
-
-- **Test Job**: Runs unit tests
-- **Evaluate Job**: Runs LLM-based evaluations (only if API keys are available)
-- **CI Success Job**: Combines results and determines overall pass/fail
-
-## Running Locally
-
-### Prerequisites
-
-1. Set up environment variables:
-   ```bash
-   export GROQ_API_KEY="your_groq_api_key"
-   ```
-
-2. Install dependencies:
-   ```bash
-   pnpm install
-   ```
-
-### Run Evaluations
+Update the committed baseline only after a deliberate review:
 
 ```bash
-# Run CI evaluations locally
-pnpm eval:ci
-
-# Build and run manually
-pnpm build
-node bin/lib/ci-eval.js
+bun run eval:ci:baseline
 ```
 
-### Understanding Output
+## Secrets
 
-The evaluation will show:
+Add these repository secrets as needed:
 
+- `GROQ_API_KEY` — required to run the workflow (generator)
+- `GOOGLE_GENERATIVE_AI_API_KEY` — preferred judge
+- `OPENAI_API_KEY` — judge fallback
+- `ANTHROPIC_API_KEY` — judge fallback
+
+## Local commands
+
+```bash
+export GROQ_API_KEY="..."
+# optional judge keys
+export GOOGLE_GENERATIVE_AI_API_KEY="..."
+
+bun install
+bun run eval:ci
+bun run eval:bundled
+bun run eval:basic
 ```
-🚀 Starting CI evaluations...
-📊 Threshold: 70%
-🎯 Critical scorers: LLMJudge
 
-[Individual test results...]
-
-============================================================
-🎯 CI EVALUATION RESULTS
-============================================================
-📊 Overall average score: 85.2%
-🎯 Required threshold: 70.0%
-
-🔍 Critical scorer results:
-  Quality: 87.5% ✅
-  Correctness: 82.3% ✅
-  Security: 90.1% ✅
-
-✅ EVALUATION PASSED
-All scores meet the required threshold.
-```
+The bundled eval gates `FirstToken` on the sanity cases and `CommandSafety` / `RefusesUnsafe` on safety cases. Held-out scores are reported but do not fail the bundled run except for safety.
 
 ## Troubleshooting
 
-### Evaluations Skipped
-
-If evaluations are skipped in CI:
-- Check that `GROQ_API_KEY` is set in repository secrets
-- Verify the secret name matches exactly
-
-### Evaluations Failing
-
-If evaluations consistently fail:
-1. Run locally to debug: `pnpm eval:ci`
-2. Review the specific scorer results
-3. Consider adjusting the threshold in `CI_CONFIG`
-4. Check if the AI model responses indicate real quality issues
-
-### API Costs
-
-The evaluations use the Groq API (free tier available). Each run evaluates 6 test cases with 4 scorers = 24 API calls.
-
-## Customization
-
-### Adding Test Cases
-
-Edit the `data` function in `src/lib/ci-eval.ts`:
-
-```typescript
-data: async () => {
-  return [
-    // ... existing test cases ...
-    { 
-      input: "your new test case", 
-      expected: null 
-    },
-  ];
-},
-```
-
-### Custom Scorers
-
-Add new evaluation criteria:
-
-```typescript
-scorers: [
-  // ... existing scorers ...
-  createLLMJudge("your custom criteria", judgeModelConf),
-],
-```
-
-### Different Models
-
-Change the judge model in `judgeModelConf`:
-
-```typescript
-const judgeModelConf: ModelConfig = {
-  model: models.anthropic('claude-3-haiku-20240307'), // Example
-  provider: 'anthropic',
-  modelId: 'claude-3-haiku-20240307'
-}
-```
-
-## Best Practices
-
-1. **Set Appropriate Thresholds**: Start with 0.6-0.7 and adjust based on your quality standards
-2. **Monitor Over Time**: Track evaluation trends to catch quality regressions
-3. **Use Multiple Criteria**: Don't rely on a single scorer for quality assessment
-4. **Regular Review**: Periodically review and update test cases to match evolving requirements 
+- **Skipped in CI**: the pull request is from a fork, or `GROQ_API_KEY` is not set
+- **Judge and generator are the same provider**: set a second judge key or `EVAL_JUDGE_PROVIDER`
+- **Baseline failure**: compare `eval-results/ci-latest.json` to `ci-baseline.json`; only update the baseline with `bun run eval:ci:baseline` after confirming the drop is intended
