@@ -2,9 +2,17 @@ import { Command } from 'commander';
 import { select, text as input, spinner, outro, isCancel, cancel, intro } from '@clack/prompts';
 import chalk from 'chalk';
 import { info, print, runCommand, printWrapped } from './utils';
-import { generateCommandStruct, getDefaultModel, getModelFromConfig, type ModelConfig } from './lib/ai';
+import {
+  generateCommandStruct,
+  getDefaultModelAsync,
+  getModelFromConfig,
+  prepareLocalRuntime,
+  type ModelConfig,
+} from './lib/ai';
 import { getOrInitializeConfig } from './lib/config';
 import { showConfigUI } from './commands/config';
+import { installBundledModelCommand, removeBundledModelCommand } from './commands/model';
+import { SKIP_BUNDLED_MODEL_FLAG } from './lib/paths';
 
 async function copyToClipboard(text: string): Promise<boolean> {
   try {
@@ -30,11 +38,12 @@ async function resolveModelConfig(): Promise<ModelConfig> {
   }
 
   try {
-    return getModelFromConfig(config);
+    const ready = await prepareLocalRuntime(config);
+    return getModelFromConfig(ready);
   } catch (error) {
     console.error(chalk.red(`Configuration error: ${error}`));
-    console.log(chalk.yellow('Falling back to environment variables...'));
-    return getDefaultModel();
+    console.log(chalk.yellow('Falling back to environment variables or a local runtime...'));
+    return getDefaultModelAsync();
   }
 }
 
@@ -58,6 +67,7 @@ program
   .description(require('../package.json').description)
   .argument('<prompt_parts...>', 'prompt')
   .option('-s, --silent', 'run in silent mode (no explanation)')
+  .option(SKIP_BUNDLED_MODEL_FLAG, 'skip the bundled-model download prompt')
   .action(async (prompt_parts: string[], options) => {
     intro(chalk.bgBlue(chalk.black('LazyShell')));
     let currentPrompt = prompt_parts.join(' ');
@@ -110,6 +120,10 @@ program
           case 'cancel':
             outro(chalk.yellow('Command cancelled.'));
             return;
+          default: {
+            const _exhaustive: never = action;
+            throw new Error(`Unhandled action: ${_exhaustive}`);
+          }
         }
       } catch (error) {
         console.error(chalk.red(error));
@@ -124,5 +138,12 @@ program
   .action(async () => {
     await showConfigUI();
   });
+
+const modelCommand = program.command('model').description('Manage the bundled local model');
+modelCommand
+  .command('install')
+  .description('Download the bundled ~469 MB local model')
+  .action(installBundledModelCommand);
+modelCommand.command('remove').description('Delete the bundled local model').action(removeBundledModelCommand);
 
 program.parse(process.argv);

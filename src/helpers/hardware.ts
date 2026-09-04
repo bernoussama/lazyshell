@@ -33,7 +33,7 @@ async function getGpuInfo(): Promise<string> {
     // Fall through to basic detection
   }
 
-  return 'GPU info unavailable (install systeminformation for detailed info)';
+  return 'GPU info unavailable';
 }
 
 export async function getHardwareInfo(): Promise<HardwareInfo> {

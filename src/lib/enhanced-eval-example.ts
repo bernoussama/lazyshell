@@ -10,9 +10,9 @@ import {
 } from './eval-improvements';
 
 const judgeModelConf: ModelConfig = {
-  model: models.groq('qwen-qwq-32b'),
+  model: models.groq('openai/gpt-oss-20b'),
   provider: 'groq',
-  modelId: 'qwen-qwq-32b',
+  modelId: 'openai/gpt-oss-20b',
 };
 
 async function runEnhancedCommandEvaluation() {

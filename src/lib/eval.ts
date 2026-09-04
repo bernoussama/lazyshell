@@ -2,11 +2,13 @@ import z from 'zod';
 import { generateObject } from 'ai';
 import { models, type ModelConfig } from './ai';
 
-const judgeModelConf: ModelConfig = {
-  model: models.groq('qwen-qwq-32b'),
-  provider: 'groq',
-  modelId: 'qwen-qwq-32b',
-};
+function defaultJudgeModel(): ModelConfig {
+  return {
+    model: models.groq('openai/gpt-oss-20b'),
+    provider: 'groq',
+    modelId: 'openai/gpt-oss-20b',
+  };
+}
 
 // 1. Core Types and Interfaces
 
@@ -95,7 +97,7 @@ export function createLLMJudge(
       try {
         return await withRetry(
           async () => {
-            const model = modelConfig || judgeModelConf;
+            const model = modelConfig || defaultJudgeModel();
 
             const prompt = `You are an expert evaluator. Please rate the following output based on ${criteria}.
 

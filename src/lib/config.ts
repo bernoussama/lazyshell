@@ -1,18 +1,25 @@
 import fs from 'fs/promises';
-import path from 'path';
-import os from 'os';
-import { select, password, cancel, isCancel } from '@clack/prompts';
+import { confirm, password, select, text, cancel, isCancel } from '@clack/prompts';
 import chalk from 'chalk';
 import { version } from '../../package.json';
 import { print } from '../utils';
+import { installBundledModel, isBundledModelInstalled, isOllamaReachable, hasCloudApiKey } from './bundled-model';
+import {
+  BUNDLED_MODEL,
+  LMSTUDIO_DEFAULT_MODEL,
+  LOCAL_MODEL_CATALOG,
+  OLLAMA_DEFAULT_MODEL,
+  catalogModelId,
+} from './local-models';
+import { CONFIG_DIR, CONFIG_FILE, shouldSkipBundledModelPrompt } from './paths';
 
 // Supported AI providers
 export const SUPPORTED_PROVIDERS = {
   groq: {
     name: 'Groq',
-    description: 'Groq LLaMA models (fast inference)',
+    description: 'Groq GPT-OSS models (fast inference)',
     envVar: 'GROQ_API_KEY',
-    defaultModel: 'llama-3.3-70b-versatile',
+    defaultModel: 'openai/gpt-oss-120b',
   },
   google: {
     name: 'Google Gemini',
@@ -39,11 +46,18 @@ export const SUPPORTED_PROVIDERS = {
     envVar: 'OPENAI_API_KEY',
     defaultModel: 'gpt-4o-mini',
   },
+  bundled: {
+    name: 'Bundled (Local)',
+    description: 'Built-in Qwen2.5-Coder 0.5B (~469 MB, no Ollama required)',
+    envVar: null,
+    defaultModel: BUNDLED_MODEL.id,
+    defaultBaseUrl: 'http://127.0.0.1:18765/v1',
+  },
   ollama: {
     name: 'Ollama (Local)',
     description: 'Local Ollama instance',
     envVar: null,
-    defaultModel: 'llama3.2',
+    defaultModel: OLLAMA_DEFAULT_MODEL,
   },
   mistral: {
     name: 'Mistral',
@@ -56,7 +70,7 @@ export const SUPPORTED_PROVIDERS = {
     name: 'LM Studio (Local)',
     description: 'Local LM Studio instance',
     envVar: null,
-    defaultModel: 'deepseek/deepseek-r1-0528-qwen3-8b',
+    defaultModel: LMSTUDIO_DEFAULT_MODEL,
     defaultBaseUrl: 'http://localhost:1234/v1',
     supportsCustomBaseUrl: true,
   },
@@ -72,12 +86,21 @@ export const SUPPORTED_PROVIDERS = {
 
 export type ProviderKey = keyof typeof SUPPORTED_PROVIDERS;
 
+export type BundledModelStatus = 'installed' | 'declined' | 'skipped';
+
+export interface BundledModelState {
+  status: BundledModelStatus;
+  version?: string;
+  sha256?: string;
+}
+
 // Configuration interface
 export interface Config {
   provider: ProviderKey;
   apiKey?: string;
   model?: string;
   baseUrl?: string; // For OpenAI compatible providers like LM Studio
+  bundledModel?: BundledModelState;
   version: string;
 }
 
@@ -85,10 +108,6 @@ export interface Config {
 const DEFAULT_CONFIG: Partial<Config> = {
   version: '1.0.0',
 };
-
-// Configuration file path
-const CONFIG_DIR = path.join(os.homedir(), '.lazyshell');
-const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json');
 
 /**
  * Ensure config directory exists
@@ -158,8 +177,13 @@ export function validateConfig(config: Config): boolean {
     return false;
   }
 
-  // Ollama, LM Studio, and OpenAI Compatible don't require an API key (can work locally)
-  if (config.provider === 'ollama' || config.provider === 'lmstudio' || config.provider === 'openaiCompatible') {
+  // Local providers don't require an API key
+  if (
+    config.provider === 'ollama' ||
+    config.provider === 'lmstudio' ||
+    config.provider === 'openaiCompatible' ||
+    config.provider === 'bundled'
+  ) {
     return true;
   }
 
@@ -172,7 +196,7 @@ export function validateConfig(config: Config): boolean {
  */
 export async function promptProvider(): Promise<ProviderKey> {
   const options = Object.entries(SUPPORTED_PROVIDERS).map(([key, provider]) => ({
-    name: `${provider.name} - ${provider.description}`,
+    label: `${provider.name} - ${provider.description}`,
     value: key as ProviderKey,
   }));
 
@@ -193,6 +217,11 @@ export async function promptProvider(): Promise<ProviderKey> {
  */
 export async function promptApiKey(provider: ProviderKey): Promise<string | undefined> {
   const providerInfo = SUPPORTED_PROVIDERS[provider];
+
+  if (provider === 'bundled') {
+    await print(chalk.green('Bundled local model selected - no API key required.'));
+    return undefined;
+  }
 
   // Ollama and LM Studio don't need an API key
   if (provider === 'ollama') {
@@ -217,7 +246,6 @@ export async function promptApiKey(provider: ProviderKey): Promise<string | unde
       return envApiKey;
     }
 
-    const { confirm } = await import('@clack/prompts');
     const needsApiKey = await confirm({
       message: 'Does your OpenAI-compatible endpoint require an API key?',
     });
@@ -283,7 +311,6 @@ export async function promptBaseUrl(provider: ProviderKey): Promise<string | und
 
   await print(chalk.yellow(`\nYou can configure a custom base URL for ${providerInfo.name}.`));
 
-  const { text } = await import('@clack/prompts');
   const baseUrl = await text({
     message: `Enter base URL for ${providerInfo.name}:`,
     placeholder: defaultBaseUrl || 'http://localhost:1234/v1',
@@ -298,33 +325,151 @@ export async function promptBaseUrl(provider: ProviderKey): Promise<string | und
   return baseUrl || defaultBaseUrl;
 }
 
+export async function promptLocalModel(provider: 'ollama' | 'lmstudio', current?: string): Promise<string> {
+  const options = LOCAL_MODEL_CATALOG.map(entry => ({
+    label: `${entry.label} (${entry.sizeHint}, ${entry.hardware})`,
+    value: catalogModelId(entry, provider),
+    hint: entry.promptStyle === 'commandOnly' ? 'command-only; may skip explanations' : entry.pullHint,
+  }));
+  options.push({ label: 'Custom…', value: '__custom__', hint: 'Enter any model id' });
+
+  const selected = await select({
+    message: `Select a local model for ${SUPPORTED_PROVIDERS[provider].name}:`,
+    options,
+    initialValue: current,
+  });
+
+  if (isCancel(selected)) {
+    cancel('Model selection cancelled');
+    process.exit(0);
+  }
+
+  if (selected !== '__custom__') {
+    return selected;
+  }
+
+  const custom = await text({
+    message: `Enter model name for ${SUPPORTED_PROVIDERS[provider].name}:`,
+    placeholder: current || SUPPORTED_PROVIDERS[provider].defaultModel,
+    initialValue: current || SUPPORTED_PROVIDERS[provider].defaultModel,
+  });
+
+  if (isCancel(custom) || !custom) {
+    cancel('Model selection cancelled');
+    process.exit(0);
+  }
+
+  return custom;
+}
+
+export function installedBundledState(): BundledModelState {
+  return {
+    status: 'installed',
+    version: BUNDLED_MODEL.version,
+    sha256: BUNDLED_MODEL.sha256,
+  };
+}
+
+async function offerBundledModel(): Promise<BundledModelState> {
+  if (shouldSkipBundledModelPrompt()) {
+    await print(chalk.gray('Skipping bundled model download (LSH_SKIP_BUNDLED_MODEL or --skip-bundled-model).'));
+    return { status: 'skipped' };
+  }
+
+  await print(
+    chalk.blue(
+      `\nLazyShell can download a bundled ${BUNDLED_MODEL.displayName} GGUF (~${Math.round(BUNDLED_MODEL.sizeBytes / 1_000_000)} MB, ${BUNDLED_MODEL.license}) for offline use.`
+    )
+  );
+  await print(chalk.gray(`Saved to ~/.lazyshell/models/${BUNDLED_MODEL.filename}`));
+
+  const shouldDownload = await confirm({
+    message: 'Download the bundled local model now?',
+    initialValue: false,
+  });
+
+  if (isCancel(shouldDownload)) {
+    cancel('Configuration cancelled');
+    process.exit(0);
+  }
+
+  if (!shouldDownload) {
+    return { status: 'declined' };
+  }
+
+  try {
+    await print(chalk.cyan('Downloading bundled model (checksum verified)...'));
+    await installBundledModel((downloaded, total) => {
+      if (total > 0 && downloaded === total) {
+        process.stdout.write(`\rDownloaded ${(downloaded / 1_000_000).toFixed(0)} MB`);
+      }
+    });
+    process.stdout.write('\n');
+    await print(chalk.green('Bundled model installed.'));
+    return installedBundledState();
+  } catch (error) {
+    console.error(chalk.red(`Bundled model download failed: ${error}`));
+    return { status: 'declined' };
+  }
+}
+
+async function resolveInitialProvider(bundledModel: BundledModelState): Promise<ProviderKey | undefined> {
+  if (bundledModel.status === 'installed' && !hasCloudApiKey() && !(await isOllamaReachable())) {
+    return 'bundled';
+  }
+  return undefined;
+}
+
 /**
  * Initialize configuration through user prompts
  */
-export async function initializeConfig(): Promise<Config | null> {
+export async function initializeConfig(existing?: Config | null): Promise<Config | null> {
   console.log(chalk.blue('\n🔧 Setting up LazyShell configuration...\n'));
 
   try {
-    // Prompt for provider
-    const provider = await promptProvider();
+    let bundledModel = existing?.bundledModel;
+    if (!bundledModel) {
+      bundledModel = await offerBundledModel();
+    }
 
-    // Prompt for API key
+    const autoProvider = await resolveInitialProvider(bundledModel);
+    const provider = autoProvider ?? (await promptProvider());
+
+    if (provider === 'bundled' && bundledModel.status !== 'installed') {
+      if (!(await isBundledModelInstalled())) {
+        bundledModel = await offerBundledModel();
+      } else {
+        bundledModel = installedBundledState();
+      }
+      if (bundledModel.status !== 'installed') {
+        console.error(
+          chalk.red(
+            'Bundled model is required for that provider. Choose another provider or run `lazyshell model install`.'
+          )
+        );
+        return null;
+      }
+    }
+
     const apiKey = await promptApiKey(provider);
-
-    // Prompt for base URL
     const baseUrl = await promptBaseUrl(provider);
 
-    // Create config object
+    let model: string = SUPPORTED_PROVIDERS[provider].defaultModel;
+    if (provider === 'ollama' || provider === 'lmstudio') {
+      model = await promptLocalModel(provider, model);
+    }
+
     const config: Config = {
       ...DEFAULT_CONFIG,
+      ...existing,
       provider,
       apiKey,
-      model: SUPPORTED_PROVIDERS[provider].defaultModel,
+      model,
       baseUrl,
+      bundledModel,
       version,
     };
 
-    // Save configuration
     const saved = await saveConfig(config);
     if (!saved) {
       console.error(chalk.red('Failed to save configuration'));
@@ -351,7 +496,7 @@ export async function getOrInitializeConfig(): Promise<Config | null> {
       return config;
     }
     console.log(chalk.yellow('Configuration exists but is incomplete or invalid.'));
-    return initializeConfig();
+    return initializeConfig(config);
   }
 
   console.log(chalk.yellow('No configuration found.'));

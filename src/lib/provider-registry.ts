@@ -6,6 +6,8 @@ import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import type { LanguageModel } from 'ai';
 import type { ProviderKey } from './config';
 import type { ModelConfig } from './ai';
+import { BUNDLED_MODEL, LMSTUDIO_DEFAULT_MODEL, OLLAMA_DEFAULT_MODEL } from './local-models';
+import { BUNDLED_SERVER_BASE_URL } from './paths';
 
 // Provider configuration interface
 interface ProviderConfig {
@@ -23,7 +25,7 @@ export const ProviderRegistry: Record<ProviderKey, ProviderConfig> = {
     name: 'groq',
     baseUrl: 'https://api.groq.com/openai/v1',
     apiKeyEnvVar: 'GROQ_API_KEY',
-    defaultModelId: 'llama-3.3-70b-versatile',
+    defaultModelId: 'openai/gpt-oss-120b',
     createModel: (modelId, baseUrl = 'https://api.groq.com/openai/v1', apiKey) => {
       const groq = createOpenAICompatible({ name: 'groq', baseURL: baseUrl, apiKey });
       return groq(modelId);
@@ -57,9 +59,19 @@ export const ProviderRegistry: Record<ProviderKey, ProviderConfig> = {
     defaultModelId: 'gpt-4o-mini',
     createModel: modelId => openai(modelId),
   },
+  bundled: {
+    name: 'bundled',
+    baseUrl: BUNDLED_SERVER_BASE_URL,
+    defaultModelId: BUNDLED_MODEL.id,
+    maxRetries: 1,
+    createModel: (modelId, baseUrl = BUNDLED_SERVER_BASE_URL) => {
+      const bundled = createOpenAICompatible({ name: 'bundled', baseURL: baseUrl, apiKey: 'bundled' });
+      return bundled(modelId);
+    },
+  },
   ollama: {
     name: 'ollama',
-    defaultModelId: 'llama3.2',
+    defaultModelId: OLLAMA_DEFAULT_MODEL,
     maxRetries: 1,
     createModel: modelId => ollama(modelId),
   },
@@ -76,7 +88,7 @@ export const ProviderRegistry: Record<ProviderKey, ProviderConfig> = {
   lmstudio: {
     name: 'lmstudio',
     baseUrl: 'http://localhost:1234/v1',
-    defaultModelId: 'deepseek/deepseek-r1-0528-qwen3-8b',
+    defaultModelId: LMSTUDIO_DEFAULT_MODEL,
     maxRetries: 1,
     createModel: (modelId, baseUrl = 'http://localhost:1234/v1') => {
       const lmstudio = createOpenAICompatible({ name: 'lmstudio', baseURL: baseUrl });

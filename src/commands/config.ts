@@ -7,10 +7,14 @@ import {
   promptProvider,
   promptApiKey,
   promptBaseUrl,
+  promptLocalModel,
+  installedBundledState,
   SUPPORTED_PROVIDERS,
   Config,
   configExists,
 } from '../lib/config';
+import { installBundledModel, isBundledModelInstalled } from '../lib/bundled-model';
+import { BUNDLED_MODEL } from '../lib/local-models';
 import { info, print } from '../utils';
 
 export async function showConfigUI() {
@@ -77,6 +81,10 @@ export async function showConfigUI() {
     case 'reset':
       await resetConfiguration();
       break;
+    default: {
+      const _exhaustive: never = action;
+      throw new Error(`Unhandled config action: ${_exhaustive}`);
+    }
   }
 }
 
@@ -98,6 +106,10 @@ async function showCurrentConfig(config: Config) {
     await print(`${chalk.cyan('Base URL:')} ${currentBaseUrl}`);
   }
 
+  if (config.bundledModel) {
+    await print(`${chalk.cyan('Bundled model:')} ${config.bundledModel.status}`);
+  }
+
   await print(`${chalk.cyan('Config File:')} ~/.lazyshell/config.json`);
 }
 
@@ -105,6 +117,17 @@ async function editProvider(config: Config) {
   const newProvider = await promptProvider();
   config.provider = newProvider;
   config.model = SUPPORTED_PROVIDERS[newProvider].defaultModel;
+
+  if (newProvider === 'bundled') {
+    if (!(await isBundledModelInstalled())) {
+      await print(chalk.cyan('Downloading the bundled local model...'));
+      await installBundledModel();
+    }
+    config.bundledModel = installedBundledState();
+    config.model = BUNDLED_MODEL.id;
+  } else if (newProvider === 'ollama' || newProvider === 'lmstudio') {
+    config.model = await promptLocalModel(newProvider, config.model);
+  }
 
   // If the new provider requires an API key, prompt for it
   if (SUPPORTED_PROVIDERS[newProvider].envVar) {
@@ -157,17 +180,25 @@ async function editApiKey(config: Config) {
 async function editModel(config: Config) {
   const currentModel = config.model || SUPPORTED_PROVIDERS[config.provider].defaultModel;
 
-  const newModel = await input({
-    message: `Enter model name for ${SUPPORTED_PROVIDERS[config.provider].name}:`,
-    placeholder: currentModel,
-    initialValue: currentModel,
-  });
-
-  if (isCancel(newModel)) {
+  if (config.provider === 'ollama' || config.provider === 'lmstudio') {
+    config.model = await promptLocalModel(config.provider, currentModel);
+  } else if (config.provider === 'bundled') {
+    config.model = BUNDLED_MODEL.id;
+    await print(chalk.gray(`Bundled provider always uses ${BUNDLED_MODEL.id}.`));
     return;
-  }
+  } else {
+    const newModel = await input({
+      message: `Enter model name for ${SUPPORTED_PROVIDERS[config.provider].name}:`,
+      placeholder: currentModel,
+      initialValue: currentModel,
+    });
 
-  config.model = newModel;
+    if (isCancel(newModel)) {
+      return;
+    }
+
+    config.model = newModel;
+  }
 
   const saved = await saveConfig(config);
   if (saved) {

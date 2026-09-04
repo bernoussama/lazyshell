@@ -6,6 +6,9 @@ import dedent from 'dedent';
 import { getDistroPackageManager } from '../helpers/package-manager';
 import { getHardwareInfo, type HardwareInfo } from '../helpers/hardware';
 import { getModelFromRegistry } from './provider-registry';
+import { ensureBundledServer, isBundledModelInstalled, isOllamaReachable } from './bundled-model';
+import { BUNDLED_MODEL, OLLAMA_DEFAULT_MODEL } from './local-models';
+import { extractCommand, usesCompactPrompt } from './command-output';
 
 export interface SystemInfo {
   platform: string;
@@ -60,7 +63,29 @@ export function getModelFromConfig(config: Config): ModelConfig {
   return getModelFromRegistry(config.provider, config.model, config.baseUrl, config.apiKey);
 }
 
-export function getDefaultModel(): ModelConfig {
+export async function prepareLocalRuntime(config: Config): Promise<Config> {
+  if (config.provider === 'ollama') {
+    if (await isOllamaReachable()) {
+      return config;
+    }
+    if (config.bundledModel?.status === 'installed' && (await isBundledModelInstalled())) {
+      const baseUrl = await ensureBundledServer();
+      return { ...config, provider: 'bundled', model: BUNDLED_MODEL.id, baseUrl };
+    }
+    throw new Error(
+      'Ollama is not running. Start Ollama, or run `lazyshell model install` to use the bundled local model.'
+    );
+  }
+
+  if (config.provider === 'bundled') {
+    const baseUrl = await ensureBundledServer();
+    return { ...config, model: BUNDLED_MODEL.id, baseUrl };
+  }
+
+  return config;
+}
+
+function envProvider(): ProviderKey | undefined {
   const envProviderMap: [string, ProviderKey][] = [
     ['GROQ_API_KEY', 'groq'],
     ['GOOGLE_GENERATIVE_AI_API_KEY', 'google'],
@@ -71,25 +96,53 @@ export function getDefaultModel(): ModelConfig {
 
   for (const [envVar, provider] of envProviderMap) {
     if (process.env[envVar]) {
-      return getModelFromRegistry(provider);
+      return provider;
     }
+  }
+  return undefined;
+}
+
+export function getDefaultModel(): ModelConfig {
+  const provider = envProvider();
+  if (provider) {
+    return getModelFromRegistry(provider);
   }
 
   try {
     return getModelFromRegistry('ollama');
   } catch {
     throw new Error(
-      'No API key found. Please set either GROQ_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY, OPENROUTER_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY. Or setup Ollama/LM Studio'
+      'No API key found. Please set either GROQ_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY, OPENROUTER_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY. Or setup Ollama/LM Studio/the bundled model'
     );
   }
+}
+
+export async function getDefaultModelAsync(): Promise<ModelConfig> {
+  const provider = envProvider();
+  if (provider) {
+    return getModelFromRegistry(provider);
+  }
+
+  if (await isOllamaReachable()) {
+    return getModelFromRegistry('ollama');
+  }
+
+  if (await isBundledModelInstalled()) {
+    const baseUrl = await ensureBundledServer();
+    return getModelFromRegistry('bundled', BUNDLED_MODEL.id, baseUrl);
+  }
+
+  throw new Error(
+    'No API key found and no local runtime is available. Set an API key, start Ollama, or run `lazyshell model install`.'
+  );
 }
 
 export function getBenchmarkModels(): Record<string, LanguageModel> {
   return {
     'or-devstral': getModelFromRegistry('openrouter', 'mistralai/devstral-small:free').model,
     'gemini-2.0-flash-lite': getModelFromRegistry('google', 'gemini-2.0-flash-lite').model,
-    'ollama3.2': getModelFromRegistry('ollama', 'llama3.2').model,
-    'llama-3.3-70b-versatile': getModelFromRegistry('groq', 'llama-3.3-70b-versatile').model,
+    'ollama3.2': getModelFromRegistry('ollama', OLLAMA_DEFAULT_MODEL).model,
+    'gpt-oss-120b': getModelFromRegistry('groq', 'openai/gpt-oss-120b').model,
     devstral: getModelFromRegistry('mistral', 'devstral-small-2505').model,
     'lmstudio-llama': getModelFromRegistry('lmstudio', 'llama-3.2-1b').model,
     'openaiCompatible-gpt': getModelFromRegistry('openaiCompatible', 'gpt-3.5-turbo').model,
@@ -175,6 +228,47 @@ ${
 
 Remember: Your primary goal is to be helpful while maintaining system safety and security.`;
 
+const compactSystemPrompt = dedent`You convert a natural-language request into one shell command.
+
+Rules:
+- Output only the command. No markdown, no quotes, no explanation.
+- Do not use sudo unless the user asked for a privileged operation.
+- Prefer POSIX tools. Print the working directory with pwd, not cd.
+- Show OS/kernel info with uname -a, not package-manager show commands.
+- List files with ls. Create directories with mkdir. Search files with find. Disk usage with df.
+
+Examples:
+User: print the working directory
+pwd
+User: show OS and kernel information
+uname -a
+User: list all files including hidden ones in long format
+ls -la
+User: create a folder named demo
+mkdir demo
+User: find javascript files recursively
+find . -type f -name '*.js'
+User: check disk usage
+df -h
+
+Platform: ${osInfo.platform}${osInfo.distro ? ` (${osInfo.distro})` : ''}
+Shell: ${currentShell}
+Package manager: ${osInfo.packageManager || 'none'}`;
+
+function promptForModel(modelConfig?: ModelConfig): string {
+  if (usesCompactPrompt(modelConfig?.provider, modelConfig?.modelId)) {
+    return compactSystemPrompt;
+  }
+  return systemPrompt;
+}
+
+function generationLimits(modelConfig?: ModelConfig): { temperature: number; maxTokens?: number } {
+  if (usesCompactPrompt(modelConfig?.provider, modelConfig?.modelId)) {
+    return { temperature: 0, maxTokens: 64 };
+  }
+  return { temperature: modelConfig?.temperature || 0.1 };
+}
+
 const zCmd = z.object({
   command: z.string().describe('The command to execute, without any formatting or markdown'),
 });
@@ -197,13 +291,13 @@ export async function generateCommandStruct(
   try {
     const result = await generateObject({
       model: modelConf.model,
-      system: systemPrompt,
+      system: promptForModel(modelConf),
       schema,
       prompt,
-      temperature: modelConf.temperature || 0.1,
+      temperature: generationLimits(modelConf).temperature,
       maxRetries: modelConf.maxRetries || undefined,
     });
-    return result.object;
+    return { ...result.object, command: extractCommand(result.object.command) };
   } catch {
     const result = await generateCommand(prompt, modelConf);
     return { command: result, explanation: '' };
@@ -213,21 +307,23 @@ export async function generateCommandStruct(
 export async function generateCommand(prompt: string, modelConfig?: ModelConfig): Promise<string> {
   const finalModelConfig = modelConfig || getDefaultModel();
 
+  const limits = generationLimits(finalModelConfig);
   const result = await generateTextWithModel(finalModelConfig.model, prompt, {
-    temperature: finalModelConfig.temperature || 0.1,
-    systemPrompt,
+    temperature: limits.temperature,
+    maxTokens: limits.maxTokens,
+    systemPrompt: promptForModel(finalModelConfig),
   });
 
-  return result.text.trim();
+  return extractCommand(result.text);
 }
 
 export async function generateBenchmarkText(model: LanguageModel, prompt: string): Promise<string> {
   const result = await generateTextWithModel(model, prompt, {
     temperature: 0,
-    systemPrompt,
+    systemPrompt: promptForModel(),
   });
 
-  return result.text.trim();
+  return extractCommand(result.text);
 }
 
 export const models = {
@@ -241,6 +337,8 @@ export const models = {
     getModelFromRegistry('anthropic', modelId, baseUrl, apiKey).model,
   openai: (modelId?: string, baseUrl?: string, apiKey?: string) =>
     getModelFromRegistry('openai', modelId, baseUrl, apiKey).model,
+  bundled: (modelId?: string, baseUrl?: string, apiKey?: string) =>
+    getModelFromRegistry('bundled', modelId, baseUrl, apiKey).model,
   ollama: (modelId?: string, baseUrl?: string, apiKey?: string) =>
     getModelFromRegistry('ollama', modelId, baseUrl, apiKey).model,
   mistral: (modelId?: string, baseUrl?: string, apiKey?: string) =>

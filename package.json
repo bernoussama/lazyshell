@@ -19,6 +19,8 @@
     "release:patch": "bun run build && npm version patch && npm run build && npm publish && git push --follow-tags",
     "prerelease": "bun run build && npm version prerelease && npm run build && npm publish && git push --follow-tags",
     "eval:ci": "bun src/lib/ci-eval.ts",
+    "eval:bundled": "bun src/lib/bundled.eval.ts",
+    "test": "bun test src/lib/bundled-model.test.ts src/lib/command-output.test.ts",
     "prepare": "husky",
     "compile": "bun build --compile --minify --sourcemap src/index.ts  --outfile bin/lsh"
   },
@@ -42,6 +44,7 @@
     "@ai-sdk/openai-compatible": "^0.2.14",
     "@eslint/js": "^9.30.0",
     "@jest/types": "^29.6.3",
+    "@types/bun": "^1.4.0",
     "@types/node": "^22.15.34",
     "@typescript-eslint/eslint-plugin": "^8.35.1",
     "@typescript-eslint/parser": "^8.35.1",
