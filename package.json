@@ -19,8 +19,11 @@
     "release:patch": "bun run build && npm version patch && npm run build && npm publish && git push --follow-tags",
     "prerelease": "bun run build && npm version prerelease && npm run build && npm publish && git push --follow-tags",
     "eval:ci": "bun src/lib/ci-eval.ts",
+    "eval:ci:baseline": "bun src/lib/ci-eval.ts --update-baseline",
     "eval:bundled": "bun src/lib/bundled.eval.ts",
-    "test": "bun test src/lib/bundled-model.test.ts src/lib/command-output.test.ts",
+    "eval:basic": "bun src/lib/basic.eval.ts",
+    "eval:example": "bun src/lib/example.eval.ts",
+    "test": "bun test src",
     "prepare": "husky",
     "compile": "bun build --compile --minify --sourcemap src/index.ts  --outfile bin/lsh"
   },

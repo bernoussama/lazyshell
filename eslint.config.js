@@ -105,6 +105,7 @@ export default [
       'dist/',
       'build/',
       'benchmark-results/',
+      'eval-results/',
       '*.d.ts',
       'coverage/',
       '*.config.js',

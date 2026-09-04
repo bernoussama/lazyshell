@@ -246,44 +246,28 @@ This enables LazyShell to generate system-appropriate commands and suggest the r
 LazyShell includes a flexible evaluation system for testing and benchmarking AI performance:
 
 ```typescript
-import { runEval, Levenshtein, LLMJudge, createLLMJudge } from './lib/eval';
+import { runEval, Levenshtein, createLLMJudge, pickJudgeModel } from './lib/eval';
 
 await runEval("My Eval", {
-  // Test data function
   data: async () => {
     return [{ input: "Hello", expected: "Hello World!" }];
   },
-  // Task to perform  
   task: async (input) => {
     return input + " World!";
   },
-  // Scoring methods
-  scorers: [Levenshtein, LLMJudge],
+  scorers: [Levenshtein, createLLMJudge('Quality', 'overall quality', pickJudgeModel())],
 });
 ```
 
 ### Built-in Scorers
 
 - **ExactMatch**: Perfect string matching
-- **Levenshtein**: Edit distance similarity  
+- **Levenshtein**: Edit distance similarity
 - **Contains**: Substring matching
-- **LLMJudge**: AI-powered quality evaluation
-- **createLLMJudge**: Custom AI judges with specific criteria
-
-### LLM Judge Features
-
-- **AI-Powered Evaluation**: Uses LLMs to evaluate command quality without expected outputs
-- **Multiple Criteria**: Quality, correctness, security, efficiency assessments
-- **Rate Limiting**: Built-in retry logic and exponential backoff
-- **Configurable Models**: Use different AI models for judging
-
-### Features
-
-- Generic TypeScript interfaces for any evaluation task
-- Multiple scoring methods per evaluation
-- Async support for LLM-based tasks
-- Detailed scoring reports with averages
-- Error handling for failed test cases
+- **FirstToken**: First command token must be in an accept list
+- **RefusesUnsafe / CommandSafety**: Refusal and destructive-command gates
+- **createLLMJudge**: AI judge with platform context (temperature 0)
+- **pickJudgeModel**: Prefer a judge provider other than the generator
 
 See [docs/EVALUATION.md](docs/EVALUATION.md) for complete documentation.
 
@@ -320,22 +304,25 @@ LazyShell includes automated quality assessments that run in CI to ensure consis
 
 ### Overview
 
-- **Automated Testing**: Runs on every PR and push to main/develop
-- **Threshold-Based**: Configurable quality thresholds that must be met
-- **LLM Judges**: Uses AI to evaluate command quality, correctness, security, and efficiency
-- **GitHub Actions**: Integrated with CI/CD pipeline
+- **Path-filtered and weekly**: Runs on `src/lib/**` changes plus a Monday schedule
+- **Pinned generator**: Groq `openai/gpt-oss-120b` unless overridden
+- **Cross-provider judge**: OpenRouter Gemini 3.8 Flash by default, with other keys as fallback
+- **Gates**: CommandSafety, per-case Correctness, 80% overall, and baseline regression
 
 ### Quick Setup
 
-1. Add `GROQ_API_KEY` to your GitHub repository secrets
-2. Evaluations run automatically with 70% threshold by default
-3. CI fails if quality scores drop below the threshold
+1. Add `GROQ_API_KEY` and `OPENROUTER_API_KEY` to repository secrets
+2. Fork PRs skip evals instead of failing when secrets are missing
+3. The job fails if scores drop below the gates or more than 10 points below `eval-results/ci-baseline.json`
 
 ### Local Testing
 
 ```bash
 # Run CI evaluations locally
 bun run eval:ci
+
+# Write a new committed baseline after a reviewed change
+bun run eval:ci:baseline
 
 # Evaluate the bundled local model (downloads GGUF on first run)
 bun run eval:bundled
@@ -344,17 +331,9 @@ bun run eval:bundled
 ### Custom Evaluation Scripts
 
 ```bash
-# Run basic evaluations
-bun run build && bun dist/lib/basic.eval.mjs
-
-# Run LLM judge evaluation
-bun run build && bun dist/lib/llm-judge.eval.mjs
-
-# Test AI library
-bun run build && bun dist/test-ai-lib.mjs
-
-# Run example evaluations
-bun run build && bun dist/lib/example.eval.mjs
+bun run eval:basic
+bun run eval:example
+bun src/lib/bundled.eval.ts
 ```
 
 See [docs/CI_EVALUATIONS.md](docs/CI_EVALUATIONS.md) for complete setup and configuration guide.
@@ -401,6 +380,9 @@ bun run typecheck       # Type checking only
 bun run lint            # Check code formatting and linting
 bun run lint:fix        # Fix formatting and linting issues
 bun run eval:ci         # Run CI evaluations locally
+bun run eval:ci:baseline # Update eval-results/ci-baseline.json
+bun run eval:basic      # Run the shared dataset locally
+bun run eval:bundled    # Evaluate the bundled local model
 bun run release:patch   # Build, version bump, publish, and push
 bun run prerelease      # Build, prerelease version, publish, and push
 ```
@@ -412,7 +394,6 @@ src/
 ├── index.ts              # Main CLI entry point
 ├── utils.ts              # Utility functions (command execution, history)
 ├── bench_models.ts       # Model benchmarking script
-├── test-ai-lib.ts        # AI library testing script
 ├── commands/
 │   ├── config.ts         # Configuration UI command
 │   └── model.ts          # Bundled model install/remove
@@ -425,10 +406,12 @@ src/
     ├── bundled-model.ts  # Bundled download, checksum, llama-server
     ├── config.ts         # Configuration management
     ├── eval.ts           # Evaluation framework
-    ├── basic.eval.ts     # Basic evaluation examples
+    ├── eval-cases.ts     # Shared command-generation cases
+    ├── prompt-examples.ts # Compact-prompt few-shots
+    ├── basic.eval.ts     # Local evaluation runner
     ├── ci-eval.ts        # CI evaluation script
-    ├── example.eval.ts   # Example evaluation scenarios
-    └── llm-judge.eval.ts # LLM judge evaluation examples
+    ├── bundled.eval.ts   # Bundled-model evaluation
+    └── example.eval.ts   # Example evaluation scenarios
 ```
 
 ### Development Features
