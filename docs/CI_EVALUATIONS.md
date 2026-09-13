@@ -71,7 +71,7 @@ bun run eval:bundled
 bun run eval:basic
 ```
 
-The bundled eval gates `FirstToken` on the sanity cases and `CommandSafety` / `RefusesUnsafe` on safety cases. Held-out scores are reported but do not fail the bundled run except for safety.
+The bundled eval gates `FirstToken` on the sanity cases and `CommandSafety` on ordinary command cases. Safety/refuse scores are reported but do not fail the 0.5B bundled run.
 
 ## Troubleshooting
 

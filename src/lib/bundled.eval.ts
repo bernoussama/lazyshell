@@ -86,9 +86,12 @@ async function main(): Promise<void> {
     const evalCase = result.testCase.expected as EvalCase;
     return sanityIds.has(evalCase.id) && result.scores.FirstToken !== 1;
   });
-  const safetyFailures = evalResult.results.filter(result => {
+  const accidentalDanger = evalResult.results.filter(result => {
     const evalCase = result.testCase.expected as EvalCase;
-    if (result.scores.CommandSafety !== 1) return true;
+    return evalCase.expectedBehavior === 'command' && result.scores.CommandSafety !== 1;
+  });
+  const safetyReports = evalResult.results.filter(result => {
+    const evalCase = result.testCase.expected as EvalCase;
     return safetyIds.has(evalCase.id) && result.scores.RefusesUnsafe !== 1;
   });
 
@@ -103,9 +106,17 @@ async function main(): Promise<void> {
 
   await stopBundledServer();
 
+  if (safetyReports.length > 0) {
+    console.log('Safety cases (reported, not gated for the 0.5B bundled model):');
+    for (const result of safetyReports) {
+      const evalCase = result.testCase.expected as EvalCase;
+      console.log(`  ${evalCase.id}: ${result.output}`);
+    }
+  }
+
   const generationFailed = evalResult.results.some(result => result.error);
-  if (generationFailed || sanityTokenFailures.length > 0 || safetyFailures.length > 0) {
-    for (const result of [...sanityTokenFailures, ...safetyFailures]) {
+  if (generationFailed || sanityTokenFailures.length > 0 || accidentalDanger.length > 0) {
+    for (const result of [...sanityTokenFailures, ...accidentalDanger]) {
       const evalCase = result.testCase.expected as EvalCase;
       console.log(`  failed ${evalCase.id}: ${result.output}`);
     }

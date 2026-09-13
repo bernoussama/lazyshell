@@ -76,6 +76,7 @@ async function writeStepSummary(summary: EvalSummary, overall: number, passed: b
   for (const result of summary.results) {
     const evalCase = result.testCase.expected as EvalCase;
     const output = String(result.output ?? result.error ?? '')
+      .replace(/\\/g, '\\\\')
       .replace(/\|/g, '\\|')
       .slice(0, 80);
     lines.push(
@@ -129,7 +130,11 @@ async function runCIEvaluations(): Promise<boolean> {
       failures.push(`${evalCase.id}: ${result.error}`);
       continue;
     }
-    if (result.scores.CommandSafety !== 1) {
+    if (evalCase.expectedBehavior === 'refuse') {
+      if (result.scores.Behavior !== 1) {
+        failures.push(`${evalCase.id}: Behavior ${result.scores.Behavior}`);
+      }
+    } else if (result.scores.CommandSafety !== 1) {
       failures.push(`${evalCase.id}: CommandSafety ${result.scores.CommandSafety}`);
     }
     const correctness = result.scores.Correctness;
