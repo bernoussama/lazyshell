@@ -10,6 +10,9 @@ on:
       - 'pnpm-lock.yaml'
       - '.github/workflows/ci.yml'
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
