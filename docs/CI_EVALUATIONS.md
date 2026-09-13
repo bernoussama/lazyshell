@@ -10,11 +10,17 @@ The workflow (`.github/workflows/evals.yml`) runs on:
 - A weekly schedule (`0 6 * * 1`) so provider deprecations are caught even when no code changes
 - Manual `workflow_dispatch`
 
-Fork pull requests do not receive repository secrets. If `GROQ_API_KEY` is empty, the eval step is skipped and the job prints `skipped: no secrets (fork PR)` instead of failing.
+The workflow runs two generators:
+
+- **Cloud** (`bun run eval:ci`): Groq `openai/gpt-oss-120b`. Skipped when `GROQ_API_KEY` is empty (typical for fork PRs).
+- **Bundled** (`bun run eval:bundled`): the embedded Qwen2.5-Coder 0.5B GGUF via llama-server. Always runs. The GGUF and llama.cpp runtime are cached under `~/.lazyshell`.
+
+Both use the same judge picker. With `OPENROUTER_API_KEY` set, that is OpenRouter `google/gemini-3.8-flash`. Without a judge key, the bundled run still applies deterministic `FirstToken` / `CommandSafety` / `RefusesUnsafe` gates.
 
 ## Models
 
-- **Generator** is pinned to Groq `openai/gpt-oss-120b`. Override with `EVAL_GENERATOR_PROVIDER` and `EVAL_GENERATOR_MODEL`.
+- **Cloud generator** is pinned to Groq `openai/gpt-oss-120b`. Override with `EVAL_GENERATOR_PROVIDER` and `EVAL_GENERATOR_MODEL`.
+- **Bundled generator** is the pinned GGUF in `src/lib/local-models.ts`.
 - **Judge** defaults to OpenRouter `google/gemini-3.8-flash` when `OPENROUTER_API_KEY` is set. Override with `EVAL_JUDGE_PROVIDER` / `EVAL_JUDGE_MODEL`. Fallbacks: Google, OpenAI, Anthropic, Groq. When another provider is available, the judge must not match the generator provider.
 
 ## Dataset
@@ -69,6 +75,6 @@ The bundled eval gates `FirstToken` on the sanity cases and `CommandSafety` / `R
 
 ## Troubleshooting
 
-- **Skipped in CI**: the pull request is from a fork, or `GROQ_API_KEY` is not set
+- **Cloud evals skipped**: the pull request is from a fork, or `GROQ_API_KEY` is not set. Bundled evals still run.
 - **Judge and generator are the same provider**: set a second judge key or `EVAL_JUDGE_PROVIDER`
 - **Baseline failure**: compare `eval-results/ci-latest.json` to `ci-baseline.json`; only update the baseline with `bun run eval:ci:baseline` after confirming the drop is intended
