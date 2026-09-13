@@ -21,6 +21,7 @@
     "eval:ci": "bun src/lib/ci-eval.ts",
     "eval:ci:baseline": "bun src/lib/ci-eval.ts --update-baseline",
     "eval:bundled": "bun src/lib/bundled.eval.ts",
+    "eval:local": "bun src/lib/local.eval.ts",
     "eval:basic": "bun src/lib/basic.eval.ts",
     "eval:example": "bun src/lib/example.eval.ts",
     "test": "bun test src",

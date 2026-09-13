@@ -384,6 +384,7 @@ bun run eval:ci         # Run CI evaluations locally
 bun run eval:ci:baseline # Update eval-results/ci-baseline.json
 bun run eval:basic      # Run the shared dataset locally
 bun run eval:bundled    # Evaluate the bundled local model
+bun run eval:local      # Evaluate EVAL_GENERATOR_MODEL (Ollama/etc.)
 bun run release:patch   # Build, version bump, publish, and push
 bun run prerelease      # Build, prerelease version, publish, and push
 ```

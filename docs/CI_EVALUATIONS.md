@@ -68,6 +68,8 @@ export OPENROUTER_API_KEY="..."
 bun install
 bun run eval:ci
 bun run eval:bundled
+# Compare other local Ollama models (requires ollama serve)
+EVAL_GENERATOR_PROVIDER=ollama EVAL_GENERATOR_MODEL=qwen2.5-coder:1.5b bun run eval:local
 bun run eval:basic
 ```
 
