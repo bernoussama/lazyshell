@@ -6,3 +6,5 @@ bin/lib
 dist
 lsh
 bin
+eval-results/*
+!eval-results/ci-baseline.json

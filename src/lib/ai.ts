@@ -9,6 +9,7 @@ import { getModelFromRegistry } from './provider-registry';
 import { ensureBundledServer, isBundledModelInstalled, isOllamaReachable } from './bundled-model';
 import { BUNDLED_MODEL, OLLAMA_DEFAULT_MODEL } from './local-models';
 import { extractCommand, usesCompactPrompt } from './command-output';
+import { formatCompactPromptExamples } from './prompt-examples';
 
 export interface SystemInfo {
   platform: string;
@@ -238,18 +239,7 @@ Rules:
 - List files with ls. Create directories with mkdir. Search files with find. Disk usage with df.
 
 Examples:
-User: print the working directory
-pwd
-User: show OS and kernel information
-uname -a
-User: list all files including hidden ones in long format
-ls -la
-User: create a folder named demo
-mkdir demo
-User: find javascript files recursively
-find . -type f -name '*.js'
-User: check disk usage
-df -h
+${formatCompactPromptExamples()}
 
 Platform: ${osInfo.platform}${osInfo.distro ? ` (${osInfo.distro})` : ''}
 Shell: ${currentShell}

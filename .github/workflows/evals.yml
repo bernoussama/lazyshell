@@ -7,20 +7,29 @@ on:
   pull_request:
     branches: [ main ]
     paths:
-      - 'src/lib/ai.ts'
-      - 'src/lib/ci-eval.ts'
-      - 'src/lib/eval.ts'
+      - 'src/lib/**'
+      - 'package.json'
+      - 'bun.lock'
+      - '.github/workflows/evals.yml'
   push:
     branches: [ main ]
     paths:
-      - 'src/lib/ai.ts'
-      - 'src/lib/ci-eval.ts'
-      - 'src/lib/eval.ts'
+      - 'src/lib/**'
+      - 'package.json'
+      - 'bun.lock'
+      - '.github/workflows/evals.yml'
+  schedule:
+    - cron: '0 6 * * 1'
   workflow_dispatch:
 
 jobs:
   evals:
     runs-on: ubuntu-latest
+    env:
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -33,16 +42,33 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Cache bundled model and llama.cpp
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.lazyshell/models
+            ~/.lazyshell/runtime
+          key: bundled-eval-${{ runner.os }}-${{ hashFiles('src/lib/local-models.ts') }}
+
       - name: Run CI evals
-        env:
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        if: env.GROQ_API_KEY != ''
         run: bun run eval:ci
+
+      - name: Skip cloud evals without secrets
+        if: env.GROQ_API_KEY == ''
+        run: "echo 'skipped cloud evals: no GROQ_API_KEY (fork PR)'"
+
+      - name: Run bundled model evals
+        if: ${{ success() || failure() }}
+        run: bun run eval:bundled
+
       - name: Upload evals results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: evaluation-results
           path: |
-            *.log
-            evaluation-*.json
-          retention-days: 30 
+            eval-results/ci-latest.json
+            eval-results/bundled-latest.json
+          if-no-files-found: warn
+          retention-days: 30
