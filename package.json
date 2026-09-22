@@ -4,8 +4,8 @@
   "description": "AI CLI that generates shell commands",
   "type": "module",
   "bin": {
-    "lazyshell": "./dist/index.mjs",
-    "lsh": "./dist/index.mjs"
+    "lazyshell": "./dist/index.js",
+    "lsh": "./dist/index.js"
   },
   "files": [
     "dist"
@@ -15,7 +15,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "prettier --check . && eslint",
     "lint:fix": "prettier --write . && eslint --fix",
-    "build": "bun build --minify --target 'node' --format 'esm'  src/index.ts --outdir dist",
+    "build": "bun build --minify --target 'node' --format 'esm'  src/index.ts --outdir dist --banner \"#!/usr/bin/env node\"",
     "release:patch": "bun run build && npm version patch && npm run build && npm publish && git push --follow-tags",
     "prerelease": "bun run build && npm version prerelease && npm run build && npm publish && git push --follow-tags",
     "eval:ci": "bun src/lib/ci-eval.ts",
